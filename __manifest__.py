@@ -1,19 +1,28 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 {
-    'name': 'Cytology',
+    'name': 'CCPP',
     'version': '1',
     'category': 'customize',
     'sequence': 101,
-    'summary': 'Cytology',
-    'description': "Project Cytology",
-    'depends': ['base','mail','web','barcodes'],
+    'summary': 'CCPP',
+    'description': "Project CCPP",
+    'depends': ['base',
+                'mail',
+                'web',
+                'project',
+                'hr',
+                ],
     'data': [
-        "security/security.xml",
+        "data/ir_sequence.xml",
         "security/ir.model.access.csv",
-        "views/cytology_menu.xml",
-        "views/cytology_register_result_view.xml",
-        "views/cytology_users_view.xml",
+        "views/project_view.xml",
+        "views/ccpp_department_view.xml",
+        "views/ccpp_priority_view.xml",
+        "views/hr_department_view.xml",
+        "views/ir_sequence_view.xml",
+        "views/res_partner_view.xml",
+        "views/ccpp_period_view.xml",
         ],
     'qweb': [ 
         ],
@@ -23,12 +32,17 @@
     'license': 'LGPL-3',
     'assets': {
     'web.assets_backend': [
-            "cytology/static/src/js/stock_barcode.js",
-            "cytology/static/src/js/cytology_scan_barcode.js",
-            'cytology/static/src/xml/**/*',  
-            'cytology/static/src/css/**/*',      
+            #'ccpp/static/src/sneat-bootstrap-html-admin-template/**/*',    
+            'ccpp/static/src/js/**/*',
+            #('remove','rocker_timesheet/static/src/scss/rocker_calendar_button.scss'),
+            #('remove','rocker_timesheet/static/src/js/rocker_calendar_button.js'),
+            #('remove','rocker_timesheet/static/src/scss/rocker_roller_button.scss'),
+            #('remove','rocker_timesheet/static/src/js/rocker_roller_button.js'),
+            #('remove','rocker_timesheet/static/src/scss/rocker_tree_button.scss'),
+            #('remove','rocker_timesheet/static/src/js/rocker_tree_button.js'),
         ],
     'web.assets_qweb': [
+            #('remove','rocker_timesheet/static/src/xml/**/*'),
     ],
     'web.assets_frontend':[        
     ],

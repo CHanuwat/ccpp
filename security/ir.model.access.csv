@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ccpp_department,access_ccpp_department,model_ccpp_department,base.group_user,1,1,1,1
+access_ccpp_priority,access_ccpp_priority,model_ccpp_priority,base.group_user,1,1,1,1
+access_ccpp_period,access_ccpp_period,model_ccpp_period,base.group_user,1,1,1,1
+access_res_partner_position,access_res_partner_position,model_res_partner_position,base.group_user,1,1,1,1

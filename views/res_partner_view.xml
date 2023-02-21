@@ -1,0 +1,126 @@
+<?xml version="1.0" ?>
+<odoo>
+    <record id="view_partner_form_inherit_ccpp" model="ir.ui.view">
+        <field name="name">view.partner.form.inherit.ccpp</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+	    <field name="arch" type="xml">
+            <xpath expr="//field[@name='function']" position='replace'>
+                <field name="job_position_id"/>
+            </xpath>
+            <xpath expr="//form[1]/sheet[1]/notebook[1]/page[1]/field[@name='child_ids']/kanban[1]/field[@name='function']" position="after">
+                <field name="job_position_id"/>
+            </xpath>
+            <xpath expr="//form[1]/sheet[1]/notebook[1]/page[1]/field[@name='child_ids']/kanban[1]/templates[1]/t[1]/div[1]/div[2]/div[1]" position='replace'>
+                <div t-if="record.job_position_id.raw_value"><field name="job_position_id"/></div>
+            </xpath>
+            <xpath expr="//form[1]/sheet[1]/notebook[1]/page[1]/field[@name='child_ids']/form[1]/sheet[1]/group[1]/group[1]/field[@name='function']" position='replace'>
+                <field name="job_position_id" attrs="{'invisible': [('type','!=', 'contact')]}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="res_partner_kanban_view_inherit_ccpp" model="ir.ui.view">
+        <field name="name">res.partner.kanban.view.inherit.ccpp</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.res_partner_kanban_view"/>
+	    <field name="arch" type="xml">
+            <xpath expr="//kanban[1]/field[@name='function']" position="after">
+                <field name="job_position_id"/>
+            </xpath>
+            <xpath expr="//kanban[1]/templates[1]/t[1]/div[1]/div[2]/div[1]" position="replace">
+                <div>
+                    <strong class="o_kanban_record_title oe_partner_heading"><field name="display_name"/></strong>
+                    <div class="o_kanban_tags_section oe_kanban_partner_categories"/>
+                    <ul>
+                        <li t-if="record.parent_id.raw_value and !record.job_position_id.raw_value"><field name="parent_id"/></li>
+                        <li t-elif="!record.parent_id.raw_value and record.job_position_id.raw_value"><field name="job_position_id"/></li>
+                        <li t-elif="record.parent_id.raw_value and record.job_position_id.raw_value"><field name="job_position_id"/> at <field name="parent_id"/></li>
+                        <li t-if="record.city.raw_value or record.country_id.raw_value">
+                            <t t-if="record.city.raw_value"><field name="city"/><t t-if="record.country_id.raw_value">, </t></t>
+                            <t t-if="record.country_id.raw_value"><field name="country_id"/></t>
+                        </li>
+                        <li t-if="record.email.raw_value" class="o_text_overflow"><field name="email"/></li>
+                    </ul>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_partner_simple_form_inherit_ccpp" model="ir.ui.view">
+        <field name="name">view.partner.simple.form.inherit.ccpp</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_simple_form"/>
+	    <field name="arch" type="xml">
+            <xpath expr="//form[1]/group[1]/field[@name='function']" position="replace">
+                <field name="job_position_id" attrs="{'invisible': [('is_company','=', True)]}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_partner_tree_inherit_ccpp" model="ir.ui.view">
+        <field name="name">view.partner.tree.inherit.ccpp</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_tree"/>
+	    <field name="arch" type="xml">
+            <xpath expr="//tree[1]/field[@name='function']" position="replace">
+                <field name="job_position_id" invisible="True"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_partner_position_search" model="ir.ui.view">
+        <field name="name">view.partner.position.search</field>
+        <field name="model">res.partner.position</field>
+        <field name="arch" type="xml">
+            <search string="Search Partner Position">
+                <field name="name"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_partner_position_tree" model="ir.ui.view">
+        <field name="name">view.partner.position.tree</field>
+        <field name="model">res.partner.position</field>
+        <field name="arch" type="xml">
+            <tree string="Tree Partner Position">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_partner_position_form" model="ir.ui.view">
+        <field name="name">view.partner.position.form</field>
+        <field name="model">res.partner.position</field>
+        <field name="arch" type="xml">
+            <form string="Form Partner Position">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <!--<field name="parent_partner_id"/>-->
+                        </group>
+                    </group> 
+                    <notebook>
+                        <page name="Member">
+                            <field name="partner_lines" widget="many2many"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_partner_position" model="ir.actions.act_window">
+        <field name="name">Job Positions</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.partner.position</field>
+        <field name="search_view_id" ref="view_partner_position_search"/>
+    </record>
+
+    <menuitem id="menu_partner_position"
+        action="action_partner_position"
+        name="Job Positions"
+        sequence="101" parent="contacts.res_partner_menu_config"/>
+
+</odoo>

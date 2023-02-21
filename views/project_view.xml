@@ -1,0 +1,1023 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+
+    <record id="view_task_calendar_inherit_ccpp" model="ir.ui.view">
+        <field name="name">view.task.calendar.inherit.ccpp</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_calendar"/>
+        <field name="arch" type="xml">
+            <xpath expr="//calendar" position="attributes">
+                <attribute name="scales">day,week,month,year</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- project update -->
+    <record id="strategy_update_all_action" model="ir.actions.act_window">
+        <field name="name">Strategy Updates</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">project.update</field>
+        <field name="domain">[('strategy_id', '=', active_id)]</field>
+        <field name="context">{'update_strategy': True}</field>
+        <field name="view_mode">form</field>
+    </record>
+
+    <!-- project update -->
+    <record id="ccpp_update_all_action" model="ir.actions.act_window">
+        <field name="name">Current Situation</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">project.update</field>
+        <field name="view_mode">tree,form,kanban</field>
+        <field name="domain">[('project_id', '=', active_id)]</field>
+        <field name="context">{'search_default_groupby_solution_id': 1}</field>
+        <field name="search_view_id" ref="project.project_update_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+            No updates found. Let's create one!
+            </p><p>
+            Get a snapshot of the status of your project and share its progress with key stakeholders.
+            </p>
+        </field>
+    </record>
+
+    <!-- project update -->
+    <record id="solution_update_all_action" model="ir.actions.act_window">
+        <field name="name">Current Situation</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">project.update</field>
+        <field name="view_mode">tree,form,kanban</field>
+        <field name="domain">[('solution_id', '=', active_id)]</field>
+        <field name="context">{'search_default_groupby_solution_id': 1}</field>
+        <field name="search_view_id" ref="project.project_update_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+            No updates found. Let's create one!
+            </p><p>
+            Get a snapshot of the status of your project and share its progress with key stakeholders.
+            </p>
+        </field>
+    </record>
+
+    <!-- project update -->
+    <record model="ir.ui.view" id="project_update_view_form_inherit_ccpp">
+        <field name="name">project.update.form.inherit.ccpp</field>
+        <field name="model">project.update</field>
+        <field name="inherit_id" ref="project.project_update_view_form"/>
+        <field eval="101" name="priority"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='project_id']" position="replace">
+                <field name="solution_id" readonly="True"/>
+                <field name="strategy_id" readonly="True"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- project update -->
+    <record model="ir.ui.view" id="project_update_view_tree_inherit_ccpp">
+        <field name="name">project.update.form.inherit.ccpp</field>
+        <field name="model">project.update</field>
+        <field name="inherit_id" ref="project.project_update_view_tree"/>
+        <field eval="101" name="priority"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree[1]" position="attributes">
+                <attribute name="js_class"></attribute>
+                <attribute name="create">false</attribute>
+            </xpath>
+            <xpath expr="//tree[1]/field[@name='name']" position="after">
+                <field name="solution_id"/>
+                <field name="strategy_id"/>
+            </xpath>
+            <xpath expr="//tree[1]/field[@name='progress_percentage']" position="replace">
+            </xpath>
+        </field>
+    </record>
+
+    <!-- project update -->
+    <record model="ir.ui.view" id="project_update_view_kanban_inherit_ccpp">
+        <field name="name">project.update.kanban.inherit.ccpp</field>
+        <field name="model">project.update</field>
+        <field name="inherit_id" ref="project.project_update_view_kanban"/>
+        <field eval="101" name="priority"/>
+        <field name="arch" type="xml">
+            <xpath expr="//kanban[1]" position="attributes">
+                <attribute name="js_class"></attribute>
+                <attribute name="create">false</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ccpp kanban -->
+    <record model="ir.ui.view" id="view_project_kanban_inherit_ccpp">
+        <field name="name">project.project.kanban.inherit.ccpp</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project_kanban"/>
+        <field eval="101" name="priority"/>
+        <field name="arch" type="xml">
+            <xpath expr="//kanban[1]/field[@name='label_tasks']" position="after">
+                <field name="code" readonly="True"/>
+                <field name="name"/>
+            </xpath>
+            <xpath expr="//kanban[1]/templates[1]/t[1]/div[1]/div[2]/div[1]/div[1]/a[1]/div[1]" position="replace">
+                <div>
+                    <span class="o_value"><t t-esc="record.task_count.value"/></span>
+                    <span class="o_label ms-1"><t t-esc="record.name.value"/></span>
+                </div>
+            </xpath> 
+            <xpath expr="//kanban[1]/templates[1]/t[1]/div[1]/div[1]/div[1]/div[1]/div[1]" position="replace">
+                <div class="o_primary">
+                    <span class="o_text_overflow" t-att-title="record.code.value"><t t-esc="record.code.value"/></span>
+                    <span class="o_text_overflow text-muted" t-if="record.partner_id.value">
+                        <span class="fa fa-user me-2" aria-label="Partner" title="Partner"></span><t t-esc="record.partner_id.value"/>
+                    </span>
+                    <div t-if="record.date.raw_value or record.date_start.raw_value" class="text-muted o_row">
+                        <span class="fa fa-clock-o me-2" title="Dates"></span><field name="date_start"/>
+                        <i t-if="record.date.raw_value and record.date_start.raw_value" class="fa fa-long-arrow-right mx-2 oe_read_only" aria-label="Arrow icon" title="Arrow"/>
+                        <field name="date"/>
+                    </div>
+                    <div t-if="record.alias_name.value and record.alias_domain.value" class="text-muted text-truncate" t-att-title="record.alias_id.value">
+                        <span class="fa fa-envelope-o me-2" aria-label="Domain Alias" title="Domain Alias"></span><t t-esc="record.alias_id.value"/>
+                    </div>
+                    <div t-if="record.rating_active.raw_value and record.rating_count.raw_value &gt; 0" class="text-muted" groups="project.group_project_rating">
+                        <b class="me-1">
+                            <span style="font-weight:bold;" class="fa mt4 fa-smile-o text-success" t-if="record.rating_avg.raw_value &gt;= 3.66" title="Average Rating: Satisfied" role="img" aria-label="Happy face"/>
+                            <span style="font-weight:bold;" class="fa mt4 fa-meh-o text-warning" t-elif="record.rating_avg.raw_value &gt;= 2.33" title="Average Rating: Okay" role="img" aria-label="Neutral face"/>
+                            <span style="font-weight:bold;" class="fa mt4 fa-frown-o text-danger" t-else="" title="Average Rating: Dissatisfied" role="img" aria-label="Sad face"/>
+                        </b>
+                        <field name="rating_avg_percentage" widget="percentage"/>
+                    </div>
+                    <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                </div>
+            </xpath>    
+        </field>
+    </record>
+
+    <!-- group by department and priority -->
+    <record id="view_project_project_filter_inherit_ccpp" model="ir.ui.view">
+        <field name="name">view.project.project.filter.inherit.ccpp</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project_project_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='groupby_stage']" position="after">
+                <filter string="Department" name="groupby_department" context="{'group_by': 'department_id'}"/>
+                <filter string="Priority" name="groupby_priority" context="{'group_by': 'priority_id'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ccpp project form view -->
+    <record id="edit_project_inherit_ccpp" model="ir.ui.view">
+        <field name="name">edit.project.inherit.ccpp</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field eval="101" name="priority"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form[1]/sheet[1]/div[1]/button[1]" position="before">
+                <span style="padding-left:30px; padding-top:5px" class="oe_left">
+                    <h1>CCPP</h1>
+                </span>
+            </xpath>
+            <xpath expr="//form[1]/header[1]/field[@name='stage_id']" position="replace">
+                <field name="state" widget="statusbar"/>
+            </xpath>
+            <xpath expr="//form[1]/header[1]/button[1]" position="before">
+                <button name="button_send_approve" string="Send Approve" type="object" class="btn-primary" states="open"/>
+                <button name="button_approve" string="Approve" type="object" class="btn-primary" states="waiting_approve"/>
+                <button name="button_reject" string="Reject" type="object" class="btn-danger" states="waiting_approve"/>
+                <!--<button name="button_done" string="Done" type="object" class="btn-success" states="process"/>-->
+                <button name="button_cancel" string="Cancel" type="object" states="open,waiting_approve,process,done"/>
+                <button name="button_to_open" string="To Open" type="object" class="btn-primary" states="cancel"/>
+            </xpath>
+
+            <!-- button stat ccpp -->
+            <xpath expr="//form[1]/sheet[1]/div[1]/button[@name='project_update_all_action']" position="replace">
+                <button class="oe_stat_button" name="ccpp_update_all_action" type="object" groups="project.group_project_manager">
+                    <div class="ps-4">
+                        <span class="o_stat_text">
+                            Current Situation
+                        </span>
+                        <br/>
+                        <field name="last_update_color" invisible="1"/>
+                        <field name="last_update_status" readonly="1" widget="status_with_color" options="{'color_field': 'last_update_color'}" attrs="{'invisible': [('last_update_status','=','to_define')]}"/>
+                    </div>
+                </button>
+            </xpath>
+            <xpath expr="//form[1]/sheet[1]/div[1]/button[@name='%(project.project_collaborator_action)d']" position="replace">
+            </xpath>
+            <!--<xpath expr="//form[1]/sheet[1]/div[2]" poqsition="replace">
+                <div class="oe_title">
+                    <h1 class="d-flex flex-row">
+                        <field name="is_favorite" nolabel="1" widget="boolean_favorite" class="me-2"/>
+                        <field name="code" class="o_text_overflow"/>
+                    </h1>
+                </div>
+            </xpath>-->
+            <xpath expr="//form[1]/sheet[1]/group[1]/group[1]/field[@name='label_tasks']" position="replace">
+                <field name="code" string="CCPP No." readonly="True"/>
+            </xpath>
+             
+            <xpath expr="//form[1]/sheet[1]/group[1]/group[2]" position="replace">
+                <group>
+                    <field name="active" invisible="True"/>
+                    <field name="show_critical"/>
+                    <field name="priority_id" string="Priority"/> <!--options="{'no_create':True}"/>-->
+                    <field name="show_time"/>
+                    <field name="deadline_date" widget="date"/>
+                </group>
+            </xpath>
+            <xpath expr="//form[1]/sheet[1]/group[1]/group[1]/field[@name='tag_ids']" position="replace">
+            </xpath>
+            <!--<xpath expr="//page[@name='settings']//group[1]" position="before">
+                <group>
+                    <group>
+                        <field name="department_id"/> 
+                        <field name="user_id"/>
+                        <label for="date_start" string="Planned Date"/>
+                        <div name="dates" class="o_row">
+                            <field name="date_start" widget="daterange" options='{"related_end_date": "date"}'/>
+                            <i class="fa fa-long-arrow-right mx-2 oe_edit_only" aria-label="Arrow icon" title="Arrow"/>
+                            <i class="fa fa-long-arrow-right mx-2 oe_read_only" aria-label="Arrow icon" title="Arrow" attrs="{'invisible': [('date_start', '=', False), ('date', '=', False)]}"/>
+                            <field name="date" widget="daterange" options='{"related_start_date": "date_start"}'/>
+                        </div>
+                    </group>
+                </group>
+            </xpath>-->
+            <xpath expr="//form[1]/sheet[1]/group[1]/group[1]/field[@name='partner_id']" position="after">
+                <!--<field name="domain_partner_contact_ids" invisible="True"/>
+                <field name="partner_contact_id" widget="res_partner_many2one" domain="[('id','in',domain_partner_contact_ids)]" context="{'show_title_position':True}"/>--> <!--options="{'no_create':True}"/>-->
+                <field name="domain_job_position_ids" invisible="True"/>
+                <field name="job_position_id" domain="[('id','in',domain_job_position_ids)]" options="{'no_create': True, 'no_open': True}"/>
+            </xpath>
+
+            <xpath expr="//form[1]/sheet[1]/notebook[1]/page[@name='settings']" position="attributes">
+                <attribute name="invisible">True</attribute>
+            </xpath>
+
+            <xpath expr="//form[1]/sheet[1]/notebook[1]/page[@name='description']" position="attributes">
+                <attribute name="string">Note</attribute>
+            </xpath>
+
+            <xpath expr="//form[1]/sheet[1]/notebook[1]/page[@name='description']/field[@name='description']" position="attributes">
+                <attribute name="placeholder">'CCPP Note'</attribute>
+            </xpath>
+
+            <xpath expr="//form[1]/sheet[1]/notebook[1]/page[@name='settings']" position="after">
+                <page name="Information" string="Information">
+                    <group>
+                        <group>
+                            <field name="department_id"/> 
+                            <field name="user_id"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+
+            <xpath expr="//form[1]/sheet[1]/notebook[1]/page[1]" position="before">
+                <page name="solutions" string="Solutions">
+                    <field name="tasks_solution" context="{'is_create_solution': True, 'project_id': active_id}">
+                        <tree decoration-muted="is_closed == True">
+                            <field name="legend_normal" invisible="1"/>
+                            <field name="legend_done" invisible="1"/>
+                            <field name="legend_blocked" invisible="1"/>
+                            <field name="project_id" invisible="1"/>
+                            <field name="is_closed" invisible="1"/>
+                            <field name="allow_milestones" invisible="1"/>
+                            <field name="sequence" widget="handle"/>
+                            <field name="priority" widget="priority" optional="show" nolabel="1"/>
+                            <field name="id" optional="hide"/>
+                            <field name="child_text" invisible="1"/>
+                            <field name="allow_subtasks" invisible="1"/>
+                            <field name="code" string="Solution No." optional="show"/>
+                            <field name="name"/>
+                            <field name="display_project_id" string="Project" optional="hide" options="{'no_open': 1}"/>
+                            <field name="milestone_id"
+                                optional="hide"
+                                context="{'default_project_id': display_project_id or project_id}"
+                                attrs="{'invisible': [('allow_milestones', '=', False)], 'column_invisible': [('allow_milestones', '=', False)]}"
+                            />
+                            <field name="partner_id" optional="hide"/>
+                            <field name="user_ids" widget="many2many_avatar_user" optional="show" domain="[('share', '=', False), ('active', '=', True)]"/>
+                            <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                            <field name="company_id" invisible="1"/>
+                            <field name="activity_ids" string="Next Activity" widget="list_activity" optional="hide"/>
+                            <!--<field name="date_deadline" attrs="{'invisible': [('is_closed', '=', True)]}" optional="show"/>-->
+                            <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" optional="hide"/>
+                            <field name="rating_last_text" string="Rating" decoration-danger="rating_last_text == 'ko'"
+                                decoration-warning="rating_last_text == 'ok'" decoration-success="rating_last_text == 'top'"
+                                attrs="{'invisible': [('rating_last_text', '=', 'none')]}"
+                                class="fw-bold" widget="badge" optional="hide"/>
+                            <!--<field name="kanban_state" widget="state_selection" optional="show" options="{'hide_label': True}" nolabel="1"/>
+                            <field name="stage_id" optional="show" context="{'default_project_id': project_id}"/>-->
+                            <field name="last_situation_solution_id" string="Current Situation" readonly="True"/>
+                            <field name="state_color" invisible="1"/>
+                            <field name="state" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'state_color'}"/>
+                            <button name="action_open_task" type="object" title="View Solution" string="View Solution" class="btn btn-link float-end"/>
+                        </tree>
+                    </field>
+                </page>
+                <page name="impact_customer" string="Critical (Impact to customer)">  
+                    <br></br> 
+                    <div>
+                        <h3><p style="margin: auto;font-weight: 900;text-align: center;">Impact to customer (ผลกระทบต่อลูกค้า)</p></h3>
+                    </div>  
+                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
+                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Critical CPP Criteria (เงื่อนไขของปัญหาที่วิกฤติของลูกค้า)</p>
+                    </div>
+                    
+                    <div class="row mt16 o_settings_container" id="impact_cus_setting">
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_income_cus">
+                            <div class="o_setting_left_pane">
+                                <field name="is_income_cus"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_income_cus"/>
+                                <div class="text-muted">
+                                    เงินได้/เงินสนับสนุน
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_effectiveness_cus">
+                            <div class="o_setting_left_pane">
+                                <field name="is_effectiveness_cus"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_effectiveness_cus"/>
+                                <div class="text-muted">
+                                    ประสิทธิภาพการทำงาน/ความก้าวหน้าส่วนบุคคล
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_repulation_cus">
+                            <div class="o_setting_left_pane">
+                                <field name="is_repulation_cus"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_repulation_cus"/>
+                                <div class="text-muted">
+                                    ภาพลักษณ์ของลูกค้า
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_competitive_cus">
+                            <div class="o_setting_left_pane">
+                                <field name="is_competitive_cus"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_competitive_cus"/>
+                                <div class="text-muted">
+                                    ความได้เปรียบของคู่แข่ง
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
+                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Time (ความเร่งด่วนของลูกค้าที่ต้องการความช่วยเหลือ)</p>
+                    </div>
+                    <div class="row mt16 o_settings_container" id="impact_time_cus_setting">
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_critical">
+                            <div class="o_setting_left_pane">
+                                <field name="is_critical"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_critical"/>
+                                <div class="text-muted">
+                                    ต้องแก้ไขด่วน
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_not_critical">
+                            <div class="o_setting_left_pane">
+                                <field name="is_not_critical"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_not_critical"/>
+                                <div class="text-muted">
+                                    รอได้
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </page>                    
+                <page name="impact_company" string="Priority (Impact to company)">  
+                    <br></br>
+                    <div>
+                        <h3><p style="margin: auto;font-weight: 900;text-align: center;">Impact to Company/Winmed (ผลกระทบต่อบริษัท)</p></h3>
+                    </div>  
+                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
+                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Priority Criteria (เงื่อนไขของลำดับความสำคัญ)</p>
+                    </div>
+                    <div class="row mt16 o_settings_container" id="impact_company_setting">
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_income_comp">
+                            <div class="o_setting_left_pane">
+                                <field name="is_income_comp" attrs="{'readonly':[('show_critical','!=','Critical')]}"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_income_comp"/>
+                                <div class="text-muted">
+                                    ยอดขาย/ต้นทุน
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_effectiveness_comp">
+                            <div class="o_setting_left_pane">
+                                <field name="is_effectiveness_comp" attrs="{'readonly':[('show_critical','!=','Critical')]}"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_effectiveness_comp"/>
+                                <div class="text-muted">
+                                    โอกาสทางธุรกิจในอนาคต
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_repulation_comp">
+                            <div class="o_setting_left_pane">
+                                <field name="is_repulation_comp" attrs="{'readonly':[('show_critical','!=','Critical')]}"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_repulation_comp"/>
+                                <div class="text-muted">
+                                    ภาพลักษณ์ของบริษัท
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_competitive_comp">
+                            <div class="o_setting_left_pane">
+                                <field name="is_competitive_comp" attrs="{'readonly':[('show_critical','!=','Critical')]}"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_competitive_comp"/>
+                                <div class="text-muted">
+                                    ความได้เปรียบของคู่แข่ง
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
+                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Time (ระยะเวลาการแก้ไขปัญหา)</p>
+                    </div>
+                    <div class="row mt16 o_settings_container" id="impact_time_cus_setting">
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_short_time">
+                            <div class="o_setting_left_pane">
+                                <field name="is_short_time" attrs="{'readonly':[('show_critical','!=','Critical')]}"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_short_time"/>
+                                <div class="text-muted">
+                                    ใช้เวลาน้อยกว่า 4 เดือน
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_long_time">
+                            <div class="o_setting_left_pane">
+                                <field name="is_long_time" attrs="{'readonly':[('show_critical','!=','Critical')]}"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_long_time"/>
+                                <div class="text-muted">
+                                    ใช้เวลานานกว่า 4 เดือน
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- for create ccpp -->
+    <record id="project_project_view_form_simplified_footer_ccpp" model="ir.ui.view">
+        <field name="name">project.project.view.form.simplified.footer.ccpp</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.project_project_view_form_simplified_footer"/>
+        <field name="priority">101</field>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_view_tasks']" position="after">
+                <field name="is_verify_impact_cus" invisible="True"/>
+                <field name="is_critical" invisible="True"/>
+                <field name="is_stamp_record" invisible="True"/>
+                <button string="Next" name="button_next_create_ccpp" type="object" class="btn-primary" attrs="{'invisible':['|',('is_verify_impact_cus','=',True),('is_critical','=',False)]}"/>
+                <button string="Discard" name="button_discard_create_ccpp" type="object" attrs="{'invisible':[('is_verify_impact_cus','=',False),('is_stamp_record','=',False)]}"/><!-- attrs="{'invisible':[('is_verify_impact_cus','=',False)]}"/>-->
+            </xpath>
+            <xpath expr="//button[@name='action_view_tasks']" position="before">
+                <button string="Back" name="button_back_create_ccpp" type="object" class="btn-primary" attrs="{'invisible':[('is_verify_impact_cus','=',False)]}"/>
+                <button string="Skip&amp;Create" name="button_skip_and_create" type="object" class="btn-primary" attrs="{'invisible':[('is_verify_impact_cus','=',False)]}"/>
+            </xpath>
+
+            <xpath expr="//button[@name='action_view_tasks']" position="attributes">
+                <attribute name="attrs">{'invisible':[('is_critical','=',True),('is_verify_impact_cus','=',False)]}</attribute>
+                <attribute name="context">{'need_fill': True}</attribute>
+                <attribute name="string">Create</attribute>
+            </xpath>
+            <xpath expr="//form[1]/footer[1]/button[last()]" position="attributes">
+                <attribute name="attrs">{'invisible':['|',('is_verify_impact_cus','=',True),('is_stamp_record','=',True)]}</attribute>
+            </xpath>
+            <xpath expr="//form[1]/div[2]" position="replace">
+            </xpath>
+        </field>
+    </record>
+
+    <!-- for create ccpp -->
+    <record id="project_project_view_form_simplified_ccpp" model="ir.ui.view">
+        <field name="name">project.project.view.form.simplified.ccpp</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.project_project_view_form_simplified"/>
+        <field name="priority">101</field>
+        <field name="arch" type="xml">
+            <xpath expr="//form[1]/div[1]" position="after">
+                <group>
+                    <group>
+                        <field name="company_id" invisible="True"/>
+                        <field name="partner_id"/>
+                        <!--<field name="domain_partner_contact_ids" invisible="True"/>
+                        <field name="partner_contact_id" domain="[('id','in',domain_partner_contact_ids)]" context="{'show_title_position':True}"/>-->
+                        <field name="domain_job_position_ids" invisible="True"/>
+                        <field name="job_position_id" domain="[('id','in',domain_job_position_ids)]" options="{'no_create': True, 'no_open': True}"/>
+                    </group>
+                </group>
+            </xpath>
+            <xpath expr="//div[hasclass('o_settings_container')]" position="after">
+                <field name="is_verify_impact_cus" invisible="True"/>
+                <field name="is_stamp_record" invisible="True"/>
+                <div attrs="{'invisible':[('is_verify_impact_cus','=',True)]}">
+                    <div>
+                        <h3><p style="margin: auto;font-weight: 900;text-align: center;">Impact to customer (ผลกระทบต่อลูกค้า)</p></h3>
+                    </div>  
+                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
+                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Critical CPP Criteria (เงื่อนไขของปัญหาที่วิกฤติของลูกค้า)</p>
+                    </div>
+                    <div class="row mt16 o_settings_container" id="impact_cus_setting">
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_income_cus">
+                            <div class="o_setting_left_pane">
+                                <field name="is_income_cus"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_income_cus"/>
+                                <div class="text-muted">
+                                    เงินได้/เงินสนับสนุน
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_effectiveness_cus">
+                            <div class="o_setting_left_pane">
+                                <field name="is_effectiveness_cus"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_effectiveness_cus"/>
+                                <div class="text-muted">
+                                    ประสิทธิภาพการทำงาน/ความก้าวหน้าส่วนบุคคล
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_repulation_cus">
+                            <div class="o_setting_left_pane">
+                                <field name="is_repulation_cus"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_repulation_cus"/>
+                                <div class="text-muted">
+                                    ภาพลักษณ์ของลูกค้า
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_competitive_cus">
+                            <div class="o_setting_left_pane">
+                                <field name="is_competitive_cus"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_competitive_cus"/>
+                                <div class="text-muted">
+                                    ความได้เปรียบของคู่แข่ง
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
+                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Time (ความเร่งด่วนของลูกค้าที่ต้องการความช่วยเหลือ)</p>
+                    </div>
+                    <div class="row mt16 o_settings_container" id="impact_time_cus_setting">
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_critical">
+                            <div class="o_setting_left_pane">
+                                <field name="is_critical"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_critical"/>
+                                <div class="text-muted">
+                                    ต้องแก้ไขด่วน
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_not_critical">
+                            <div class="o_setting_left_pane">
+                                <field name="is_not_critical"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_not_critical"/>
+                                <div class="text-muted">
+                                    รอได้
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div attrs="{'invisible':[('is_verify_impact_cus','=',False)]}">
+                    <div>
+                        <h3><p style="margin: auto;font-weight: 900;text-align: center;">Impact to Company/Winmed (ผลกระทบต่อบริษัท)</p></h3>
+                    </div>  
+                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
+                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Priority Criteria (เงื่อนไขของลำดับความสำคัญ)</p>
+                    </div>
+                    <div class="row mt16 o_settings_container" id="impact_company_setting">
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_income_comp">
+                            <div class="o_setting_left_pane">
+                                <field name="is_income_comp"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_income_comp"/>
+                                <div class="text-muted">
+                                    ยอดขาย/ต้นทุน
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_effectiveness_comp">
+                            <div class="o_setting_left_pane">
+                                <field name="is_effectiveness_comp"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_effectiveness_comp"/>
+                                <div class="text-muted">
+                                    โอกาสทางธุรกิจในอนาคต
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_repulation_comp">
+                            <div class="o_setting_left_pane">
+                                <field name="is_repulation_comp"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_repulation_comp"/>
+                                <div class="text-muted">
+                                    ภาพลักษณ์ของบริษัท
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_competitive_comp">
+                            <div class="o_setting_left_pane">
+                                <field name="is_competitive_comp"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_competitive_comp"/>
+                                <div class="text-muted">
+                                    ความได้เปรียบของคู่แข่ง
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
+                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Time (ระยะเวลาการแก้ไขปัญหา)</p>
+                    </div>
+                    <div class="row mt16 o_settings_container" id="impact_time_cus_setting">
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_short_time">
+                            <div class="o_setting_left_pane">
+                                <field name="is_short_time"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_short_time"/>
+                                <div class="text-muted">
+                                    ใช้เวลาน้อยกว่า 4 เดือน
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_long_time">
+                            <div class="o_setting_left_pane">
+                                <field name="is_long_time"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_long_time"/>
+                                <div class="text-muted">
+                                    ใช้เวลานานกว่า 4 เดือน
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- button update on kanban -->
+    <record id="project_view_kanban_inherit_project_inherit_ccpp" model="ir.ui.view">
+        <field name="name">project.kanban.inherit.project</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.project_view_kanban_inherit_project"/>
+        <field name="priority">201</field>
+        <field name="arch" type="xml">
+            <xpath expr="//a[@name='project_update_all_action']" position="replace">
+                <a name="ccpp_update_all_action" type="object" t-attf-context="{'active_id': #{record.id.raw_value} }">CCPP Updates</a>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- solution / strategy / task is task view -->
+    <record id="view_task_form2_inherit_ccpp" model="ir.ui.view">
+        <field name="name">view.task.form2.inherit.ccpp</field>
+        <field name="model">project.task</field>
+        <field eval="101" name="priority"/>
+        <field name="inherit_id" ref="project.view_task_form2"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form[1]/header[1]/field[@name='stage_id']" position="replace">
+                <field name="state" widget="statusbar"/>
+            </xpath>
+            <xpath expr="//form[1]/header[1]/field[@name='personal_stage_type_id']" position="replace">
+            </xpath>
+            <xpath expr="//form[1]/sheet[1]/div[2]/h1[1]/field[@name='kanban_state']" position="replace">
+            </xpath>
+
+            <xpath expr="//form[1]/sheet[1]/div[1]/button[1]" position="before">
+                <span style="padding-left:30px; padding-top:5px" class="oe_left" attrs="{'invisible': [('is_solution', '=', False)]}">
+                    <h1>Solution</h1>
+                </span>
+                <span style="padding-left:30px; padding-top:5px" class="oe_left" attrs="{'invisible': [('is_strategy', '=', False)]}">
+                    <h1>Strategy</h1>
+                </span>
+                <span style="padding-left:30px; padding-top:5px" class="oe_left" attrs="{'invisible': [('is_task', '=', False)]}">
+                    <h1>Task</h1>
+                </span>
+                <span style="padding-left:30px; padding-top:5px" class="oe_left" attrs="{'invisible': [('is_subtask', '=', False)]}">
+                    <h1>Sub Task</h1>
+                </span>
+            </xpath>
+
+            <xpath expr="//button[@name='action_assign_to_me']" position='before'>
+                <button name="button_update_strategy" type="object" class="btn-primary" string="Current Situation" attrs="{'invisible': [('is_strategy', '=', False)]}"/>
+                <button name="button_done" string="Done" type="object" class="btn-success" attrs="{'invisible': ['|',('is_strategy', '=', False),('state','!=','process')]}"/>
+                <button name="button_to_process" string="To Process" type="object" states="cancel" attrs="{'invisible': ['|',('is_strategy', '=', False),('state','!=','cancel')]}"/>
+                <button name="button_cancel" string="Cancel" type="object" attrs="{'invisible': ['|','|',('is_strategy', '=', False),('state','not in',['open','process','done']),('id', '=', False)]}"/>
+            </xpath>
+
+            <xpath expr="//form[1]/sheet[1]/group[1]" position="replace">
+                <group>
+                    <group>
+                        <field name="code" string="Solution No." attrs="{'invisible': [('is_solution','=',False)]}" readonly="True"/>
+                        <field name="code" string="Strategy No." attrs="{'invisible': [('is_strategy','=',False)]}" readonly="True"/>
+                        <field name="code" string="Task No." attrs="{'invisible': [('is_task','=',False),('is_subtask','=',False)]}" readonly="True"/>
+                        <field name="evaluate_method" attrs="{'invisible': [('is_strategy','=',False)]}"/>
+
+                        <!--<field name="project_id" domain="[('active', '=', True), ('company_id', '=', company_id)]" widget="project_private_task" string="CCPP" />
+                        <field name="parent_id" string="Solution" attrs="{'invisible': [('is_solution','=',True)]}"/>
+                        <field name="parent_id" string="Strategy" attrs="{'invisible': ['|',('is_solution','=',True),('is_strategy','=',True)]}"/>
+                        <field name="partner_id" widget="res_partner_many2one" class="o_task_customer_field"/>
+                        <field name="evaluate_method" attrs="{'invisible': [('is_strategy','=',False)]}"/>-->
+                        <field name="project_id" attrs="{'invisible': True}" />
+                        <field name="parent_id" attrs="{'invisible': True}"/>
+                        <field name="parent_id" attrs="{'invisible': True}"/>
+                        <field name="partner_id" attrs="{'invisible': True}"/>
+                        <field name="project_solution_id" attrs="{'invisible': True}"/>
+                    </group>
+                    <group>
+                        <!--<field name="priority_id"/>
+                        <field name="period_id" string="period"/>
+                        <field name="date_deadline" attrs="{'invisible': [('is_closed', '=', True)]}"/>
+                        <field name="user_ids" class="o_task_user_field" options="{'no_open': True, 'no_quick_create': True}" widget="many2many_avatar_user" domain="[('share', '=', False), ('active', '=', True)]"/>
+                        <field name="activity_ids" string="Next Activity" widget="list_activity" attrs="{'invisible': [('is_strategy','=',False)]}"/>-->
+                        <field name="priority_id"  attrs="{'invisible': True}"/>
+                        <field name="period_id"  attrs="{'invisible': True}"/>
+                        <field name="date_deadline"  attrs="{'invisible': True}"/>
+                        <field name="user_ids"  attrs="{'invisible': True}"/>
+                        <field name="activity_ids"  attrs="{'invisible': True}"/>
+                        <field name="active" invisible="1"/>
+                        <field name="partner_phone" widget="phone" attrs="{'invisible': True}"/>
+                        <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}" context="{'project_id': project_id}" invisible="True"/>
+                        <field name="legend_blocked" invisible="1"/>
+                        <field name="legend_normal" invisible="1"/>
+                        <field name="legend_done" invisible="1"/>
+                        <field name="display_project_id" string="Project" attrs="{'invisible': True}" domain="[('active', '=', True), ('company_id', '=', company_id)]"/>
+                        <field name="milestone_id" placeholder="e.g. Product Launch" context="{'default_project_id': project_id if not parent_id or not display_project_id else display_project_id}" attrs="{'invisible': True}"/>
+                        <field name="is_solution" attrs="{'invisible': True}"/>
+                        <field name="is_strategy" attrs="{'invisible': True}"/>
+                        <field name="is_task" attrs="{'invisible': True}"/>
+                        <field name="is_subtask" attrs="{'invisible': True}"/>
+                    </group>
+                </group>
+            </xpath>
+
+            <xpath expr="//field[@name='task_properties']" position="replace">
+            </xpath>
+
+            <!-- timesheet page -->
+            <xpath expr="//form[1]/sheet[1]/notebook[1]/page[2]" position="attributes">
+                <attribute name="attrs">{'invisible': ['|',('allow_subtasks', '=', False), '&amp;', ('is_task', '=' ,False), ('is_subtask', '=', False)]}</attribute>
+            </xpath>
+            <!-- task page -->
+            <xpath expr="//form[1]/sheet[1]/notebook[1]/page[3]" position="attributes">
+                <attribute name="attrs">{'invisible': ['|', ('allow_subtasks', '=', False), '&amp;', ('is_task', '=' ,False), ('is_subtask', '=', False)]}</attribute>
+            </xpath>
+            <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/button[@name='action_open_task']" position="replace">
+                <field name="is_strategy" invisible="True"/>
+                <field name="is_task" invisible="True"/>
+                <field name="is_subtask" invisible="True"/>
+                <button name="action_open_task" type="object" title="View Strategy" string="View Strategy" class="btn btn-link float-end" attrs="{'invisible': [('parent.is_solution','=',False)]}"/>
+                <button name="action_open_task" type="object" title="View Task" string="View Task" class="btn btn-link float-end" attrs="{'invisible': [('parent.is_strategy','=',False)]}"/>
+            </xpath>
+            <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='activity_ids']" position="replace">
+                <!--<field name="activity_ids" string="Next Activity" widget="list_activity" attrs="{'column_invisible': [('parent.is_solution','=',False)]}"/>-->
+                <field name="last_situation_id" string="Current Situation" attrs="{'column_invisible': [('parent.is_solution','=',False)]}" readonly="True"/>
+            </xpath>
+            <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='id']" position="replace">
+            </xpath>
+            <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='date_deadline']" position="replace">
+            </xpath>
+            <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='kanban_state']" position="replace">
+            </xpath>
+            <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='stage_id']" position="replace">
+                <field name="state_color" invisible="1"/>
+                <field name="state" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'state_color'}"/>
+                <!--<field name="state_color" invisible="True"/>
+                <field name="state" readonly="1" widget="status_with_color" options="{'color_field': 'state_color', 'hide_label': True }"/>-->
+            </xpath>
+            <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='name']" position="attributes">
+                <attribute name="widget"></attribute>
+            </xpath>
+            <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']" position="attributes">
+                <attribute name="widget"></attribute>
+                <attribute name="context">{'search_view_ref' : 'project.view_task_search_form_extended', 'default_project_id': project_solution_id if not parent_id or not display_project_id else display_project_id, 'default_user_ids': user_ids, 'default_parent_id': id,
+                                    'default_partner_id': partner_id, 'default_milestone_id': allow_milestones and milestone_id, 'search_default_display_project_id': project_id, "is_create_strategy": True}</attribute>
+            </xpath>
+            
+            <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='name']" position="before">
+                <field name="code" string="Strategy No." optional="show" attrs="{'column_invisible': [('parent.is_solution','=',False)]}" readonly="True"/>
+                <field name="code" string="Task No." optional="show" attrs="{'column_invisible': [('parent.is_strategy','=',False),('parent.is_task','=',False),('parent.is_subtask','=',False)]}" readonly="True"/>
+            </xpath>
+            
+            <!-- page name -->
+            <xpath expr="//form[1]/sheet[1]/notebook[1]/page[2]" position="after">
+                <page name="strategy_page" string="Strategy" attrs="{'invisible': [('is_solution', '=' ,False)]}">
+                    <field name="child_ids"/>
+                </page>
+                <page name="situation_page" string="Situation" attrs="{'invisible': [('is_strategy', '=' ,False)]}">
+                    <field name="situation_ids">
+                        <tree create="false" delete="false" edit="false" multi_edit="1">
+                            <field name="code"/>
+                            <field name="name" string="Situation"/>
+                            <field name="user_id" string="Assignees"/>
+                            <field name="date"/>
+                            <field name="location"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+            
+            <!-- invisible page -->
+            <xpath expr="//page[@name='recurrence']" position="attributes">
+                <attribute name="invisible">True</attribute>
+            </xpath>
+            <xpath expr="//page[@name='task_dependencies']" position="attributes">
+                <attribute name="invisible">True</attribute>
+            </xpath>
+            <xpath expr="//page[@name='extra_info']" position="attributes">
+                <attribute name="invisible">True</attribute>
+            </xpath>
+            <xpath expr="//page[@name='description_page']" position="attributes">
+                <attribute name="invisible">True</attribute>
+            </xpath>
+            
+
+            <!-- button stat -->
+            <xpath expr="//form[1]/sheet[1]/div[1]/button[@name='%(project.project_task_action_sub_task)d']" position="replace">
+                <button name="button_open_project" type="object" class="oe_stat_button" icon="fa-tasks"
+                    attrs="{'invisible' : [('id', '=', False)]}" context="{'default_user_ids': user_ids}">
+                    <span class="o_stat_text">CCPP</span>  
+                </button>
+                <button name="button_open_solution" type="object" class="oe_stat_button" icon="fa-tasks"
+                    attrs="{'invisible' : ['|',('id', '=', False), ('is_solution', '=', True)]}" context="{'default_user_ids': user_ids}">
+                    <span class="o_stat_text">Solution</span>
+                </button>
+                <button class="oe_stat_button" name="solution_update_all_action" type="object" groups="project.group_project_manager"
+                attrs="{'invisible' : ['|',('id', '=', False),('is_solution', '=', False)]}">
+                    <div class="ps-4">
+                        <span class="o_stat_text">
+                            Current Situation
+                        </span>
+                        <br/>
+                        <field name="last_update_color_solution" invisible="1"/>
+                        <field name="last_update_status_solution" readonly="1" widget="status_with_color" options="{'color_field': 'last_update_color_solution'}" attrs="{'invisible': [('last_update_status_solution','=','to_define')]}"/>
+                    </div>
+                </button>
+                <!--<button name="button_open_child" type="object" class="oe_stat_button" icon="fa-tasks"
+                    attrs="{'invisible' : ['|', '|', '|',('allow_subtasks', '=', False), ('id', '=', False), ('subtask_count', '=', 0), ('is_solution', '=', False)]}" context="{'default_user_ids': user_ids}">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_value">
+                            <field name="subtask_count" widget="statinfo" nolabel="1"/>
+                        </span>
+                        <span class="o_stat_text">Strategy</span>
+                    </div>
+                </button>
+                <button name="button_open_child" type="object" class="oe_stat_button" icon="fa-tasks"
+                    attrs="{'invisible' : ['|', '|', '|',('allow_subtasks', '=', False), ('id', '=', False), ('subtask_count', '=', 0), ('is_strategy', '=', False)]}" context="{'default_user_ids': user_ids}">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_value">
+                            <field name="subtask_count" widget="statinfo" nolabel="1"/>
+                        </span>
+                        <span class="o_stat_text">Tasks</span>
+                    </div>
+                </button>
+                <button name="button_open_child" type="object" class="oe_stat_button" icon="fa-tasks"
+                    attrs="{'invisible' : ['|', '|', ('allow_subtasks', '=', False), '|', ('id', '=', False), ('subtask_count', '=', 0), '&amp;',('is_task', '=', False), ('is_subtask', '=', False)]}" context="{'default_user_ids': user_ids}">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_value">
+                            <field name="subtask_count" widget="statinfo" nolabel="1"/>
+                        </span>
+                        <span class="o_stat_text">Sub Tasks</span>
+                    </div>
+                </button>-->
+            </xpath>
+
+            <!-- button parent -->
+            <xpath expr="//form[1]/sheet[1]/div[1]/button[@name='action_open_parent_task']" position="replace">
+                <!--<button name="action_open_parent_task" type="object" class="oe_stat_button" icon="fa-tasks" string="Solution" attrs="{'invisible': ['|', '|', ('allow_subtasks', '=', False), ('parent_id', '=', False), ('is_strategy', '=', False)]}" groups="project.group_subtask_project"/>
+                <button name="action_open_parent_task" type="object" class="oe_stat_button" icon="fa-tasks" string="Strategy" attrs="{'invisible': ['|', '|', ('allow_subtasks', '=', False), ('parent_id', '=', False), ('is_task', '=', False)]}" groups="project.group_subtask_project"/>
+                <button name="action_open_parent_task" type="object" class="oe_stat_button" icon="fa-tasks" string="Task" attrs="{'invisible': ['|', '|', ('allow_subtasks', '=', False), ('parent_id', '=', False), ('is_subtask', '=', False)]}" groups="project.group_subtask_project"/>-->
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- action open form project -->
+    <record id="open_view_project_all_ccpp" model="ir.actions.act_window">
+        <field name="name">CCPP</field>
+        <field name="res_model">project.project</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="project.edit_project"/>
+        <field name="target">main</field>
+    </record>
+
+    <record id="open_view_task_all_ccpp" model="ir.actions.act_window">
+        <field name="name">Solution</field>
+        <field name="res_model">project.task</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="project.view_task_form2"/>
+        <field name="target">main</field>
+    </record>
+
+    <!-- Menu / action change name -->
+        <record model="ir.ui.menu" id="project.menu_main_pm">
+            <field name="name">CCPPOS</field>
+        </record>
+
+        <record model="ir.ui.menu" id="project.menu_projects">
+            <field name="name">CCPP</field>
+        </record>
+
+        <record model="ir.ui.menu" id="project.menu_projects_group_stage">
+            <field name="name">CCPP</field>
+        </record>
+
+        <record model="ir.ui.menu" id="project.menu_projects_config">
+            <field name="name">CCPP</field>
+        </record>
+
+        <record model="ir.ui.menu" id="project.menu_projects_config_group_stage">
+            <field name="name">CCPP</field>
+        </record>
+
+        <record model="ir.actions.act_window" id="project.open_view_project_all">
+            <field name="name">CCPP</field>
+        </record>
+
+        <record model="ir.actions.act_window" id="project.open_view_project_all_group_stage">
+            <field name="name">CCPP</field>
+        </record>
+
+        <record model="ir.actions.act_window" id="project.open_view_project_all_config">
+            <field name="name">CCPP</field>
+        </record>
+
+        <record model="ir.actions.act_window" id="project.open_view_project_all_config_group_stage">
+            <field name="name">CCPP</field>
+        </record>
+
+        <record model="ir.actions.act_window" id="project.project_project_stage_configure">
+            <field name="name">CCPP Stages</field>
+        </record>
+
+        <record model="ir.ui.menu" id="project.menu_project_config_project_stage">
+            <field name="name">CCPP Stages</field>
+        </record>
+
+        <!--<record model="ir.actions.act_window" id="project.open_create_project">
+            <field name="name">Create CCPP</field>
+        </record>-->
+
+        <record model="ir.actions.act_window" id="project.act_res_users_2_project_task_opened">
+            <field name="context">{}</field>
+        </record>
+
+        <record model="ir.ui.menu" id="project.menu_project_config_project">
+            <field name="action" eval="False"/>
+        </record>
+
+        <record model="ir.ui.menu" id="project.menu_project_tags_act">
+            <field name="action" eval="False"/>
+        </record>
+        
+</odoo>

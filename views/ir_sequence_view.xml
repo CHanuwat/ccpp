@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<odoo>
+    <record id="sequence_view_form_inherit_ccpp" model="ir.ui.view">
+        <field name="name">sequence.view.form.inherit.ccpp</field>
+        <field name="model">ir.sequence</field>
+        <field name="inherit_id" ref="base.sequence_view"/>
+	    <field name="arch" type="xml">
+                <xpath expr="//field[@name='use_date_range']" position='after'>
+                    <field name="type_range"/>
+                </xpath>
+        </field>
+    </record>
+</odoo>

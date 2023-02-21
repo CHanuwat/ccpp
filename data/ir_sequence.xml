@@ -1,0 +1,1287 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <data noupdate="1">
+
+        <record id="seq_ccpp_ccpp_acc" model="ir.sequence">
+            <field name="name">CCPP CCPP ACC Department</field>
+            <field name="code">ccpp.cp.acc</field>
+            <field name="prefix">ACC-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_acc" model="ir.sequence">
+            <field name="name">CCPP Solution ACC Department</field>
+            <field name="code">ccpp.sl.acc</field>
+            <field name="prefix">ACC-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_acc" model="ir.sequence">
+            <field name="name">CCPP Strategy ACC Department</field>
+            <field name="code">ccpp.st.acc</field>
+            <field name="prefix">ACC-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_acc" model="ir.sequence">
+            <field name="name">CCPP Task ACC Department</field>
+            <field name="code">ccpp.ta.acc</field>
+            <field name="prefix">ACC-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <record id="seq_ccpp_ccpp_amo" model="ir.sequence">
+            <field name="name">CCPP CCPP AMO Department</field>
+            <field name="code">ccpp.cp.amo</field>
+            <field name="prefix">AMO-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_amo" model="ir.sequence">
+            <field name="name">CCPP Solution AMO Department</field>
+            <field name="code">ccpp.sl.amo</field>
+            <field name="prefix">AMO-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_amo" model="ir.sequence">
+            <field name="name">CCPP Strategy AMO Department</field>
+            <field name="code">ccpp.st.amo</field>
+            <field name="prefix">AMO-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_amo" model="ir.sequence">
+            <field name="name">CCPP Task AMO Department</field>
+            <field name="code">ccpp.ta.amo</field>
+            <field name="prefix">AMO-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <record id="seq_ccpp_ccpp_adm" model="ir.sequence">
+            <field name="name">CCPP CCPP ADM Department</field>
+            <field name="code">ccpp.cp.adm</field>
+            <field name="prefix">ADM-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_adm" model="ir.sequence">
+            <field name="name">CCPP Solution ADM Department</field>
+            <field name="code">ccpp.sl.adm</field>
+            <field name="prefix">ADM-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_adm" model="ir.sequence">
+            <field name="name">CCPP Strategy ADM Department</field>
+            <field name="code">ccpp.st.adm</field>
+            <field name="prefix">ADM-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_adm" model="ir.sequence">
+            <field name="name">CCPP Task ADM Department</field>
+            <field name="code">ccpp.ta.adm</field>
+            <field name="prefix">ADM-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <record id="seq_ccpp_ccpp_btm" model="ir.sequence">
+            <field name="name">CCPP CCPP BTM Department</field>
+            <field name="code">ccpp.cp.brm</field>
+            <field name="prefix">BTM-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_btm" model="ir.sequence">
+            <field name="name">CCPP Solution BTM Department</field>
+            <field name="code">ccpp.sl.btm</field>
+            <field name="prefix">BTM-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_btm" model="ir.sequence">
+            <field name="name">CCPP Strategy BTM Department</field>
+            <field name="code">ccpp.st.btm</field>
+            <field name="prefix">BTM-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_btm" model="ir.sequence">
+            <field name="name">CCPP Task BTM Department</field>
+            <field name="code">ccpp.ta.btm</field>
+            <field name="prefix">BTM-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <record id="seq_ccpp_ccpp_bud" model="ir.sequence">
+            <field name="name">CCPP CCPP BUD Department</field>
+            <field name="code">ccpp.cp.bud</field>
+            <field name="prefix">BUD-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_bud" model="ir.sequence">
+            <field name="name">CCPP Solution BUD Department</field>
+            <field name="code">ccpp.sl.bud</field>
+            <field name="prefix">BUD-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_bud" model="ir.sequence">
+            <field name="name">CCPP Strategy BUD Department</field>
+            <field name="code">ccpp.st.bud</field>
+            <field name="prefix">BUD-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_bud" model="ir.sequence">
+            <field name="name">CCPP Task BUD Department</field>
+            <field name="code">ccpp.ta.bud</field>
+            <field name="prefix">BUD-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <record id="seq_ccpp_ccpp_bud2" model="ir.sequence">
+            <field name="name">CCPP CCPP BUD2 Department</field>
+            <field name="code">ccpp.cp.bud2</field>
+            <field name="prefix">BUD2-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_bud2" model="ir.sequence">
+            <field name="name">CCPP Solution BUD2 Department</field>
+            <field name="code">ccpp.sl.bud2</field>
+            <field name="prefix">BUD2-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_bud2" model="ir.sequence">
+            <field name="name">CCPP Strategy BUD2 Department</field>
+            <field name="code">ccpp.st.bud2</field>
+            <field name="prefix">BUD2-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_bud2" model="ir.sequence">
+            <field name="name">CCPP Task BUD2 Department</field>
+            <field name="code">ccpp.ta.bud2</field>
+            <field name="prefix">BUD2-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <record id="seq_ccpp_ccpp_bud3" model="ir.sequence">
+            <field name="name">CCPP CCPP BUD3 Department</field>
+            <field name="code">ccpp.cp.bud3</field>
+            <field name="prefix">BUD3-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_bud3" model="ir.sequence">
+            <field name="name">CCPP Solution BUD3 Department</field>
+            <field name="code">ccpp.sl.bud3</field>
+            <field name="prefix">BUD3-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_bud3" model="ir.sequence">
+            <field name="name">CCPP Strategy BUD3 Department</field>
+            <field name="code">ccpp.st.bud3</field>
+            <field name="prefix">BUD3-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_bud3" model="ir.sequence">
+            <field name="name">CCPP Task BUD3 Department</field>
+            <field name="code">ccpp.ta.bud3</field>
+            <field name="prefix">BUD3-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <record id="seq_ccpp_ccpp_cli" model="ir.sequence">
+            <field name="name">CCPP CCPP CLI Department</field>
+            <field name="code">ccpp.cp.cli</field>
+            <field name="prefix">CLI-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_cli" model="ir.sequence">
+            <field name="name">CCPP Solution CLI Department</field>
+            <field name="code">ccpp.sl.cli</field>
+            <field name="prefix">CLI-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_cli" model="ir.sequence">
+            <field name="name">CCPP Strategy CLI Department</field>
+            <field name="code">ccpp.st.cli</field>
+            <field name="prefix">CLI-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_cli" model="ir.sequence">
+            <field name="name">CCPP Task CLI Department</field>
+            <field name="code">ccpp.ta.cli</field>
+            <field name="prefix">CLI-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <record id="seq_ccpp_ccpp_cmk" model="ir.sequence">
+            <field name="name">CCPP CCPP CMK Department</field>
+            <field name="code">ccpp.cp.cmk</field>
+            <field name="prefix">CMK-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_cmk" model="ir.sequence">
+            <field name="name">CCPP Solution CMK Department</field>
+            <field name="code">ccpp.sl.cmk</field>
+            <field name="prefix">CMK-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_cmk" model="ir.sequence">
+            <field name="name">CCPP Strategy CMK Department</field>
+            <field name="code">ccpp.st.cmk</field>
+            <field name="prefix">CMK-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_cmk" model="ir.sequence">
+            <field name="name">CCPP Task CMK Department</field>
+            <field name="code">ccpp.ta.cmk</field>
+            <field name="prefix">CMK-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <record id="seq_ccpp_ccpp_cmt" model="ir.sequence">
+            <field name="name">CCPP CCPP CMT Department</field>
+            <field name="code">ccpp.cp.cmt</field>
+            <field name="prefix">CMT-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_cmt" model="ir.sequence">
+            <field name="name">CCPP Solution CMT Department</field>
+            <field name="code">ccpp.sl.cmt</field>
+            <field name="prefix">CMT-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_cmt" model="ir.sequence">
+            <field name="name">CCPP Strategy CMT Department</field>
+            <field name="code">ccpp.st.cmt</field>
+            <field name="prefix">CMT-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_cmt" model="ir.sequence">
+            <field name="name">CCPP Task CMT Department</field>
+            <field name="code">ccpp.ta.cmt</field>
+            <field name="prefix">CMT-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <record id="seq_ccpp_ccpp_csd" model="ir.sequence">
+            <field name="name">CCPP CCPP CSD Department</field>
+            <field name="code">ccpp.cp.csd</field>
+            <field name="prefix">CSD-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_csd" model="ir.sequence">
+            <field name="name">CCPP Solution CSD Department</field>
+            <field name="code">ccpp.sl.csd</field>
+            <field name="prefix">CSD-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_csd" model="ir.sequence">
+            <field name="name">CCPP Strategy CSD Department</field>
+            <field name="code">ccpp.st.csd</field>
+            <field name="prefix">CSD-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_csd" model="ir.sequence">
+            <field name="name">CCPP Task CSD Department</field>
+            <field name="code">ccpp.ta.csd</field>
+            <field name="prefix">CSD-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <record id="seq_ccpp_ccpp_eng" model="ir.sequence">
+            <field name="name">CCPP CCPP ENG Department</field>
+            <field name="code">ccpp.cp.eng</field>
+            <field name="prefix">ENG-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_eng" model="ir.sequence">
+            <field name="name">CCPP Solution ENG Department</field>
+            <field name="code">ccpp.sl.eng</field>
+            <field name="prefix">ENG-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_eng" model="ir.sequence">
+            <field name="name">CCPP Strategy ENG Department</field>
+            <field name="code">ccpp.st.eng</field>
+            <field name="prefix">ENG-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_eng" model="ir.sequence">
+            <field name="name">CCPP Task ENG Department</field>
+            <field name="code">ccpp.ta.eng</field>
+            <field name="prefix">ENG-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <record id="seq_ccpp_ccpp_fin" model="ir.sequence">
+            <field name="name">CCPP CCPP FIN Department</field>
+            <field name="code">ccpp.cp.fin</field>
+            <field name="prefix">FIN-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_fin" model="ir.sequence">
+            <field name="name">CCPP Solution FIN Department</field>
+            <field name="code">ccpp.sl.fin</field>
+            <field name="prefix">FIN-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_fin" model="ir.sequence">
+            <field name="name">CCPP Strategy FIN Department</field>
+            <field name="code">ccpp.st.fin</field>
+            <field name="prefix">FIN-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_fin" model="ir.sequence">
+            <field name="name">CCPP Task FIN Department</field>
+            <field name="code">ccpp.ta.fin</field>
+            <field name="prefix">FIN-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <record id="seq_ccpp_ccpp_hrm" model="ir.sequence">
+            <field name="name">CCPP CCPP HRM Department</field>
+            <field name="code">ccpp.cp.hrm</field>
+            <field name="prefix">HRM-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_hrm" model="ir.sequence">
+            <field name="name">CCPP Solution HRM Department</field>
+            <field name="code">ccpp.sl.hrm</field>
+            <field name="prefix">HRM-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_hrm" model="ir.sequence">
+            <field name="name">CCPP Strategy HRM Department</field>
+            <field name="code">ccpp.st.hrm</field>
+            <field name="prefix">HRM-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_hrm" model="ir.sequence">
+            <field name="name">CCPP Task HRM Department</field>
+            <field name="code">ccpp.ta.hrm</field>
+            <field name="prefix">HRM-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <record id="seq_ccpp_ccpp_iad" model="ir.sequence">
+            <field name="name">CCPP CCPP IAD Department</field>
+            <field name="code">ccpp.cp.iad</field>
+            <field name="prefix">IAD-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_iad" model="ir.sequence">
+            <field name="name">CCPP Solution IAD Department</field>
+            <field name="code">ccpp.sl.iad</field>
+            <field name="prefix">IAD-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_iad" model="ir.sequence">
+            <field name="name">CCPP Strategy IAD Department</field>
+            <field name="code">ccpp.st.iad</field>
+            <field name="prefix">IAD-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_iad" model="ir.sequence">
+            <field name="name">CCPP Task IAD Department</field>
+            <field name="code">ccpp.ta.iad</field>
+            <field name="prefix">IAD-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <record id="seq_ccpp_ccpp_ird" model="ir.sequence">
+            <field name="name">CCPP CCPP IRD Department</field>
+            <field name="code">ccpp.cp.ird</field>
+            <field name="prefix">IRD-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_ird" model="ir.sequence">
+            <field name="name">CCPP Solution IRD Department</field>
+            <field name="code">ccpp.sl.ird</field>
+            <field name="prefix">IRD-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_ird" model="ir.sequence">
+            <field name="name">CCPP Strategy IRD Department</field>
+            <field name="code">ccpp.st.ird</field>
+            <field name="prefix">IRD-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_ird" model="ir.sequence">
+            <field name="name">CCPP Task IRD Department</field>
+            <field name="code">ccpp.ta.ird</field>
+            <field name="prefix">IRD-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <record id="seq_ccpp_ccpp_iso" model="ir.sequence">
+            <field name="name">CCPP CCPP ISO Department</field>
+            <field name="code">ccpp.cp.iso</field>
+            <field name="prefix">ISO-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_iso" model="ir.sequence">
+            <field name="name">CCPP Solution ISO Department</field>
+            <field name="code">ccpp.sl.iso</field>
+            <field name="prefix">ISO-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_iso" model="ir.sequence">
+            <field name="name">CCPP Strategy ISO Department</field>
+            <field name="code">ccpp.st.iso</field>
+            <field name="prefix">ISO-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_iso" model="ir.sequence">
+            <field name="name">CCPP Task ISO Department</field>
+            <field name="code">ccpp.ta.iso</field>
+            <field name="prefix">ISO-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <record id="seq_ccpp_ccpp_itd" model="ir.sequence">
+            <field name="name">CCPP CCPP ITD Department</field>
+            <field name="code">ccpp.cp.itd</field>
+            <field name="prefix">ITD-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_itd" model="ir.sequence">
+            <field name="name">CCPP Solution ITD Department</field>
+            <field name="code">ccpp.sl.itd</field>
+            <field name="prefix">ITD-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_itd" model="ir.sequence">
+            <field name="name">CCPP Strategy ITD Department</field>
+            <field name="code">ccpp.st.itd</field>
+            <field name="prefix">ITD-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_itd" model="ir.sequence">
+            <field name="name">CCPP Task ITD Department</field>
+            <field name="code">ccpp.ta.itd</field>
+            <field name="prefix">ITD-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <record id="seq_ccpp_ccpp_lab" model="ir.sequence">
+            <field name="name">CCPP CCPP LAB Department</field>
+            <field name="code">ccpp.cp.lab</field>
+            <field name="prefix">LAB-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_lab" model="ir.sequence">
+            <field name="name">CCPP Solution LAB Department</field>
+            <field name="code">ccpp.sl.lab</field>
+            <field name="prefix">LAB-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_lab" model="ir.sequence">
+            <field name="name">CCPP Strategy LAB Department</field>
+            <field name="code">ccpp.st.lab</field>
+            <field name="prefix">LAB-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_lab" model="ir.sequence">
+            <field name="name">CCPP Task LAB Department</field>
+            <field name="code">ccpp.ta.lab</field>
+            <field name="prefix">LAB-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <record id="seq_ccpp_ccpp_leg" model="ir.sequence">
+            <field name="name">CCPP CCPP LEG Department</field>
+            <field name="code">ccpp.cp.leg</field>
+            <field name="prefix">LEG-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_leg" model="ir.sequence">
+            <field name="name">CCPP Solution LEG Department</field>
+            <field name="code">ccpp.sl.leg</field>
+            <field name="prefix">LEG-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_leg" model="ir.sequence">
+            <field name="name">CCPP Strategy LEG Department</field>
+            <field name="code">ccpp.st.leg</field>
+            <field name="prefix">LEG-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_leg" model="ir.sequence">
+            <field name="name">CCPP Task LEG Department</field>
+            <field name="code">ccpp.ta.leg</field>
+            <field name="prefix">LEG-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <record id="seq_ccpp_ccpp_mgt" model="ir.sequence">
+            <field name="name">CCPP CCPP MGT Department</field>
+            <field name="code">ccpp.cp.mgt</field>
+            <field name="prefix">MGT-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_mgt" model="ir.sequence">
+            <field name="name">CCPP Solution MGT Department</field>
+            <field name="code">ccpp.sl.mgt</field>
+            <field name="prefix">MGT-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_mgt" model="ir.sequence">
+            <field name="name">CCPP Strategy MGT Department</field>
+            <field name="code">ccpp.st.mgt</field>
+            <field name="prefix">MGT-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_mgt" model="ir.sequence">
+            <field name="name">CCPP Task MGT Department</field>
+            <field name="code">ccpp.ta.mgt</field>
+            <field name="prefix">MGT-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <record id="seq_ccpp_ccpp_mkt" model="ir.sequence">
+            <field name="name">CCPP CCPP MKT Department</field>
+            <field name="code">ccpp.cp.mkt</field>
+            <field name="prefix">MKT-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_mkt" model="ir.sequence">
+            <field name="name">CCPP Solution MKT Department</field>
+            <field name="code">ccpp.sl.mkt</field>
+            <field name="prefix">MKT-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_mkt" model="ir.sequence">
+            <field name="name">CCPP Strategy MKT Department</field>
+            <field name="code">ccpp.st.mkt</field>
+            <field name="prefix">MKT-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_mkt" model="ir.sequence">
+            <field name="name">CCPP Task MKT Department</field>
+            <field name="code">ccpp.ta.mkt</field>
+            <field name="prefix">MKT-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <record id="seq_ccpp_ccpp_oma" model="ir.sequence">
+            <field name="name">CCPP CCPP OMA Department</field>
+            <field name="code">ccpp.cp.oma</field>
+            <field name="prefix">OMA-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_oma" model="ir.sequence">
+            <field name="name">CCPP Solution OMA Department</field>
+            <field name="code">ccpp.sl.oma</field>
+            <field name="prefix">OMA-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_oma" model="ir.sequence">
+            <field name="name">CCPP Strategy OMA Department</field>
+            <field name="code">ccpp.st.oma</field>
+            <field name="prefix">OMA-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_oma" model="ir.sequence">
+            <field name="name">CCPP Task OMA Department</field>
+            <field name="code">ccpp.ta.oma</field>
+            <field name="prefix">OMA-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <record id="seq_ccpp_ccpp_onl" model="ir.sequence">
+            <field name="name">CCPP CCPP ONL Department</field>
+            <field name="code">ccpp.cp.onl</field>
+            <field name="prefix">ONL-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_onl" model="ir.sequence">
+            <field name="name">CCPP Solution ONL Department</field>
+            <field name="code">ccpp.sl.onl</field>
+            <field name="prefix">ONL-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_onl" model="ir.sequence">
+            <field name="name">CCPP Strategy ONL Department</field>
+            <field name="code">ccpp.st.onl</field>
+            <field name="prefix">ONL-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_onl" model="ir.sequence">
+            <field name="name">CCPP Task ONL Department</field>
+            <field name="code">ccpp.ta.onl</field>
+            <field name="prefix">ONL-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <record id="seq_ccpp_ccpp_prd" model="ir.sequence">
+            <field name="name">CCPP CCPP PRD Department</field>
+            <field name="code">ccpp.cp.prd</field>
+            <field name="prefix">PRD-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_prd" model="ir.sequence">
+            <field name="name">CCPP Solution PRD Department</field>
+            <field name="code">ccpp.sl.prd</field>
+            <field name="prefix">PRD-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_prd" model="ir.sequence">
+            <field name="name">CCPP Strategy PRD Department</field>
+            <field name="code">ccpp.st.prd</field>
+            <field name="prefix">PRD-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_prd" model="ir.sequence">
+            <field name="name">CCPP Task PRD Department</field>
+            <field name="code">ccpp.ta.prd</field>
+            <field name="prefix">PRD-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <record id="seq_ccpp_ccpp_pro" model="ir.sequence">
+            <field name="name">CCPP CCPP PRO Department</field>
+            <field name="code">ccpp.cp.pro</field>
+            <field name="prefix">PRO-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_pro" model="ir.sequence">
+            <field name="name">CCPP Solution PRO Department</field>
+            <field name="code">ccpp.sl.pro</field>
+            <field name="prefix">PRO-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_pro" model="ir.sequence">
+            <field name="name">CCPP Strategy PRO Department</field>
+            <field name="code">ccpp.st.pro</field>
+            <field name="prefix">PRO-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_pro" model="ir.sequence">
+            <field name="name">CCPP Task PRO Department</field>
+            <field name="code">ccpp.ta.pro</field>
+            <field name="prefix">PRO-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <record id="seq_ccpp_ccpp_rid" model="ir.sequence">
+            <field name="name">CCPP CCPP RID Department</field>
+            <field name="code">ccpp.cp.rid</field>
+            <field name="prefix">RID-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_rid" model="ir.sequence">
+            <field name="name">CCPP Solution RID Department</field>
+            <field name="code">ccpp.sl.rid</field>
+            <field name="prefix">RID-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_rid" model="ir.sequence">
+            <field name="name">CCPP Strategy RID Department</field>
+            <field name="code">ccpp.st.rid</field>
+            <field name="prefix">RID-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_rid" model="ir.sequence">
+            <field name="name">CCPP Task RID Department</field>
+            <field name="code">ccpp.ta.rid</field>
+            <field name="prefix">RID-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <record id="seq_ccpp_ccpp_sco" model="ir.sequence">
+            <field name="name">CCPP CCPP SCO Department</field>
+            <field name="code">ccpp.cp.sco</field>
+            <field name="prefix">SCO-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_sco" model="ir.sequence">
+            <field name="name">CCPP Solution SCO Department</field>
+            <field name="code">ccpp.sl.sco</field>
+            <field name="prefix">SCO-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_sco" model="ir.sequence">
+            <field name="name">CCPP Strategy SCO Department</field>
+            <field name="code">ccpp.st.sco</field>
+            <field name="prefix">SCO-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_sco" model="ir.sequence">
+            <field name="name">CCPP Task SCO Department</field>
+            <field name="code">ccpp.ta.sco</field>
+            <field name="prefix">SCO-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+<record id="seq_ccpp_ccpp_src" model="ir.sequence">
+            <field name="name">CCPP CCPP SRC Department</field>
+            <field name="code">ccpp.cp.src</field>
+            <field name="prefix">SRC-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_src" model="ir.sequence">
+            <field name="name">CCPP Solution SRC Department</field>
+            <field name="code">ccpp.sl.src</field>
+            <field name="prefix">SRC-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_src" model="ir.sequence">
+            <field name="name">CCPP Strategy SRC Department</field>
+            <field name="code">ccpp.st.src</field>
+            <field name="prefix">SRC-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_src" model="ir.sequence">
+            <field name="name">CCPP Task SRC Department</field>
+            <field name="code">ccpp.ta.src</field>
+            <field name="prefix">SRC-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <record id="seq_ccpp_ccpp_srt" model="ir.sequence">
+            <field name="name">CCPP CCPP SRT Department</field>
+            <field name="code">ccpp.cp.srt</field>
+            <field name="prefix">SRT-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_srt" model="ir.sequence">
+            <field name="name">CCPP Solution SRT Department</field>
+            <field name="code">ccpp.sl.srt</field>
+            <field name="prefix">SRT-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_srt" model="ir.sequence">
+            <field name="name">CCPP Strategy SRT Department</field>
+            <field name="code">ccpp.st.srt</field>
+            <field name="prefix">SRT-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_srt" model="ir.sequence">
+            <field name="name">CCPP Task SRT Department</field>
+            <field name="code">ccpp.ta.srt</field>
+            <field name="prefix">SRT-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <record id="seq_ccpp_ccpp_wcl" model="ir.sequence">
+            <field name="name">CCPP CCPP WCL Department</field>
+            <field name="code">ccpp.cp.wcl</field>
+            <field name="prefix">WCL-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_wcl" model="ir.sequence">
+            <field name="name">CCPP Solution WCL Department</field>
+            <field name="code">ccpp.sl.wcl</field>
+            <field name="prefix">WCL-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_wcl" model="ir.sequence">
+            <field name="name">CCPP Strategy WCL Department</field>
+            <field name="code">ccpp.st.wcl</field>
+            <field name="prefix">WCL-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_wcl" model="ir.sequence">
+            <field name="name">CCPP Task WCL Department</field>
+            <field name="code">ccpp.ta.wcl</field>
+            <field name="prefix">WCL-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <record id="seq_ccpp_ccpp_whd" model="ir.sequence">
+            <field name="name">CCPP CCPP WHD Department</field>
+            <field name="code">ccpp.cp.whd</field>
+            <field name="prefix">WHD-CP%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_solution_whd" model="ir.sequence">
+            <field name="name">CCPP Solution WHD Department</field>
+            <field name="code">ccpp.sl.whd</field>
+            <field name="prefix">WHD-SL%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_strategy_whd" model="ir.sequence">
+            <field name="name">CCPP Strategy WHD Department</field>
+            <field name="code">ccpp.st.whd</field>
+            <field name="prefix">WHD-ST%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_ccpp_task_whd" model="ir.sequence">
+            <field name="name">CCPP Task WHD Department</field>
+            <field name="code">ccpp.ta.whd</field>
+            <field name="prefix">WHD-TA%(month)s%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+    </data>
+</odoo>

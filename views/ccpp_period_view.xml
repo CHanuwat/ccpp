@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="ccpp_period_action" model="ir.actions.act_window">
+        <field name="name">Period</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">ccpp.period</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="ccpp_period_view_tree" model="ir.ui.view">
+        <field name="name">ccpp.period.view.tree</field>
+        <field name="model">ccpp.period</field>
+        <field name="arch" type="xml">
+            <tree sample="1" multi_edit="1" default_order="name">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ccpp_period_view_form" model="ir.ui.view">
+        <field name="name">ccpp.period.view.form</field>
+        <field name="model">ccpp.period</field>
+        <field name="arch" type="xml">
+            <form string="period">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <label for="count" string="Period Every"/>
+                            <div name="dates" class="o_row">
+                                <field name="count"/>
+                                <p> range </p>
+                                <i class="fa fa-long-arrow-right mx-2 oe_read_only" aria-label="Arrow icon" title="Arrow"/>
+                                <field name="period"/>
+                            </div>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" groups="base.group_user"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <menuitem id="menu_ccpp_period" name="CCPP Period" parent="project.menu_project_config" action="ccpp_period_action" sequence="12"/>
+    
+</odoo>
