@@ -2,7 +2,7 @@
 <odoo>
 
     <record id="ccpp_period_action" model="ir.actions.act_window">
-        <field name="name">Period</field>
+        <field name="name">CCPP Period</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">ccpp.period</field>
         <field name="view_mode">tree,form</field>
@@ -37,10 +37,10 @@
                         </group>
                     </group>
                 </sheet>
-                <div class="oe_chatter">
+                <!--<div class="oe_chatter">
                     <field name="message_follower_ids" groups="base.group_user"/>
                     <field name="message_ids"/>
-                </div>
+                </div>-->
             </form>
         </field>
     </record>

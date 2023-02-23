@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="ccpp_purchase_history_action" model="ir.actions.act_window">
+        <field name="name">Customer Purchase History</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">ccpp.purchase.history</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="ccpp_purchase_history_view_tree" model="ir.ui.view">
+        <field name="name">ccpp.purchase.history.view.tree</field>
+        <field name="model">ccpp.purchase.history</field>
+        <field name="arch" type="xml">
+            <tree sample="1" multi_edit="1" editable="top">
+                <field name="year_selection"/>
+                <field name="month"/>
+                <field name="customer_id"/>
+                <field name="potential_type"/>
+                <field name="company_id" invisible="True"/>
+                <field name="company_partner_id" invisible="True"/>
+                <field name="vendor_id" domain="['|',('is_competitor','=',True),('id','=',company_partner_id)]"/>
+                <field name="domain_job_position_ids" invisible="True"/>
+                <field name="key_user_id" domain="[('id','in',domain_job_position_ids)]"/>
+                <field name="product_id"/>
+                <field name="unit_price"/>
+                <field name="order_qty" sum="sum_order_qty"/>
+                <field name="use_qty" sum="sum_use_qty"/>
+                <field name="note"/>
+                <field name="sale_person_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ccpp_purchase_history_view_form" model="ir.ui.view">
+        <field name="name">ccpp.purchase.history.view.form</field>
+        <field name="model">ccpp.purchase.history</field>
+        <field name="arch" type="xml">
+            <form string="Purchase History">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="year_selection"/>
+                            <field name="month"/>
+                            <field name="customer_id"/>
+                            <field name="potential_type"/>
+                            <field name="vendor_id"/>
+                            <field name="domain_job_position_ids" invisible="True"/>
+                            <field name="key_user_id" domain="[('id','in',domain_job_position_ids)]"/>
+                        </group>
+                        <group>
+                            <field name="product_id"/>
+                            <field name="unit_price"/>
+                            <field name="order_qty"/>
+                            <field name="use_qty"/>
+                            <field name="note"/>
+                            <field name="sale_person_id"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" groups="base.group_user"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <menuitem id="menu_ccpp_purchase_history" name="Customer Purchase History" parent="crm.crm_menu_sales" action="ccpp_purchase_history_action" sequence="103"/>
+    
+</odoo>

@@ -22,8 +22,8 @@ class CCPPPrioirty(models.Model):
     
     @api.model
     def name_get(self):
+        result = []
         for rec in self:
-            result = []
             result.append((rec.id, '%s %s' %(rec.name, rec.description)))
         return result
     

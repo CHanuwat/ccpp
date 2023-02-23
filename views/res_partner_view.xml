@@ -17,6 +17,29 @@
             <xpath expr="//form[1]/sheet[1]/notebook[1]/page[1]/field[@name='child_ids']/form[1]/sheet[1]/group[1]/group[1]/field[@name='function']" position='replace'>
                 <field name="job_position_id" attrs="{'invisible': [('type','!=', 'contact')]}"/>
             </xpath>
+            <xpath expr="//field[@name='vat']" position='before'>
+                <field name="province_id"/>
+                <field name="customer_category_id"/>
+            </xpath>
+            <xpath expr="//form[1]/sheet[1]/div[2]/div[1]" position="after">
+                <div class="o_row">
+                    <div>
+                        <field name="is_customer" style="width:35%"/>
+                        <label class="o_label" for="is_customer" string="Customer" style="width:65%"/>
+                    </div>
+                    <div>
+                        <field name="is_vendor" style="width:35%"/>
+                        <label class="o_label" for="is_vendor" string="Vendor" style="width:65%"/>
+                    </div>
+                    <div>
+                        <field name="is_competitor" style="width:35%"/>
+                        <label class="o_label" for="is_competitor" string="Competitor" style="width:65%"/>
+                    </div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </xpath>
         </field>
     </record>
 
@@ -83,8 +106,9 @@
         <field name="name">view.partner.position.tree</field>
         <field name="model">res.partner.position</field>
         <field name="arch" type="xml">
-            <tree string="Tree Partner Position">
+            <tree sample="1" multi_edit="1" editable="top" string="Tree Partner Position">
                 <field name="name"/>
+                <field name="active" widget="boolean_toggle"/>
             </tree>
         </field>
     </record>
@@ -98,7 +122,7 @@
                     <group>
                         <group>
                             <field name="name"/>
-                            <!--<field name="parent_partner_id"/>-->
+                            <field name="active" widget="boolean_toggle"/>
                         </group>
                     </group> 
                     <notebook>

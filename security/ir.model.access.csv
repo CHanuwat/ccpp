@@ -3,3 +3,9 @@ access_ccpp_department,access_ccpp_department,model_ccpp_department,base.group_u
 access_ccpp_priority,access_ccpp_priority,model_ccpp_priority,base.group_user,1,1,1,1
 access_ccpp_period,access_ccpp_period,model_ccpp_period,base.group_user,1,1,1,1
 access_res_partner_position,access_res_partner_position,model_res_partner_position,base.group_user,1,1,1,1
+access_ccpp_customer_information,access_ccpp_customer_information,model_ccpp_customer_information,base.group_user,1,1,1,1
+access_ccpp_province,access_ccpp_province,model_ccpp_province,base.group_user,1,1,1,1
+access_ccpp_customer_category,access_ccpp_customer_category,model_ccpp_customer_category,base.group_user,1,1,1,1
+access_ccpp_sale_target,access_ccpp_sale_target,model_ccpp_sale_target,base.group_user,1,1,1,1
+access_ccpp_sale_target_period,access_ccpp_sale_target_period,model_ccpp_sale_target_period,base.group_user,1,1,1,1
+access_ccpp_purchase_history,access_ccpp_purchase_history,model_ccpp_purchase_history,base.group_user,1,1,1,1

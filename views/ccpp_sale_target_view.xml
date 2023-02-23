@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="ccpp_sale_target_action" model="ir.actions.act_window">
+        <field name="name">Sales Target</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">ccpp.sale.target</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="ccpp_sale_target_view_tree" model="ir.ui.view">
+        <field name="name">ccpp.sale.target.view.tree</field>
+        <field name="model">ccpp.sale.target</field>
+        <field name="arch" type="xml">
+            <tree sample="1" multi_edit="1" editable="top">
+                <!--<field name="years" interval="year" options="{'datepicker': {'format': 'yyyy'}, 'hide_month': True,'date_format': '%Y/%m/%d'}" />-->
+                <field name="year_selection"/>
+                <field name="period"/>
+                <field name="date_from" force_save="1"/>
+                <field name="date_to" force_save="1"/>
+                <field name="target" sum="sum_target"/>
+                <field name="actual" sum="sum_actual"/>
+                <field name="sale_person_id"/>
+                <field name="status_color" invisible="1"/>
+                <field name="status" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'status_color'}"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ccpp_sale_target_view_form" model="ir.ui.view">
+        <field name="name">ccpp.sale.target.view.form</field>
+        <field name="model">ccpp.sale.target</field>
+        <field name="arch" type="xml">
+            <form string="Sales Target">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="year_selection"/>
+                            <field name="sale_period_id"/>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                        </group>
+                        <group>
+                            <field name="target"/>
+                            <field name="actual"/>
+                            <field name="sale_person_id"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" groups="base.group_user"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <menuitem id="menu_ccpp_sale_target" name="Sales Target" parent="crm.crm_menu_sales" action="ccpp_sale_target_action" sequence="102"/>
+
+    <record model="ir.ui.menu" id="crm.menu_crm_opportunities">
+        <field name="action" eval="False"/>
+    </record>
+    <record model="ir.ui.menu" id="crm.crm_lead_menu_my_activities">
+        <field name="action" eval="False"/>
+    </record>
+    <record model="ir.ui.menu" id="crm.sales_team_menu_team_pipeline">
+        <field name="action" eval="False"/>
+    </record>
+    <record model="ir.ui.menu" id="crm.res_partner_menu_customer">
+        <field name="action" eval="False"/>
+    </record>
+
+</odoo>

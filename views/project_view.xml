@@ -858,8 +858,8 @@
                     <field name="situation_ids">
                         <tree create="false" delete="false" edit="false" multi_edit="1">
                             <field name="code"/>
-                            <field name="name" string="Situation"/>
-                            <field name="user_id" string="Assignees"/>
+                            <field name="name" string="Title"/>
+                            <field name="user_id" string="Author"/>
                             <field name="date"/>
                             <field name="location"/>
                         </tree>

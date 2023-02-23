@@ -12,6 +12,9 @@ export const STATUS_COLORS = {
     'process': 3,
     'done': 20,
     'cancel': 23,
+    'over': 20,
+    'similar': 3,
+    'less': 23,
 };
 
 export const STATUS_COLOR_PREFIX = 'o_status_bubble mx-0 o_color_bubble_';

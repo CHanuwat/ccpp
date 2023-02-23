@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="ccpp_customer_information_action" model="ir.actions.act_window">
+        <field name="name">Customer Information</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">ccpp.customer.information</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="ccpp_customer_information_view_tree" model="ir.ui.view">
+        <field name="name">ccpp.customer.information.view.tree</field>
+        <field name="model">ccpp.customer.information</field>
+        <field name="arch" type="xml">
+            <tree sample="1" multi_edit="1">
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="customer_id"/>
+                <field name="province_id"/>
+                <field name="sale_area_id"/>
+                <field name="potential_ranking"/>
+                <field name="actual_sale_ranking"/>
+                <field name="total_sale_revenue" string="Actual Sales"/>
+                <field name="competitor_ranking"/>
+                <field name="active"/>
+                <field name="sale_person_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ccpp_customer_information_view_form" model="ir.ui.view">
+        <field name="name">ccpp.customer.information.view.form</field>
+        <field name="model">ccpp.customer.information</field>
+        <field name="arch" type="xml">
+            <form string="Customer Information">
+                <sheet>
+                    <div class="o_row" style="padding-top:5px; padding-bottom:10px">
+                        
+                        <div>
+                            <h2> From 
+                            <field name="date_from"/>  
+                            </h2>
+                        </div>
+                        <div>
+                            <h2> To
+                            <field name="date_to"/>  
+                            </h2>
+                        
+                        </div>
+                        <div>
+                        </div>
+                        <div>
+                        </div>
+                        
+                    </div>
+                    <!--<group>
+                        <group col="4">
+                            <field name="date_from"/>
+                        </group>
+                        <group col="4">
+                            <field name="date_to"/>
+                        </group>
+                    </group>-->
+                    <h2 style="color:gray; font-size:1.2em;"> General Information </h2>
+                    <div style="border-top: 2px solid #e6e6e6;padding: 0px;;margin-top: 10px; margin-bottom: 10px;"/>
+                    <group>
+                        <group>
+                            <field name="customer_id"/>
+                            <field name="province_id"/>
+                            <field name="sale_area_id"/>
+                            <field name="sale_person_id"/>
+                        </group>
+                        <group>
+                            <field name="hospital_size"/>
+                            <field name="customer_category_id"/>
+                            <field name="budget"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                    <h2 style="color:gray; font-size:1.2em;"> Ranking </h2>
+                    <div style="border-top: 2px solid #e6e6e6;padding: 0px;margin-top: 10px; margin-bottom: 10px"/>
+
+                    <div class="o_row" style="padding-top:5px">
+                        <div>
+                            <label class="o_label" for="potential_ranking" string="Ranking by Potential" style="width:35%"/>
+                            <field name="potential_ranking" style="width:65%"/>
+                        </div>
+                        <div>  
+                        </div>
+                    </div>
+                    <div class="o_row" style="padding-top:5px">
+                        <div>
+                            <label class="o_label" for="actual_sale_ranking" string="Ranking by Actual Sale" style="width:35%"/>
+                            <field name="actual_sale_ranking" style="width:65%"/>
+                        </div>
+                        <div>
+                            <label class="o_label" for="total_sale_revenue" string="Total Sale Revenue Last Year(THB)" style="width:35%"/>
+                            <field name="total_sale_revenue" style="width:65%"/>
+                        </div>
+                    </div>
+                    <div class="o_row" style="padding-top:5px">
+                        <div>
+                            <label class="o_label" for="competitor_ranking" string="Ranking by Competitor" style="width:35%"/>
+                            <field name="competitor_ranking" style="width:65%"/>
+                        </div>  
+                        <div>
+                        </div>
+                    </div>
+                    <!--<group>
+                        <group>
+                            <field name="potential_ranking"/>
+                            <field name="actual_sale_ranking"/>
+                            <field name="competitor_ranking"/>
+                        </group>
+                        <group>
+                            <field name="total_sale_revenue"/>
+                        </group>
+                    </group>-->
+
+                    <div style="border-top: 2px solid #e6e6e6;padding: 0px;margin-top: 10px; margin-bottom: 10px"/>
+
+                    <h4 style="margin-top: 10px;">Future Project/Plan (โครงการในอนาคต/แผนงาน)</h4>
+                    <field style="padding:20px;" placeholder="Type Future Project/Plan" name="future_plan" nolabel="True" type="html" options="{'collaborative': true, 'resizable': false}"/>
+
+                    <h4 style="margin-top: 10px;">Connection with other hospital (ความสัมพันธ์กับโรงพยาบาลอื่นๆ)</h4>         
+                    <field style="padding:20px;" placeholder="Type Connection" name="future_plan" nolabel="True" type="html" options="{'collaborative': true, 'resizable': false}"/>
+
+                    <h4 style="margin-top: 10px;">Note</h4>         
+                    <field style="padding:20px;" placeholder="Type Note" name="future_plan" nolabel="True" type="html" options="{'collaborative': true, 'resizable': false}"/>
+                    
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" groups="base.group_user"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <menuitem id="menu_ccpp_customer_information" name="Customer Information" parent="crm.crm_menu_sales" action="ccpp_customer_information_action" sequence="101"/>
+    
+</odoo>

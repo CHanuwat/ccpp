@@ -19,7 +19,7 @@ STATUS_COLOR = {
 
 STATE_COLOR = {
     'open': 0,  # green / success
-    'process': 3,  # orange
+    'process': 3,  # orangeq
     'done': 20,  # red / danger
     'cancel': 23,  # light blue
     False: 0,  # default grey -- for studio
@@ -569,6 +569,7 @@ class ProjectUpdate(models.Model):
     project_id = fields.Many2one(required=False, default=False, related="strategy_id.project_id")
     location = fields.Char("Location")
     code = fields.Char("Situation No.")
+    date = fields.Datetime(default=lambda self: fields.datetime.now(), tracking=True)
 
     @api.model_create_multi
     def create(self, vals_list):

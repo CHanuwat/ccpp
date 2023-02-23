@@ -10,6 +10,11 @@ class Partner(models.Model):
     _inherit = "res.partner"
     
     job_position_id = fields.Many2one('res.partner.position', string='Job Position', index=True, copy=False ,help="replace instead function field char")
+    province_id = fields.Many2one('ccpp.province', string="Province")
+    customer_category_id = fields.Many2one('ccpp.customer.category', string="Customer Category")
+    is_customer = fields.Boolean(string="Customer", default=False)
+    is_vendor = fields.Boolean(string="Vendor", default=False)
+    is_competitor = fields.Boolean(string="Competitor", default=False)
     
     def name_get(self):
         #res = []
@@ -55,3 +60,4 @@ class PartnerPosition(models.Model):
     name = fields.Char("Position Name")
     parent_partner_id = fields.Many2one("res.partner", string="Position Of", domain=[('is_company','=',True)])
     partner_lines = fields.One2many('res.partner', 'job_position_id', string='Partner')
+    active = fields.Boolean("Acrive", default=True)

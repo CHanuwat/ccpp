@@ -5,12 +5,10 @@ from datetime import datetime, timedelta, date, timezone
 import pytz
 import json
 from pprint import pprint
+from random import randint
 
-class CCPPDepartment(models.Model):
-    _name = "ccpp.department"
-    _inherit = ['mail.thread']
+class CCPPCustomerCategory(models.Model):
+    _name = "ccpp.customer.category"
 
-    name = fields.Char("Name")
-    active = fields.Boolean("Active", default="True")
-    
-    
+    name = fields.Char(string="Name")
+    active = fields.Boolean(string="Active", default=True)
