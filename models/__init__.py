@@ -14,3 +14,4 @@ from . import ccpp_customer_category
 from . import ccpp_sale_target
 from . import ccpp_sale_target_period
 from . import ccpp_purchase_history
+from . import ccpp_dashboard

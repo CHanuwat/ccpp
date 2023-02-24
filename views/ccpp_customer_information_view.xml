@@ -1,8 +1,22 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
-    <record id="ccpp_customer_information_action" model="ir.actions.act_window">
-        <field name="name">Customer Information</field>
+    <record id="view_customer_information_search" model="ir.ui.view">
+        <field name="name">view.customer.infomation.search</field>
+        <field name="model">ccpp.customer.information</field>
+        <field name="arch" type="xml">
+            <search string="Search Customer Infomation">
+                <field name="name" string="Project"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Sales Person" name="sale_person_id" context="{'group_by': 'sale_person_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="ccpp_customer_information_action2" model="ir.actions.act_window">
+        <field name="name">Customer Information2</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">ccpp.customer.information</field>
         <field name="view_mode">tree,form</field>
@@ -12,7 +26,7 @@
         <field name="name">ccpp.customer.information.view.tree</field>
         <field name="model">ccpp.customer.information</field>
         <field name="arch" type="xml">
-            <tree sample="1" multi_edit="1">
+            <tree string="Customer Information" multi_edit="1" sample="1">
                 <field name="date_from"/>
                 <field name="date_to"/>
                 <field name="customer_id"/>

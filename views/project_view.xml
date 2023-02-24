@@ -257,6 +257,10 @@
                 <attribute name="string">Note</attribute>
             </xpath>
 
+            <xpath expr="//field[@name='partner_id']" position="attributes">
+                <attribute name="domain">[('child_ids','!=',False)]</attribute>
+            </xpath>
+
             <xpath expr="//form[1]/sheet[1]/notebook[1]/page[@name='description']/field[@name='description']" position="attributes">
                 <attribute name="placeholder">'CCPP Note'</attribute>
             </xpath>
@@ -528,7 +532,7 @@
                 <group>
                     <group>
                         <field name="company_id" invisible="True"/>
-                        <field name="partner_id"/>
+                        <field name="partner_id" domain="[('child_ids','!=',False)]"/>
                         <!--<field name="domain_partner_contact_ids" invisible="True"/>
                         <field name="partner_contact_id" domain="[('id','in',domain_partner_contact_ids)]" context="{'show_title_position':True}"/>-->
                         <field name="domain_job_position_ids" invisible="True"/>
@@ -1019,5 +1023,13 @@
         <record model="ir.ui.menu" id="project.menu_project_tags_act">
             <field name="action" eval="False"/>
         </record>
+        
+        <record id="ccpp_dashboard_project_action" model="ir.actions.act_window">
+            <field name="name">CCPP</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">project.project</field>
+            <field name="view_mode">kanban,form,tree</field>
+        </record>
+
         
 </odoo>

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="ccpp_dashboard_action" model="ir.actions.act_window">
+        <field name="name">CCPP Dashboard V.1</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">ccpp.dashboard</field>
+        <field name="view_mode">kanban,form,tree</field>
+    </record>
+
+    <record id="ccpp_customer_information_view_tree" model="ir.ui.view">
+        <field name="name">ccpp.dashboard.view.tree</field>
+        <field name="model">ccpp.dashboard</field>
+        <field name="arch" type="xml">
+            <tree sample="1" multi_edit="1">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ccpp_customer_information_view_form" model="ir.ui.view">
+        <field name="name">ccpp.dashboard.view.form</field>
+        <field name="model">ccpp.dashboard</field>
+        <field name="arch" type="xml">
+            <form string="CCPP Dashboard">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="priority_id"/>
+                        <field name="ranking_type"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="ccpp_customer_information_view_kanban" model="ir.ui.view">
+        <field name="name">ccpp.dashboard.view.kanban</field>
+        <field name="model">ccpp.dashboard</field>
+        <field name="arch" type="xml">
+            <form string="CCPP Dashboard">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="priority_id"/>
+                        <field name="ranking_type"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="ccpp_dashboard_view_kanban" model="ir.ui.view">
+        <field name="name">ccpp.dashboard.kanban</field>
+        <field name="model">ccpp.dashboard</field>
+        <field name="arch" type="xml">
+            <kanban class="oe_background_grey o_kanban_dashboard o_emphasize_colors o_stock_kanban" create="0" group_create="false">
+                <field name="color"/>
+                <field name="count_doc"/>
+                <field name="priority_id"/>
+                <field name="ranking_type"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div name="ccpp_dashboard">
+                            <div t-attf-class="o_kanban_card_header">
+                                <div class="o_kanban_card_header_title">
+                                    <div class="o_primary" t-if="!selection_mode">
+                                        <!--<a type="object" name="get_stock_picking_action_picking_type">-->
+                                        <a>
+                                            <field name="name"/>
+                                        </a>
+                                    </div>
+                                    <div class="o_primary" t-if="selection_mode">
+                                        <field name="name"/>
+                                    </div>
+                                    <!--<div class="o_secondary"><field class="o_secondary"  name="warehouse_id" readonly="1" groups="stock.group_stock_multi_warehouses"/></div>-->
+                                </div>
+                                <div class="o_kanban_manage_button_section" t-if="!selection_mode">
+                                    <a class="o_kanban_manage_toggle_button" href="#"><i class="fa fa-ellipsis-v" role="img" aria-label="Manage" title="Manage"/></a>
+                                </div>
+                            </div>
+                            <div class="container o_kanban_card_content" t-if="!selection_mode">
+                                <div class="row">
+                                    <div class="col-6 o_kanban_primary_left">
+                                        <button class="btn btn-primary" name="action_get_view" type="object">
+                                            <span><t t-esc="record.count_doc.value"/> Customer </span>
+                                        </button>
+                                    </div>
+                                    <div class="col-6 o_kanban_primary_right">
+                                        <button class="btn btn-primary" name="action_get_task" type="object">
+                                            <span> View Task </span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+
+    <menuitem id="menu_ccpp_customer_information" name="CCPP Dashboard V.1" parent="project.menu_project_config" action="ccpp_dashboard_action" sequence="13"/>
+    
+</odoo>

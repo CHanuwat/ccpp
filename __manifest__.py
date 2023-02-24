@@ -30,6 +30,7 @@
         "views/ccpp_sale_target_view.xml",
         "views/ccpp_sale_target_period_view.xml",
         "views/ccpp_purchase_history_view.xml",
+        "views/ccpp_dashboard_view.xml",
         ],
     'qweb': [ 
         ],

@@ -9,3 +9,4 @@ access_ccpp_customer_category,access_ccpp_customer_category,model_ccpp_customer_
 access_ccpp_sale_target,access_ccpp_sale_target,model_ccpp_sale_target,base.group_user,1,1,1,1
 access_ccpp_sale_target_period,access_ccpp_sale_target_period,model_ccpp_sale_target_period,base.group_user,1,1,1,1
 access_ccpp_purchase_history,access_ccpp_purchase_history,model_ccpp_purchase_history,base.group_user,1,1,1,1
+access_ccpp_dashboard,access_ccpp_dashboard,model_ccpp_dashboard,base.group_user,1,1,1,1

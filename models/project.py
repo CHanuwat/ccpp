@@ -45,6 +45,7 @@ class Project(models.Model):
     user_id = fields.Many2one(string="CCPP User")
     job_position_id = fields.Many2one("res.partner.position", string="Host of CCPP")
     domain_job_position_ids = fields.Many2many("res.partner.position", string="Domain Job Position", compute="_compute_domain_job_position_ids")
+    color = fields.Integer(related="priority_id.color", store=True)
     
     ## impact customer ##
     is_income_cus = fields.Boolean("Income/Funding", default=False)
