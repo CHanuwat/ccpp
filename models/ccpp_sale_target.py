@@ -128,34 +128,35 @@ class CCPPSaleTarget(models.Model):
     date_to = fields.Date(string="Date To", readonly=True)
     target = fields.Float(string="Sales Target")
     actual = fields.Float(string="Sales Actual")
+    actual_percent = fields.Float(string="% Success", compute="_compute_actual_percent", store=True)
     sale_person_id = fields.Many2one("hr.employee", default="_get_default_sale_person", string="Sales Person", required=True)
     status = fields.Selection(selection=[
         ('over', 'Over'),
         ('similar', 'Similar'),
         ('less', 'Less than'),
         ('to_define', 'Undefine'),
-    ], default='to_define', compute='_compute_status', store=True, readonly=False, required=True, string="Target Result")
+    ], compute='_compute_status', store=True, readonly=False, string="Target Result")
     status_color = fields.Integer(string="Status Color", compute='_compute_status_color')
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
     
-    @api.model_create_multi
-    def create(self, vals_list):
-        for vals in vals_list:
-            status = 'to_define'
-            if vals.get('target') and vals.get('actual'):
-                if vals.get('actual') < vals.get('target'):
-                    status = 'less'
-                elif vals.get('actual') > vals.get('target'):
-                    status = 'over'
-                else:
-                    status = 'similar'
-            if vals.get('target') and not vals.get('actual'):
-                status = 'less'
-            if not vals.get('target') and vals.get('actual'):
-                status = 'over'
-            vals['status'] = status
-        res = super(CCPPSaleTarget, self).create(vals_list)
-        return res
+    #@api.model_create_multi
+    #def create(self, vals_list):
+    #    for vals in vals_list:
+    #        status = 'to_define'
+    #        if vals.get('target') and vals.get('actual'):
+    #            if vals.get('actual') < vals.get('target'):
+    #                status = 'less'
+    #            elif vals.get('actual') > vals.get('target'):
+    #                status = 'over'
+    #            else:
+    #                status = 'similar'
+    #        if vals.get('target') and not vals.get('actual'):
+    #            status = 'less'
+    #        if not vals.get('target') and vals.get('actual'):
+    #            status = 'over'
+    #        vals['status'] = status
+    #    res = super(CCPPSaleTarget, self).create(vals_list)
+    #    return res
     
     @api.constrains('year_selection','period')
     def constrains_year_selection_period(self):
@@ -194,6 +195,12 @@ class CCPPSaleTarget(models.Model):
                 obj.date_to = date_to_str
     
     @api.depends('target','actual')
+    def _compute_actual_percent(self):
+        for obj in self:
+            if obj.actual and obj.target:
+                obj.actual_percent = obj.actual / obj.target * 100
+    
+    @api.depends('target','actual')
     def _compute_status(self):
         for obj in self:
             if obj.actual < obj.target:
@@ -202,6 +209,8 @@ class CCPPSaleTarget(models.Model):
                 obj.status = 'over'
             if obj.actual == obj.target:
                 obj.status = 'similar'
+            if not obj.actual and not obj.target:
+                obj.status = 'to_define'
             """
             if obj.target and obj.actual:
                 if obj.actual < obj.target:

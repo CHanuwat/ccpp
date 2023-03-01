@@ -45,6 +45,6 @@
         </field>
     </record>
 
-    <menuitem id="menu_ccpp_period" name="CCPP Period" parent="project.menu_project_config" action="ccpp_period_action" sequence="12"/>
+    <!--<menuitem id="menu_ccpp_period" name="CCPP Period" parent="project.menu_project_config" action="ccpp_period_action" sequence="12"/>-->
     
 </odoo>

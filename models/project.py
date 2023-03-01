@@ -6,6 +6,15 @@ import pytz
 import json
 from pprint import pprint
 from odoo.addons.project.models.project_update import ProjectUpdate
+import requests
+from urllib.request import urlopen
+#from digidevice import location
+#from geopy.geocoders import Nominatim
+from odoo.http import request
+from geopy.geocoders import Nominatim
+import geopy
+import urllib
+from bs4 import BeautifulSoup
 
 STATUS_COLOR = {
     'on_track': 20,  # green / success
@@ -37,15 +46,17 @@ class Project(models.Model):
     employee_id = fields.Many2one("hr.employee", string="Employee")
     priority_id = fields.Many2one("ccpp.priority", string="CCPP Priority", compute="_get_priority", store=True)
     sale_team_id = fields.Many2one("crm.team", string="Sale Team", default="_get_default_sale_team")
-    partner_contact_id = fields.Many2one("res.partner", string="Host of CCPP")
-    domain_partner_contact_ids = fields.Many2many("res.partner", string="Domain partner contact", compute="_compute_domain_partner_contact_ids")
     domain_task_solution_ids = fields.Many2many('project.task', string="Domain task solution")
     tasks_solution = fields.One2many('project.task', 'project_solution_id', string="Solution", context={'is_solution': True})
     name = fields.Char(string="Name of CCPP")
     user_id = fields.Many2one(string="CCPP User")
-    job_position_id = fields.Many2one("res.partner.position", string="Host of CCPP")
-    domain_job_position_ids = fields.Many2many("res.partner.position", string="Domain Job Position", compute="_compute_domain_job_position_ids")
     color = fields.Integer(related="priority_id.color", store=True)
+    
+    # Host CCPP
+    partner_contact_id = fields.Many2one("res.partner", string="Host of CCPP")
+    domain_partner_contact_ids = fields.Many2many("res.partner", string="Domain partner contact", compute="_compute_domain_partner_contact_ids")
+    job_position_id = fields.Many2one("res.partner.position", string="Host of CCPP", related="partner_contact_id.job_position_id")
+    domain_job_position_ids = fields.Many2many("res.partner.position", string="Domain Job Position", compute="_compute_domain_job_position_ids")
     
     ## impact customer ##
     is_income_cus = fields.Boolean("Income/Funding", default=False)
@@ -78,6 +89,7 @@ class Project(models.Model):
         ('cancel', 'Cancelled'),
         ('delay', 'delayed'),
     ], default='open', index=True, string="State", track_visibility="onchange", tracking=True)
+    next_action = fields.Char("Next Action")
     
     @api.depends("is_critical", "is_not_critical", "is_short_time", "is_long_time")
     def _compute_show_time(self):
@@ -339,17 +351,17 @@ class Task(models.Model):
         else:
             return False
     
-    is_solution = fields.Boolean(string='Is Solution', default=_get_default_level, compute="_compute_level")
-    is_strategy = fields.Boolean(string='Is Strategy', default=False, compute="_compute_level")
-    is_task = fields.Boolean(string='Is Task', default=False, compute="_compute_level")
-    is_subtask = fields.Boolean(string='Is SubTask', default=False, compute="_compute_level")
+    is_solution = fields.Boolean(string='Is Solution', default=_get_default_level, compute="_compute_level", store=True)
+    is_strategy = fields.Boolean(string='Is Strategy', default=False, compute="_compute_level", store=True)
+    is_task = fields.Boolean(string='Is Task', default=False, compute="_compute_level", store=True)
+    is_subtask = fields.Boolean(string='Is SubTask', default=False, compute="_compute_level", store=True)
     project_solution_id = fields.Many2one("project.project", string="Relate Project Solution")
     code = fields.Char(string="Code")
     period_id = fields.Many2one("ccpp.period", string="Priority Period", related="project_id.period_id")
     partner_id = fields.Many2one(related="project_id.partner_id")
     job_position_id = fields.Many2one("res.partner.position", string="Host of CCPP",related="project_id.job_position_id")
     priority_id = fields.Many2one("ccpp.priority", string="Priority", related="project_id.priority_id")
-    evaluate_method = fields.Char("วิธีวัดผล")
+    evaluate_method = fields.Char("วิธีวัดผล/เป้าหมาย")
     situation_ids = fields.One2many("project.update", 'strategy_id', string="Current Situation")
     last_situation_id = fields.Many2one("project.update", string="Last Update Situation Strategy") # last update at strategy
     last_situation_solution_id = fields.Many2one("project.update", string="Last Update Situation Solution") # last update at solution
@@ -376,6 +388,8 @@ class Task(models.Model):
     ], default='to_define', compute='_compute_last_update_status', store=True, readonly=False, required=True)
     last_update_color_solution = fields.Integer(compute='_compute_last_update_color')
     state_color = fields.Integer(compute='_compute_state_color')
+    next_action_solution = fields.Char(string="Next Action Solution")
+    next_action = fields.Char(string="Next Action")
     
     @api.depends('last_situation_id.status','last_situation_solution_id.status')
     def _compute_last_update_status(self):
@@ -414,19 +428,36 @@ class Task(models.Model):
         print("Y"*100)
         print(res)
         for rec in res:
+            print("type solution/strategy----->",rec.is_solution,rec.is_strategy)
             print("project ------>", rec.project_id)
             print("project solution ------>", rec.project_solution_id)
+            print("project ------>", rec.parent_id.project_id)
+            print("project solution ------>", rec.parent_id.project_solution_id,rec.parent_id.project_solution_id.department_id.code )
             
             if rec.is_solution:
                 rec.project_id = rec.project_solution_id
             if rec.is_solution and rec.project_id.department_id:
+                if not rec.project_id.department_id.code:
+                    raise UserError("Not recognize the department code. Please Configure code to Department to get the department code")
                 sequence_date = datetime.now().strftime("%Y-%m-%d")
                 sequence_code = 'ccpp.'+'sl.'+rec.project_id.department_id.code
                 code = self.env['ir.sequence'].next_by_code(sequence_code,sequence_date=sequence_date)
                 rec.code = code
-            if rec.is_strategy and rec.project_id.department_id:
+            print()
+            if rec.is_strategy and (rec.project_id.department_id or rec.project_solution_id.department_id or rec.parent_id.project_id.department_id or rec.parent_id.project_solution_id.department_id):
                 sequence_date = datetime.now().strftime("%Y-%m-%d")
-                sequence_code = 'ccpp.'+'st.'+rec.project_id.department_id.code
+                code = ''
+                if rec.project_id.department_id:
+                    code = rec.project_id.department_id.code
+                elif rec.project_solution_id.department_id:
+                    code = rec.project_solution_id.department_id.code
+                elif rec.parent_id.project_id.department_id:
+                    code = rec.parent_id.project_id.department_id.code
+                elif rec.parent_id.project_solution_id.department_id:
+                    code = rec.parent_id.project_solution_id.department_id.code
+                else:
+                    raise UserError("Not recognize the department code. Please Configure code to Department to get the department code")
+                sequence_code = 'ccpp.'+'st.'+ code
                 code = self.env['ir.sequence'].next_by_code(sequence_code,sequence_date=sequence_date)
                 rec.code = code
             #if rec.is_task and rec.project_id.department_id:
@@ -511,6 +542,88 @@ class Task(models.Model):
         return action
     
     def button_update_strategy(self):
+        
+        
+        import requests
+        
+
+        page = requests.get("https://ava.win.clinic/geolocation")
+        soup = BeautifulSoup(page.text, 'html.parser')
+        title = soup.title.text # gets you the text of the <title>(...)</title>
+        print("P'bank1",page.text)
+        print('soup',soup)
+        print("P'bank2",title)
+        
+
+        #link = "https://ava.win.clinic/geolocation"
+        #f = urllib.urlopen(link)
+        #myfile = f.read()
+        #print("P'bank -->", myfile)
+        x = requests.get("https://ava.win.clinic/geolocation")
+        xx = x.json()
+        print("P'bank -->",xx)
+        
+        
+        
+        headers = {"User-Agent": "Mozilla/5.0"}
+        r = requests.get('https://get.geojs.io/', headers=headers)
+        ip_request = requests.get('https://get.geojs.io/v1/ip.json', headers=headers)
+        ip_address = ip_request.json()['ip']
+        print("IP -->", ip_address)
+        
+        url = 'https://get.geojs.io/v1/ip/geo/' + ip_address +  '.json'
+        geo_request = requests.get(url, headers=headers)
+        geo_data = geo_request.json()
+        
+        print("new lati -->", geo_data['latitude'])
+        print("new long -->", geo_data['longitude'])
+        
+        
+        
+        
+        
+        key = '7108a77ce6104fc7af3a37227fbace9a'
+        url = f'https://ipgeolocation.abstractapi.com/v1/?api_key={key}'
+        response = urlopen(url)
+        response_bytes = response.read()
+        print(type(response_bytes))
+        print(response.getheader('Content-Type'))
+        response_json = response_bytes.decode()
+        print(response_json)
+
+        
+        
+        
+        
+        
+        url = "https://www.googleapis.com/geolocation/v1/geolocate"
+        params = {"key": "AIzaSyBGMY2ya5VHQ8_2GqA31xfKhpfFGOUQGwg"}
+
+        response = requests.post(url, params=params)
+        if response.ok:
+            location = response.json()["location"]
+            latitude = location["lat"]
+            longitude = location["lng"]
+            accuracy = response.json()["accuracy"]
+            print("Latitude:", latitude)
+            print("Longitude:", longitude)
+            print("Accuracy:", accuracy)
+        else:
+            print("response:",response)
+            print("Error:", response.status_code)
+        
+        
+        
+        geolocator = Nominatim(user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36")
+
+        location = geolocator.geocode(geopy.exc.GeocoderTimedOut)
+        print("time out --> ")
+        print("location --> ", location)
+        #latitude = location.latitude
+        #longitude = location.longitude
+        #print("lati -->> ",latitude, longitude)
+        
+        #print(resp_json_payload['results'][0]['geometry']['location'])
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.strategy_update_all_action')
         #action['display_name'] = _("%(name)s's Updates", name=self.name)
         return action
@@ -567,10 +680,12 @@ class ProjectUpdate(models.Model):
     
     strategy_id = fields.Many2one("project.task", string="Strategy")
     solution_id = fields.Many2one("project.task", string="Solution", related="strategy_id.parent_id")
-    project_id = fields.Many2one(required=False, default=False, related="strategy_id.project_id")
+    project_id = fields.Many2one(required=False, default=False, related="strategy_id.project_id", store=True)
+    customer_id = fields.Many2one("res.partner", string="Customer", required=True)
     location = fields.Char("Location")
     code = fields.Char("Situation No.")
     date = fields.Datetime(default=lambda self: fields.datetime.now(), tracking=True)
+    next_action = fields.Char(string="Next Action")
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -578,6 +693,9 @@ class ProjectUpdate(models.Model):
         for update in res:
             update.strategy_id.sudo().last_situation_id = update
             update.strategy_id.parent_id.sudo().last_situation_solution_id = update
+            update.strategy_id.sudo().next_action = update.next_action
+            update.strategy_id.parent_id.sudo().next_action_solution = update.next_action
+            update.strategy_id.project_id.sudo().next_action = update.next_action
             if not update.code:
                 sequence_date = datetime.now().strftime("%Y-%m-%d")
                 try:
@@ -598,11 +716,19 @@ class ProjectUpdate(models.Model):
     def unlink(self):
         strategies = self.strategy_id
         solutions = self.solution_id
+        ccpps = self.project_id
         res = super().unlink()
         for strategy_id in strategies:
-            strategy_id.last_situation_id = self.search([('strategy_id', "=", strategy_id.id)], order="date desc", limit=1)
+            last_situation_id = self.search([('strategy_id', "=", strategy_id.id)], order="date desc", limit=1)
+            strategy_id.last_situation_id = last_situation_id
+            strategy_id.next_action = last_situation_id.next_action
         for solution_id in solutions:
-            solution_id.last_situation_solution_id = self.search([('solution_id', "=", solution_id.id)], order="date desc", limit=1)
+            last_situation_solution_id = self.search([('solution_id', "=", solution_id.id)], order="date desc", limit=1)
+            solution_id.last_situation_solution_id = last_situation_solution_id
+            solution_id.next_action_solution = last_situation_solution_id.next_action_solution
+        for ccpp in ccpps:
+            last_situation_ccpp_id = self.search([('project_id', "=", solution_id.id)], order="date desc", limit=1)
+            ccpp.next_action = last_situation_ccpp_id.next_action
         return res
 
     def default_get(self, fields):
@@ -619,6 +745,7 @@ class ProjectUpdate(models.Model):
             strategy_id = self.env['project.task'].browse(strategy)
             result['solution_id'] = strategy_id.parent_id.id
             result['project_id'] = strategy_id.project_id.id
+            result['customer_id'] = strategy_id.project_id.partner_id.id
         return result
     
     # overide change color

@@ -32,12 +32,14 @@ class Partner(models.Model):
                     new_name_list.append(obj.name)
                 if obj.function:
                     new_name_list.append(obj.function)
+                if obj.job_position_id:
+                    new_name_list.append(obj.job_position_id.name)
                 new_name = ', '.join(new_name_list)
                 res.append((obj.id, new_name))
                 obj.display_name = new_name
         return res
     
-    @api.depends('is_company', 'name', 'parent_id.display_name', 'type', 'company_name')
+    @api.depends('is_company', 'name', 'parent_id.display_name', 'type', 'company_name', 'job_position_id')
     def _compute_display_name(self):
         # retrieve name_get() without any fancy feature
         names = dict(self.with_context({}).name_get())
@@ -51,6 +53,8 @@ class Partner(models.Model):
                     new_name_list.append(obj.name)
                 if obj.function:
                     new_name_list.append(obj.function)
+                if obj.job_position_id:
+                    new_name_list.append(obj.job_position_id.name)
                 new_name = ', '.join(new_name_list)
                 obj.display_name = new_name
                 

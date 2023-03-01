@@ -46,9 +46,9 @@ class CCPPCustomerInformation(models.Model):
     user_id = fields.Many2one("res.users", string="User", related="sale_person_id.user_id")
     province_id = fields.Many2one("ccpp.province", string="Province", related="customer_id.province_id")
     sale_area_id = fields.Many2one("hr.work.location", string="Sales Area", related="sale_person_id.work_location_id")
-    potential_ranking = fields.Integer(string="Ranking by Potential")
-    competitor_ranking = fields.Integer(string="Ranking by Competitor")
-    actual_sale_ranking = fields.Integer(string="Ranking by Actual Sales", compute="_compute_actual_sale_ranking", store=True)
+    potential_ranking = fields.Integer(string="Ranking by Potential in Area")
+    competitor_ranking = fields.Integer(string="Ranking by Competitor's Sales")
+    actual_sale_ranking = fields.Integer(string="Ranking by Winmed Actual Sales", compute="_compute_actual_sale_ranking", store=True)
     total_sale_revenue = fields.Float(string="Total Sale Revenue Last Year(THB)")
     customer_category_id = fields.Many2one("ccpp.customer.category", string="Customer Category", related="customer_id.customer_category_id")
     hospital_size = fields.Integer(string="Hospital Size")
@@ -112,11 +112,17 @@ class CCPPCustomerInformation(models.Model):
     @api.depends("total_sale_revenue")
     def _compute_actual_sale_ranking(self):
         for obj in self:
-            customer_info_ids = self.env["ccpp.customer.information"].search([("sale_person_id",'=',obj.sale_person_id.id)],order="total_sale_revenue desc").mapped("id")
-            if obj.id in customer_info_ids:
-                rank = customer_info_ids.index(obj.id) + 1
-                obj.actual_sale_ranking = rank
-            else:
-                obj.actual_sale_ranking = False
+            customer_info_ids = self.env["ccpp.customer.information"].search([('date_from','=',obj.date_from),
+                                                                              ('date_to','=',obj.date_to),
+                                                                              ("sale_person_id",'=',obj.sale_person_id.id)],order="total_sale_revenue desc")
+            rank = 1
+            for info in customer_info_ids:
+                info.actual_sale_ranking = rank
+                rank += 1 
+            #if obj.id in customer_info_ids:
+            #    rank = customer_info_ids.index(obj.id) + 1
+            #    obj.actual_sale_ranking = rank
+            #else:
+            #    obj.actual_sale_ranking = False
             
     

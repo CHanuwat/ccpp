@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
-
     <record id="view_task_calendar_inherit_ccpp" model="ir.ui.view">
         <field name="name">view.task.calendar.inherit.ccpp</field>
         <field name="model">project.task</field>
@@ -69,13 +68,31 @@
             <xpath expr="//field[@name='project_id']" position="replace">
                 <field name="solution_id" readonly="True"/>
                 <field name="strategy_id" readonly="True"/>
+                <field name="customer_id"/>
+                <field name="location"/>
+            </xpath>
+            <xpath expr="//field[@name='name']" position="attributes">
+                <attribute name="placeholder">Enter Current Situation</attribute>
+            </xpath>
+            <xpath expr="//form[1]/sheet[1]/div[1]" position="after">
+                <div class="oe_title">
+                    <h1>
+                        <field name="next_action" class="o_text_overflow" placeholder="Enter Next Action"/>
+                    </h1>
+                </div>
+            </xpath>
+            <xpath expr="//field[@name='date']" position="attributes">
+                <attribute name="readonly">True</attribute>
+            </xpath>
+            <xpath expr="//field[@name='progress']" position="attributes">
+                <attribute name="invisible">True</attribute>
             </xpath>
         </field>
     </record>
 
     <!-- project update -->
     <record model="ir.ui.view" id="project_update_view_tree_inherit_ccpp">
-        <field name="name">project.update.form.inherit.ccpp</field>
+        <field name="name">project.update.tree.inherit.ccpp</field>
         <field name="model">project.update</field>
         <field name="inherit_id" ref="project.project_update_view_tree"/>
         <field eval="101" name="priority"/>
@@ -84,7 +101,9 @@
                 <attribute name="js_class"></attribute>
                 <attribute name="create">false</attribute>
             </xpath>
+            
             <xpath expr="//tree[1]/field[@name='name']" position="after">
+                <field name="customer_id"/>
                 <field name="solution_id"/>
                 <field name="strategy_id"/>
             </xpath>
@@ -107,63 +126,61 @@
         </field>
     </record>
 
-    <!-- ccpp kanban -->
+    <!-- project kanban -->
     <record model="ir.ui.view" id="view_project_kanban_inherit_ccpp">
-        <field name="name">project.project.kanban.inherit.ccpp</field>
+        <field name="name">project.project.kanban</field>
         <field name="model">project.project</field>
         <field name="inherit_id" ref="project.view_project_kanban"/>
-        <field eval="101" name="priority"/>
+        <field name="priority">201</field>
         <field name="arch" type="xml">
             <xpath expr="//kanban[1]/field[@name='label_tasks']" position="after">
-                <field name="code" readonly="True"/>
+                <field name="code"/>
                 <field name="name"/>
+                <field name="last_update_id"/>
+                <field name="next_action"/>
             </xpath>
-            <xpath expr="//kanban[1]/templates[1]/t[1]/div[1]/div[2]/div[1]/div[1]/a[1]/div[1]" position="replace">
-                <div>
-                    <span class="o_value"><t t-esc="record.task_count.value"/></span>
-                    <span class="o_label ms-1"><t t-esc="record.name.value"/></span>
-                </div>
-            </xpath> 
             <xpath expr="//kanban[1]/templates[1]/t[1]/div[1]/div[1]/div[1]/div[1]/div[1]" position="replace">
                 <div class="o_primary">
                     <span class="o_text_overflow" t-att-title="record.code.value"><t t-esc="record.code.value"/></span>
                     <span class="o_text_overflow text-muted" t-if="record.partner_id.value">
-                        <span class="fa fa-user me-2" aria-label="Partner" title="Partner"></span><t t-esc="record.partner_id.value"/>
-                    </span>
-                    <div t-if="record.date.raw_value or record.date_start.raw_value" class="text-muted o_row">
-                        <span class="fa fa-clock-o me-2" title="Dates"></span><field name="date_start"/>
-                        <i t-if="record.date.raw_value and record.date_start.raw_value" class="fa fa-long-arrow-right mx-2 oe_read_only" aria-label="Arrow icon" title="Arrow"/>
-                        <field name="date"/>
-                    </div>
-                    <div t-if="record.alias_name.value and record.alias_domain.value" class="text-muted text-truncate" t-att-title="record.alias_id.value">
-                        <span class="fa fa-envelope-o me-2" aria-label="Domain Alias" title="Domain Alias"></span><t t-esc="record.alias_id.value"/>
-                    </div>
-                    <div t-if="record.rating_active.raw_value and record.rating_count.raw_value &gt; 0" class="text-muted" groups="project.group_project_rating">
-                        <b class="me-1">
-                            <span style="font-weight:bold;" class="fa mt4 fa-smile-o text-success" t-if="record.rating_avg.raw_value &gt;= 3.66" title="Average Rating: Satisfied" role="img" aria-label="Happy face"/>
-                            <span style="font-weight:bold;" class="fa mt4 fa-meh-o text-warning" t-elif="record.rating_avg.raw_value &gt;= 2.33" title="Average Rating: Okay" role="img" aria-label="Neutral face"/>
-                            <span style="font-weight:bold;" class="fa mt4 fa-frown-o text-danger" t-else="" title="Average Rating: Dissatisfied" role="img" aria-label="Sad face"/>
-                        </b>
-                        <field name="rating_avg_percentage" widget="percentage"/>
-                    </div>
-                    <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                        <span class="fa fa-address-card me-2" aria-label="Partner" title="Partner"/><t t-esc="record.partner_id.value"/>
+                    </span><br/>
+                    <span class="o_text_overflow text-muted" style="padding-bottom:5px;" t-if="record.partner_contact_id.value">
+                        <span class="fa fa-user me-2" aria-label="Partner" title="Partner"/><t t-esc="record.partner_contact_id.value"/>
+                    </span><br/>
+                    <span t-if="record.name.value">
+                        <span/><t t-esc="record.name.value"/>
+                    </span><br/>
+                
+                    <field style="padding-top:8px; padding-bottom:5px;" t-if="record.last_update_id.value &amp;&amp; widget.editable" name="last_update_status" widget="project_state_selection" options="{'color_field': 'last_update_color', 'hide_label': 1}"/>
+                    <span style="padding-top:5px; padding-bottom:5px;" class="o_text_overflow text-primary" t-if="record.last_update_id.value">
+                        <span class="me-2"/><t t-esc="record.last_update_id.value"/>
+                    </span><br/>
+                    
                 </div>
-            </xpath>    
-        </field>
-    </record>
-
-    <!-- group by department and priority -->
-    <record id="view_project_project_filter_inherit_ccpp" model="ir.ui.view">
-        <field name="name">view.project.project.filter.inherit.ccpp</field>
-        <field name="model">project.project</field>
-        <field name="inherit_id" ref="project.view_project_project_filter"/>
-        <field name="arch" type="xml">
-            <xpath expr="//filter[@name='groupby_stage']" position="after">
-                <filter string="Department" name="groupby_department" context="{'group_by': 'department_id'}"/>
-                <filter string="Priority" name="groupby_priority" context="{'group_by': 'priority_id'}"/>
+            </xpath>
+            <xpath expr="//kanban[1]/templates[1]/t[1]/div[1]/div[2]" position="replace">
+                <div class="o_kanban_record_bottom mt-3">      
+                    <div class="oe_kanban_bottom_left">
+                      <span style="padding-left:25px;" t-if="record.next_action.value">
+                        <span class="fa fa-tasks me-2" style="color:green;"/><t t-esc="record.next_action.value"/> <span class="fa fa-clock-o me-2"/>
+                    </span><br/>
+                    </div>
+                    <div class="oe_kanban_bottom_right">
+                        <field name="user_id" widget="many2one_avatar_user" t-if="record.user_id.raw_value"/>
+                    </div>
+                </div>
             </xpath>
         </field>
     </record>
+
+    <record id="open_view_task_all_ccpp" model="ir.actions.act_window">
+        <field name="name">Solution</field>
+        <field name="res_model">project.task</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="project.view_task_form2"/>
+        <field name="target">main</field>
+    </record>  
 
     <!-- ccpp project form view -->
     <record id="edit_project_inherit_ccpp" model="ir.ui.view">
@@ -243,10 +260,10 @@
                 </group>
             </xpath>-->
             <xpath expr="//form[1]/sheet[1]/group[1]/group[1]/field[@name='partner_id']" position="after">
-                <!--<field name="domain_partner_contact_ids" invisible="True"/>
-                <field name="partner_contact_id" widget="res_partner_many2one" domain="[('id','in',domain_partner_contact_ids)]" context="{'show_title_position':True}"/>--> <!--options="{'no_create':True}"/>-->
-                <field name="domain_job_position_ids" invisible="True"/>
-                <field name="job_position_id" domain="[('id','in',domain_job_position_ids)]" options="{'no_create': True, 'no_open': True}"/>
+                <field name="domain_partner_contact_ids" invisible="True"/>
+                <field name="partner_contact_id" widget="res_partner_many2one" domain="[('id','in',domain_partner_contact_ids)]" context="{'show_title_position':True}"/> <!--options="{'no_create':True}"/>-->
+                <!--<field name="domain_job_position_ids" invisible="True"/>
+                <field name="job_position_id" domain="[('id','in',domain_job_position_ids)]" options="{'no_create': True, 'no_open': True}"/>-->
             </xpath>
 
             <xpath expr="//form[1]/sheet[1]/notebook[1]/page[@name='settings']" position="attributes">
@@ -533,10 +550,10 @@
                     <group>
                         <field name="company_id" invisible="True"/>
                         <field name="partner_id" domain="[('child_ids','!=',False)]"/>
-                        <!--<field name="domain_partner_contact_ids" invisible="True"/>
-                        <field name="partner_contact_id" domain="[('id','in',domain_partner_contact_ids)]" context="{'show_title_position':True}"/>-->
-                        <field name="domain_job_position_ids" invisible="True"/>
-                        <field name="job_position_id" domain="[('id','in',domain_job_position_ids)]" options="{'no_create': True, 'no_open': True}"/>
+                        <field name="domain_partner_contact_ids" invisible="True"/>
+                        <field name="partner_contact_id" domain="[('id','in',domain_partner_contact_ids)]" context="{'show_title_position':True}"/>
+                        <!--<field name="domain_job_position_ids" invisible="True"/>
+                        <field name="job_position_id" domain="[('id','in',domain_job_position_ids)]" options="{'no_create': True, 'no_open': True}"/>-->
                     </group>
                 </group>
             </xpath>
@@ -766,6 +783,7 @@
                         <field name="code" string="Strategy No." attrs="{'invisible': [('is_strategy','=',False)]}" readonly="True"/>
                         <field name="code" string="Task No." attrs="{'invisible': [('is_task','=',False),('is_subtask','=',False)]}" readonly="True"/>
                         <field name="evaluate_method" attrs="{'invisible': [('is_strategy','=',False)]}"/>
+                        <field name="next_action" attrs="{'invisible': [('is_strategy','=',False)]}" readonly="True"/>
 
                         <!--<field name="project_id" domain="[('active', '=', True), ('company_id', '=', company_id)]" widget="project_private_task" string="CCPP" />
                         <field name="parent_id" string="Solution" attrs="{'invisible': [('is_solution','=',True)]}"/>
@@ -826,6 +844,7 @@
             <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='activity_ids']" position="replace">
                 <!--<field name="activity_ids" string="Next Activity" widget="list_activity" attrs="{'column_invisible': [('parent.is_solution','=',False)]}"/>-->
                 <field name="last_situation_id" string="Current Situation" attrs="{'column_invisible': [('parent.is_solution','=',False)]}" readonly="True"/>
+                <field name="next_action" attrs="{'column_invisible': [('parent.is_solution','=',False)]}" readonly="True"/>
             </xpath>
             <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='id']" position="replace">
             </xpath>
@@ -865,6 +884,7 @@
                             <field name="name" string="Title"/>
                             <field name="user_id" string="Author"/>
                             <field name="date"/>
+                            <field name="next_action"/>
                             <field name="location"/>
                         </tree>
                     </field>
@@ -1008,9 +1028,9 @@
             <field name="name">CCPP Stages</field>
         </record>
 
-        <!--<record model="ir.actions.act_window" id="project.open_create_project">
+        <record model="ir.actions.act_window" id="project.open_create_project">
             <field name="name">Create CCPP</field>
-        </record>-->
+        </record>
 
         <record model="ir.actions.act_window" id="project.act_res_users_2_project_task_opened">
             <field name="context">{}</field>
@@ -1031,5 +1051,85 @@
             <field name="view_mode">kanban,form,tree</field>
         </record>
 
-        
+    <!-- group by department and priority -->
+    <record id="view_project_project_filter_inherit_ccpp" model="ir.ui.view">
+        <field name="name">view.project.project.filter.inherit.ccpp</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project_project_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='groupby_stage']" position="after">
+                <filter string="Department" name="groupby_department" context="{'group_by': 'department_id'}"/>
+                <filter string="Priority" name="groupby_priority" context="{'group_by': 'priority_id'}"/>
+                <filter string="Customer" name="groupby_customer" context="{'group_by': 'partner_id'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_task_search_form_inherit_ccpp" model="ir.ui.view">
+        <field name="name">view.task.search.form.inherit.ccpp</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_search_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='group_create_date']" position="after">
+                <filter string="CCPP" name="groupby_ccpp" context="{'group_by': 'project_id'}"/>
+                <filter string="Parent" name="groupby_parent" context="{'group_by': 'parent_id'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="ccpp_group_all_action" model="ir.actions.act_window">
+        <field name="name">CCPP</field>
+        <field name="res_model">project.task</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="ccpp.ccpp_group_all_tree"/>
+        <field name="domain">[('is_strategy','=',True)]</field>
+        <field name="context">{'search_default_customer': 1, 'search_default_groupby_ccpp': 1, 'search_default_groupby_parent': 1}</field>
+        <field name="target">main</field>
+    </record>
+
+    <record id="ccpp_group_all_tree" model="ir.ui.view">
+        <field name="name">ccpp.group.all.tree</field>
+        <field name="model">project.task</field>
+        <field eval="101" name="priority"/>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>            
+            </tree>
+        </field>
+    </record>
+
+    <menuitem id="menu_ccpp_group_all_action" name="Test Group" parent="project.menu_project_config" action="ccpp_group_all_action" sequence="14"/>
+
+    <record id="ccpp_group_all_tree_ccpp" model="ir.ui.view">
+        <field name="name">ccpp.group.all.tree.ccpp</field>
+        <field name="model">project.project</field>
+        <field eval="101" name="priority"/>
+        <field name="arch" type="xml">
+            <tree string="test1">
+                <field name="name"/>           
+                <field name="tasks_solution">
+                    <tree string="test2">
+                        <field name="name"/>
+                        <field name="child_ids">
+                            <tree string="test3">
+                                <field name="name"/>
+                            </tree>
+                        </field>
+                    </tree>
+                </field> 
+            </tree>
+        </field>
+    </record>
+
+    <record id="ccpp_group_all_action_ccpp" model="ir.actions.act_window">
+        <field name="name">CCPP2</field>
+        <field name="res_model">project.project</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="ccpp.ccpp_group_all_tree_ccpp"/>
+        <field name="domain">[]</field>
+        <field name="context">{'search_default_groupby_customer': 1}</field>
+        <field name="target">main</field>
+    </record>
+
+    <menuitem id="menu_ccpp_group_all_action_ccpp" name="Test Group 2" parent="project.menu_project_config" action="ccpp_group_all_action_ccpp" sequence="15"/>    
 </odoo>

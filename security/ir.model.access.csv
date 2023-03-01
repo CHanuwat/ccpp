@@ -10,3 +10,11 @@ access_ccpp_sale_target,access_ccpp_sale_target,model_ccpp_sale_target,base.grou
 access_ccpp_sale_target_period,access_ccpp_sale_target_period,model_ccpp_sale_target_period,base.group_user,1,1,1,1
 access_ccpp_purchase_history,access_ccpp_purchase_history,model_ccpp_purchase_history,base.group_user,1,1,1,1
 access_ccpp_dashboard,access_ccpp_dashboard,model_ccpp_dashboard,base.group_user,1,1,1,1
+access_rocker_timesheet_tasks,rocker.timesheet.task,model_rocker_task,base.group_user,1,1,1,1
+access_rocker_user_defaults,rocker.user.defaults,model_rocker_user_defaults,base.group_user,1,1,1,1
+access_rocker_company_defaults,rocker.company.defaults,model_rocker_company_defaults,base.group_user,1,1,1,1
+access_rocker_company_defaults_user,rocker.company.defaults.user,model_rocker_company_defaults,base.group_user,1,1,1,1
+access_ccpp_purchase_history_line,access_ccpp_purchase_history_line,model_ccpp_purchase_history_line,base.group_user,1,1,1,1
+
+
+

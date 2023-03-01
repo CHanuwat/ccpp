@@ -10,6 +10,7 @@ from random import randint
 class CCPPPrioirty(models.Model):
     _name = "ccpp.priority"
     _inherit = ['mail.thread']
+    _order = "name"
 
     def _get_default_color(self):
         return randint(1, 11)
