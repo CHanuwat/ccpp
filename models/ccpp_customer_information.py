@@ -10,6 +10,7 @@ from random import randint
 class CCPPCustomerInformation(models.Model):
     _name = "ccpp.customer.information"
     _inherit = ['mail.thread','portal.mixin','mail.activity.mixin']
+    _order = "date_from desc"
     #_rec_name = "customer_name"
 
     #@api.model
@@ -40,24 +41,31 @@ class CCPPCustomerInformation(models.Model):
     name = fields.Char("Name")
     date_from = fields.Date("From", required=True, default=_get_default_date_from)
     date_to = fields.Date("To", required=True, default=_get_default_date_to)
-    customer_id = fields.Many2one("res.partner", string="Customer", required=True)
+    customer_id = fields.Many2one("res.partner", string="Customer")
     active = fields.Boolean(string="Active", default=True)
     sale_person_id = fields.Many2one("hr.employee", string="Sales Person", default=_get_default_sale_person, required=True)
-    user_id = fields.Many2one("res.users", string="User", related="sale_person_id.user_id")
-    province_id = fields.Many2one("ccpp.province", string="Province", related="customer_id.province_id")
-    sale_area_id = fields.Many2one("hr.work.location", string="Sales Area", related="sale_person_id.work_location_id")
-    potential_ranking = fields.Integer(string="Ranking by Potential in Area")
-    competitor_ranking = fields.Integer(string="Ranking by Competitor's Sales")
-    actual_sale_ranking = fields.Integer(string="Ranking by Winmed Actual Sales", compute="_compute_actual_sale_ranking", store=True)
+    user_id = fields.Many2one("res.users", string="User", related="sale_person_id.user_id", store=True)
+    province_id = fields.Many2one("ccpp.province", string="Province", related="customer_id.province_id", store=True)
+    sale_area_id = fields.Many2one("hr.work.location", string="Sales Area", related="sale_person_id.work_location_id", store=True)
+    potential_ranking = fields.Integer(string="Ranking by Potential in Area", group_operator=False)
+    competitor_ranking = fields.Integer(string="Ranking by Competitor's Sales", group_operator=False)
+    actual_sale_ranking = fields.Integer(string="Ranking by Winmed Actual Sales", compute="_compute_actual_sale_ranking", store=True, group_operator=False)
     total_sale_revenue = fields.Float(string="Total Sale Revenue Last Year(THB)")
-    customer_category_id = fields.Many2one("ccpp.customer.category", string="Customer Category", related="customer_id.customer_category_id")
+    customer_category_id = fields.Many2one("ccpp.customer.category", string="Customer Category", related="customer_id.customer_category_id", store=True)
     hospital_size = fields.Integer(string="Hospital Size")
-    budget = fields.Float(string="Funding/Budget")
+    budget = fields.Char(string="Funding/Budget")
     future_plan = fields.Text(string="Future Project/Plan (โครงการในอนาคต/แผนงาน)")
     connection = fields.Text(string="Connection with other hospital (ความสัมพันธ์กับโรงพยาบาลอื่นๆ)")
     note = fields.Text(string="Note")
     #actual_sale = fields.Float(string="Actual Sale")
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
+    year_text = fields.Char(string="Year", compute="_compute_year_text", store=True)
+    company_name = fields.Char(string="Company Name")
+    state = fields.Selection(selection=[
+        ('open', 'Open'),
+        ('active', 'Active'),
+        ('inactive', 'Inactive')
+    ], default='open', string="Status") 
     
     @api.constrains('potential_ranking','competitor_ranking',"customer_id","date_from","date_to")
     def constraint_customer(self):
@@ -125,4 +133,51 @@ class CCPPCustomerInformation(models.Model):
             #else:
             #    obj.actual_sale_ranking = False
             
+    @api.depends("date_from")
+    def _compute_year_text(self):
+        for obj in self:
+            if obj.date_from:
+                obj.year_text = str(obj.date_from.year)
+                
+    def button_active(self):
+        for obj in self:
+            obj.state = "active"
+            
+    def button_inactive(self):
+        for obj in self:
+            obj.state = "inactive"
     
+    def button_to_open(self):
+        for obj in self:
+            obj.state = "open"
+            
+    def open_sales_target(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_sale_target_action')
+        sales_target_ids = self.env['ccpp.sale.target'].search([('user_id','=',self.user_id.id)])
+        action['domain'] = [('id', 'in', sales_target_ids.ids)]
+        return action
+    
+    def open_purchase_history(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_purchase_history_action')
+        purchase_history_ids = self.env['ccpp.purchase.history'].search([('user_id','=',self.user_id.id),('customer_id','=',self.customer_id.id)])
+        action['domain'] = [('id', 'in', purchase_history_ids.ids)]
+        action['context'] = {}
+        return action
+            
+    def open_ccpp(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('project.open_view_project_all')
+        ccpp_ids = self.env['project.project'].search([('user_id','=',self.user_id.id),('partner_id','=',self.customer_id.id)])
+        action['domain'] = [('id', 'in', ccpp_ids.ids)]
+        return action
+    
+    def open_current_situation(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_project_update_action')
+        update_ids = self.env['project.update'].search([('user_id','=',self.user_id.id),('customer_id','=',self.customer_id.id)])
+        action['domain'] = [('id', 'in', update_ids.ids)]
+        return action
+    
+    @api.model
+    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
+        orderby = "year_text desc"
+        res = super(CCPPCustomerInformation, self).read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+        return res

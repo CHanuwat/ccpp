@@ -1,0 +1,29 @@
+.sale_target_tree [data-name="target"] {
+  width: 150px !important;
+  max-width: 150px !important;
+}
+
+.sale_target_tree [data-name="actual"] {
+  width: 150px !important;
+  max-width: 150px !important;
+}
+.sale_target_tree .o_group_caret {
+  margin-inline-start: calc(var(10) * #{map-get($spacers, 4)});
+}
+
+.customer_information_tree [data-name="potential_ranking"] {
+  width: 190px !important;
+  max-width: 200px !important;
+}
+.customer_information_tree [data-name="actual_sale_ranking"] {
+  width: 220px !important;
+  max-width: 220px !important;
+}
+.customer_information_tree [data-name="total_sale_revenue"] {
+  width: 170px !important;
+  max-width: 170px !important;
+}
+.customer_information_tree [data-name="competitor_ranking"] {
+  width: 200px !important;
+  max-width: 200px !important;
+}

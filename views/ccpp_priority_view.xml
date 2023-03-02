@@ -12,11 +12,9 @@
         <field name="name">ccpp.priority.view.tree</field>
         <field name="model">ccpp.priority</field>
         <field name="arch" type="xml">
-            <tree editable="top" sample="1" multi_edit="1" default_order="name">
+            <tree sample="1" multi_edit="1" default_order="name">
                 <field name="name"/>
                 <field name="description"/>
-                <field name="point"/>
-                <field name="period_id"/>
                 <field name="color" widget="color_picker"/>
             </tree>
         </field>
@@ -32,13 +30,29 @@
                         <group>
                             <field name="name" t-att-t-name="ccpp_template"/>
                             <field name="description"/>
-                            <field name="point"/>
-                            <field name="color" widget="color_picker"/>
+
                             <!--<xpath expr="//form[1]/sheet[1]/group[1]/group[1]/field[@name='partner_id']" position="attributes">
                                 <attribute name="t-att-t-name">ccpp_template</attribute>
                             </xpath>-->
                         </group>
+                        <group>
+                            <field name="point"/>
+                            <field name="color" widget="color_picker"/>
+                        </group>
                     </group>
+                    <notebook>
+                        <page name="Period Information">
+                            <field name="lines">
+                                <tree editable="bottom" delete="false">
+                                    <field name="date" attrs="{'readonly': [('id','!=',False)]}"/>
+                                    <field name="frequency" attrs="{'readonly': [('id','!=',False)]}"/>
+                                    <field name="frequency_time" attrs="{'readonly': [('id','!=',False)]}"/>
+                                    <field name="period" attrs="{'readonly': [('id','!=',False)]}"/>
+                                    <field name="active" widget="boolean_toggle"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
                 <!--<div class="oe_chatter">
                     <field name="message_follower_ids" groups="base.group_user"/>

@@ -47,9 +47,9 @@
     ],
     'web.assets_backend': [
             #'ccpp/static/src/sneat-bootstrap-html-admin-template/**/*',    
-            'ccpp/static/src/js/tree_button.js',
+            'ccpp/static/src/js/**/*',
             'ccpp/static/src/scss/**/*',
-            'ccpp/static/src/xml/tree_button.xml',
+            'ccpp/static/src/xml/**/*',
             #('remove','rocker_timesheet/static/src/scss/rocker_calendar_button.scss'),
             #('remove','rocker_timesheet/static/src/js/rocker_calendar_button.js'),
             #('remove','rocker_timesheet/static/src/scss/rocker_roller_button.scss'),

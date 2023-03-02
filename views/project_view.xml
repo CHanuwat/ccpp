@@ -23,6 +23,14 @@
     </record>
 
     <!-- project update -->
+    <record id="ccpp_project_update_action" model="ir.actions.act_window">
+        <field name="name">Current Situation</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">project.update</field>
+        <field name="view_mode">tree,form,kanban</field>
+    </record>
+
+    <!-- project update -->
     <record id="ccpp_update_all_action" model="ir.actions.act_window">
         <field name="name">Current Situation</field>
         <field name="type">ir.actions.act_window</field>
@@ -238,7 +246,8 @@
                     <field name="active" invisible="True"/>
                     <field name="show_critical"/>
                     <field name="priority_id" string="Priority"/> <!--options="{'no_create':True}"/>-->
-                    <field name="show_time"/>
+                    <field name="show_time" readonly="True"/>
+                    <field name="show_period" readonly="True"/>
                     <field name="deadline_date" widget="date"/>
                 </group>
             </xpath>
@@ -259,6 +268,9 @@
                     </group>
                 </group>
             </xpath>-->
+            <xpath expr="//form[1]/sheet[1]/group[1]/group[1]/field[@name='partner_id']" position="attributes">
+                <attribute name="domain">['|',('company_id','=',company_id),('company_id','=',False),('is_customer','=',True)]</attribute>
+            </xpath>
             <xpath expr="//form[1]/sheet[1]/group[1]/group[1]/field[@name='partner_id']" position="after">
                 <field name="domain_partner_contact_ids" invisible="True"/>
                 <field name="partner_contact_id" widget="res_partner_many2one" domain="[('id','in',domain_partner_contact_ids)]" context="{'show_title_position':True}"/> <!--options="{'no_create':True}"/>-->
@@ -310,6 +322,9 @@
                             <field name="allow_subtasks" invisible="1"/>
                             <field name="code" string="Solution No." optional="show"/>
                             <field name="name"/>
+                            <field name="start_date"/>
+                            <field name="deadline_date"/>
+                            <field name="show_period"/>
                             <field name="display_project_id" string="Project" optional="hide" options="{'no_open': 1}"/>
                             <field name="milestone_id"
                                 optional="hide"
@@ -780,6 +795,7 @@
                 <group>
                     <group>
                         <field name="code" string="Solution No." attrs="{'invisible': [('is_solution','=',False)]}" readonly="True"/>
+                        <field name="start_date" attrs="{'invisible': [('is_solution','=',False)]}"/>
                         <field name="code" string="Strategy No." attrs="{'invisible': [('is_strategy','=',False)]}" readonly="True"/>
                         <field name="code" string="Task No." attrs="{'invisible': [('is_task','=',False),('is_subtask','=',False)]}" readonly="True"/>
                         <field name="evaluate_method" attrs="{'invisible': [('is_strategy','=',False)]}"/>
@@ -802,6 +818,8 @@
                         <field name="date_deadline" attrs="{'invisible': [('is_closed', '=', True)]}"/>
                         <field name="user_ids" class="o_task_user_field" options="{'no_open': True, 'no_quick_create': True}" widget="many2many_avatar_user" domain="[('share', '=', False), ('active', '=', True)]"/>
                         <field name="activity_ids" string="Next Activity" widget="list_activity" attrs="{'invisible': [('is_strategy','=',False)]}"/>-->
+                        <field name="show_period" attrs="{'invisible': [('is_solution','=',False)]}" readonly="True"/>
+                        <field name="deadline_date" attrs="{'invisible': [('is_solution','=',False)]}"/>
                         <field name="priority_id"  attrs="{'invisible': True}"/>
                         <field name="period_id"  attrs="{'invisible': True}"/>
                         <field name="date_deadline"  attrs="{'invisible': True}"/>
@@ -1132,4 +1150,19 @@
     </record>
 
     <menuitem id="menu_ccpp_group_all_action_ccpp" name="Test Group 2" parent="project.menu_project_config" action="ccpp_group_all_action_ccpp" sequence="15"/>    
+
+    <!-- My task -->
+
+    <record model="ir.ui.menu" id="project.menu_project_management">
+        <field name="action" eval="False"/>
+    </record>
+
+    <menuitem name="Tasks" id="menu_ccpp_task" parent="project.menu_main_pm" sequence="2" />
+
+        <menuitem name="Tasks Calendar" id="menu_ccpp_task_calendar" parent="menu_ccpp_task"
+        action="act_rocker_timesheet_calendar" sequence="1" />
+
+        <menuitem name="Tasks List" id="menu_ccpp_task_list" parent="menu_ccpp_task"
+        action="act_rocker_timesheet_tree" sequence="2" />
+
 </odoo>

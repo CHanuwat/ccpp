@@ -128,7 +128,7 @@ class CCPPSaleTarget(models.Model):
     date_to = fields.Date(string="Date To", readonly=True)
     target = fields.Float(string="Sales Target")
     actual = fields.Float(string="Sales Actual")
-    actual_percent = fields.Float(string="% Success", compute="_compute_actual_percent", store=True)
+    actual_percent = fields.Float(string="% Success", compute="_compute_actual_percent", store=True, group_operator=False)
     sale_person_id = fields.Many2one("hr.employee", default="_get_default_sale_person", string="Sales Person", required=True)
     status = fields.Selection(selection=[
         ('over', 'Over'),
@@ -138,6 +138,7 @@ class CCPPSaleTarget(models.Model):
     ], compute='_compute_status', store=True, readonly=False, string="Target Result")
     status_color = fields.Integer(string="Status Color", compute='_compute_status_color')
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
+    user_id = fields.Many2one("res.users", string="User", related="sale_person_id.user_id", store=True)
     
     #@api.model_create_multi
     #def create(self, vals_list):

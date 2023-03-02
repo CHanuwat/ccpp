@@ -15,6 +15,8 @@ from geopy.geocoders import Nominatim
 import geopy
 import urllib
 from bs4 import BeautifulSoup
+from dateutil.relativedelta import relativedelta
+import math
 
 STATUS_COLOR = {
     'on_track': 20,  # green / success
@@ -48,8 +50,8 @@ class Project(models.Model):
     sale_team_id = fields.Many2one("crm.team", string="Sale Team", default="_get_default_sale_team")
     domain_task_solution_ids = fields.Many2many('project.task', string="Domain task solution")
     tasks_solution = fields.One2many('project.task', 'project_solution_id', string="Solution", context={'is_solution': True})
-    name = fields.Char(string="Name of CCPP")
-    user_id = fields.Many2one(string="CCPP User")
+    name = fields.Char(string="Name of CCPP", translate=False)
+    user_id = fields.Many2one(related="employee_id.user_id", string="CCPP User", store=True)
     color = fields.Integer(related="priority_id.color", store=True)
     
     # Host CCPP
@@ -77,10 +79,11 @@ class Project(models.Model):
     is_verify_impact_cus = fields.Boolean("Verify impact Customer", default=False)
     is_stamp_record = fields.Boolean("Aready have record", default=False)
     show_critical = fields.Char(string="Customer Impact", compute="_compute_show_time")
-    show_time = fields.Char(string="Period", compute="_compute_show_time")
+    show_time = fields.Char(string="Time", compute="_compute_show_time")
     code = fields.Char(string="Code")
+    show_period = fields.Char(string="Period", compute="_compute_period_deadline", store=True)
     period_id = fields.Many2one("ccpp.period", string="Priority Period", compute="_get_priority", store=True)
-    deadline_date = fields.Date(string="Deadline")
+    deadline_date = fields.Date(string="Deadline", compute="_compute_period_deadline", store=True)
     state = fields.Selection([
         ('open', 'Open'),
         ('waiting_approve', 'Waiting Approve'),
@@ -90,6 +93,15 @@ class Project(models.Model):
         ('delay', 'delayed'),
     ], default='open', index=True, string="State", track_visibility="onchange", tracking=True)
     next_action = fields.Char("Next Action")
+    
+    @api.depends("tasks_solution.start_date")
+    def _compute_period_deadline(self):
+        for obj in self:
+            for line in obj.tasks_solution:
+                if line.state not in ['cancel','delay']:
+                    obj.show_period = line.show_period
+                    obj.deadline_date = line.deadline_date
+            
     
     @api.depends("is_critical", "is_not_critical", "is_short_time", "is_long_time")
     def _compute_show_time(self):
@@ -367,9 +379,11 @@ class Task(models.Model):
     last_situation_solution_id = fields.Many2one("project.update", string="Last Update Situation Solution") # last update at solution
     state = fields.Selection([
         ('open', 'Open'),
+        ('waiting_approve', 'Waiting Approve'),
         ('process', 'On Process'),
         ('done', 'Done'),
-        ('cancel', 'Canceled'),
+        ('cancel', 'Cancelled'),
+        ('delay', 'delayed'),
     ], default='open', index=True, string="State", track_visibility="onchange", tracking=True)
     last_update_status_strategy = fields.Selection(selection=[
         ('on_track', 'On Track'),
@@ -390,7 +404,103 @@ class Task(models.Model):
     state_color = fields.Integer(compute='_compute_state_color')
     next_action_solution = fields.Char(string="Next Action Solution")
     next_action = fields.Char(string="Next Action")
+    start_date = fields.Date(string="Start Date")
+    deadline_date = fields.Date(string="Deadline", compute="_compute_deadline", store=True)
+    priority_line_id = fields.Date(string="Priority Line") # stamp when approve :fix me
+    show_period = fields.Char(string="Period", compute="_compute_deadline", store=True)
     
+    
+    @api.depends('project_id.priority_id','start_date')
+    def _compute_deadline(self):
+        for obj in self:
+            deadline_date = False
+            string_show_period = False
+            if obj.project_id.priority_id and obj.start_date and obj.project_id.priority_id.point <= 2:
+                start_date_obj = obj.start_date
+                priority_line_id = obj.project_id.priority_id.lines.filtered(lambda o:o.active)
+                
+                if not priority_line_id:
+                    raise UserError("Please Configure Time Frequenzy for Priority %s"%(obj.project_id.priority_id.name))
+                if len(priority_line_id) > 1:
+                    raise UserError("Configure Time Frequenzy more than 1")
+                
+                start_period_date_obj = priority_line_id.date
+                
+                if priority_line_id.period == "day":
+                    period = 0
+                    while True:
+                        end_period_date_obj = start_period_date_obj + timedelta(days=priority_line_id.frequency_time -1)
+                        if start_date_obj >= start_period_date_obj and start_date_obj <= end_period_date_obj:
+                            deadline_date = end_period_date_obj.strftime("%Y-%m-%d")
+                            break
+                        else:
+                            start_period_date_obj = end_period_date_obj + timedelta(days=1)
+                            period += 1
+                    
+                elif priority_line_id.period == "week":
+                    period = 0
+                    while True:
+                        end_period_date_obj = start_period_date_obj + timedelta(days=(priority_line_id.frequency_time*7)-1)
+                        if start_date_obj >= start_period_date_obj and start_date_obj <= end_period_date_obj:
+                            deadline_date = end_period_date_obj.strftime("%Y-%m-%d")
+                            break
+                        else:
+                            start_period_date_obj = end_period_date_obj + timedelta(days=1)
+                            period += 1
+
+                elif priority_line_id.period in ["month","year"]:
+                    period = 0
+                    if priority_line_id.period == 'month':
+                        frequency_time = priority_line_id.frequency_time
+                    elif priority_line_id.period == 'year':
+                        frequency_time = priority_line_id.frequency_time * 12
+                    count = frequency_time
+                    while True:
+                        if count%frequency_time == 0:
+                            month = start_period_date_obj.month
+                            if start_period_date_obj.month + frequency_time <= 12:
+                                replace_month = start_period_date_obj.month + frequency_time -1
+                                replace_year = start_period_date_obj.year
+                                period += 1
+                            else:
+                                replace_month = ((start_period_date_obj.month + frequency_time) %12) -1
+                                if priority_line_id.period == 'month':
+                                    replace_year = start_period_date_obj.year + 1
+                                    period = 0
+                                elif priority_line_id.period == 'year':
+                                    replace_year = start_period_date_obj.year + priority_line_id.frequency_time
+                                    period += 1
+                            if replace_month == 0:
+                                replace_month = 12
+                                replace_year -= 1
+                                
+                            
+                            print("x1")
+                            print(start_period_date_obj)
+                            print("x2")
+                            print(replace_month,replace_year)
+                            end_period_date_obj = start_period_date_obj
+                            print("x3")
+                            print(end_period_date_obj)
+                            end_period_date_obj = end_period_date_obj.replace(month=replace_month,year=replace_year)
+                            end_period_date_obj = end_period_date_obj + relativedelta(day=31)
+                            print("x4")
+                            print(end_period_date_obj)
+                        
+                        
+                        if start_date_obj >= start_period_date_obj and start_date_obj <= end_period_date_obj:
+                            deadline_date = end_period_date_obj.strftime("%Y-%m-%d")
+                            break
+                        else:
+                            start_period_date_obj = end_period_date_obj + timedelta(days=1)
+                            count += 1
+                if period == 0:
+                    period = math.ceil(12/frequency_time)
+                string_show_period = 'Period '+ str(period)
+                
+            obj.show_period = string_show_period
+            obj.deadline_date = deadline_date
+                
     @api.depends('last_situation_id.status','last_situation_solution_id.status')
     def _compute_last_update_status(self):
         for obj in self:
@@ -543,7 +653,7 @@ class Task(models.Model):
     
     def button_update_strategy(self):
         
-        
+        """
         import requests
         
 
@@ -622,7 +732,7 @@ class Task(models.Model):
         #latitude = location.latitude
         #longitude = location.longitude
         #print("lati -->> ",latitude, longitude)
-        
+        """
         #print(resp_json_payload['results'][0]['geometry']['location'])
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.strategy_update_all_action')
         #action['display_name'] = _("%(name)s's Updates", name=self.name)

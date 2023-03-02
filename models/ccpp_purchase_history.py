@@ -17,6 +17,7 @@ STATUS_COLOR = {
 class CCPPPurchaseHistory(models.Model):
     _name = "ccpp.purchase.history"
     _inherit = ['mail.thread']
+    _order = "name"
     
     """def _get_default_date_from(self):
         if datetime.today().month in range(1,3):
@@ -42,21 +43,21 @@ class CCPPPurchaseHistory(models.Model):
 
     @api.model
     def default_get(self,fields):
-        res = super(CCPPPurchaseHistory,self).default_get(fields)
-        #if 'sale_person_id' in fields:
-        #    sale_person_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-        #    if not sale_person_id:
-        #        raise UserError("Not recognize the sales person. Please Configure User to Employee to get the sales person")
-        #    res['sale_person_id'] = sale_person_id.id
-        #if 'year_selection' in fields:
-        #    current_year = datetime.today().year
-        #    res['year_selection'] = str(current_year)
+        res = super().default_get(fields)
+        if 'sale_person_id' in fields:
+            sale_person_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+            if not sale_person_id:
+                raise UserError("Not recognize the sales person. Please Configure User to Employee to get the sales person")
+            res['sale_person_id'] = sale_person_id.id
+        if 'year_selection' in fields:
+            current_year = datetime.today().year
+            res['year_selection'] = str(current_year)
         #if 'month' in fields:
         #    current_period = datetime.today().month
         #    res['month'] = str(current_period)
         return res
         
-    name = fields.Char(string="Name")
+    name = fields.Char(string="Name", compute="_compute_name", store=True)
     #year = fields.Char(string="Year")
     month = fields.Selection(selection=[
         ('1', 'JAN'),
@@ -71,7 +72,7 @@ class CCPPPurchaseHistory(models.Model):
         ('10', 'OCT'),
         ('11', 'NOV'),
         ('12', 'DEC'),
-    ], required=True, string="Month") 
+    ], string="Month") 
     year_selection = fields.Selection(selection=[
         ('2003', '2003'),
         ('2004', '2004'),
@@ -150,12 +151,12 @@ class CCPPPurchaseHistory(models.Model):
         ('company', 'Company'),
         ('competitor', 'Competitors'),
         ('to_define', 'Undefine')
-    ], default='to_define', required=True, string="Potential Type", compute='_compute_potential_type') 
-    vendor_id = fields.Many2one("res.partner", string="Vendor", required=True)
+    ], default='to_define', string="Potential Type", compute='_compute_potential_type') 
+    vendor_id = fields.Many2one("res.partner", string="Vendor")
     key_user_id = fields.Many2one("res.partner", string="Key User")
     domain_job_position_ids = fields.Many2many("res.partner.position", string="Domain Job Position", compute="_compute_domain_job_position_ids")
     domain_key_user_ids = fields.Many2many("res.partner", string="Domain Key User", compute="_compute_domain_key_user_ids")
-    product_id = fields.Many2one("product.product", string="Product", required=True)
+    product_id = fields.Many2one("product.product", string="Product")
     unit_price = fields.Float(string="Unit Price")
     order_qty = fields.Float(string="Ordered Qty")
     use_qty = fields.Float(string="Used Qty")
@@ -164,6 +165,7 @@ class CCPPPurchaseHistory(models.Model):
     total_use_qty = fields.Float(string="Total Used Qty", compute="_compute_total")
     note = fields.Text("Competitors' Sales Strategy")
     sale_person_id = fields.Many2one("hr.employee", string="Sales Person", required=True)
+    user_id = fields.Many2one(related="sale_person_id.user_id", string="Sales User", store=True)
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
     company_partner_id = fields.Many2one("res.partner", string="Company Partner", related="company_id.partner_id")
     winmed_lines = fields.One2many("ccpp.purchase.history.line", "history_id", string="Winmed Purchase History Lines", domain=[('potential_type','=','company')])
@@ -183,6 +185,14 @@ class CCPPPurchaseHistory(models.Model):
             obj.total_price = total_price
             obj.total_qty = total_qty
             obj.total_use_qty = total_use_qty
+
+    @api.depends("year_selection", "customer_id")
+    def _compute_name(self):
+        for obj in self:
+            name = "New"
+            if obj.year_selection and obj.customer_id:
+                name = obj.year_selection + ' - ' + obj.customer_id.name
+            obj.name = name
 
     @api.depends("vendor_id")
     def _compute_domain_job_position_ids(self):
@@ -212,6 +222,18 @@ class CCPPPurchaseHistory(models.Model):
                     obj.potential_type = 'competitor'
             else:
                 obj.potential_type = 'to_define'
+     
+    @api.constrains('year_selection','customer_id')
+    def constrains_year_selection_period(self):
+        for obj in self:
+            if obj.year_selection and obj.customer_id:
+                check_duplicate = self.env['ccpp.purchase.history'].search([('id','!=',obj.id),
+                                                                            ('customer_id','=',obj.customer_id.id),
+                                                                            ('year_selection','=',obj.year_selection),
+                                                                            ('sale_person_id','=',obj.sale_person_id.id),
+                                                                            ])
+                if check_duplicate:
+                    raise UserError("Customer %s already have Purchase History in year %s"%(obj.customer_id.name,obj.year_selection))
             
 class CCPPPurchaseHistory(models.Model):
     _name = "ccpp.purchase.history.line"
@@ -234,7 +256,7 @@ class CCPPPurchaseHistory(models.Model):
     unit_price = fields.Float(string="Unit Price")
     order_qty = fields.Float(string="Ordered Qty")
     use_qty = fields.Float(string="Used Qty") 
-    vendor_id = fields.Many2one("res.partner", string="Vendor", required=True, default=_get_default_vendor)
+    vendor_id = fields.Many2one("res.partner", string="Vendor", default=_get_default_vendor)
     customer_id = fields.Many2one(related="history_id.customer_id", store=True)
     year_selection = fields.Selection(related="history_id.year_selection", store=True)
     sale_person_id = fields.Many2one(related="history_id.sale_person_id", store=True)
@@ -244,15 +266,15 @@ class CCPPPurchaseHistory(models.Model):
         ('company', 'Company'),
         ('competitor', 'Competitors'),
     ], default=_get_default_type, string="Potential Type")
-    note = fields.Text("Competitors' Sales Strategy")
+    note = fields.Text("Sales Strategy")
     
     @api.model_create_multi
     def create(self, vals_list):
-        for vals in vals_list:
-            print(self._context)
-            if self._context.get('is_create_history'):
-                action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_purchase_history_action_form')
-                return action
+        #for vals in vals_list:
+        #    print(self._context)
+        #    if self._context.get('is_create_history'):
+        #        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_purchase_history_action_form')
+        #        return action
             
         res = super(CCPPPurchaseHistory, self).create(vals_list)
         

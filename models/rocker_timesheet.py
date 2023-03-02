@@ -285,34 +285,68 @@ class RockerTimesheet(models.Model):
         else:
             return None
 
-    def _default_task(self):
+    def _default_task_solution(self):
         # _logger.debug('_default_task')
         _selected_id = 0
         _selected_id = self._get_search_id()
         if _selected_id > 0:
             search_task = self.env['project.task'].search([('id', '=', _selected_id)], limit=1)
-            if search_task.id > 0:
+            if search_task.id > 0 and search_task.is_solution:
+                return search_task.id
+            elif search_task.id > 0 and search_task.is_strategy:
+                return search_task.parent_id.id
+        return None
+    
+    def _default_task_strategy(self):
+        # _logger.debug('_default_task')
+        _selected_id = 0
+        _selected_id = self._get_search_id()
+        if _selected_id > 0:
+            search_task = self.env['project.task'].search([('id', '=', _selected_id)], limit=1)
+            if search_task.id > 0 and search_task.is_strategy:
                 return search_task.id
         return None
 
+    
     def _default_project(self):
         # _logger.debug('_default_project')
         _selected_id = 0
         _selected_id = self._get_search_id()
+        print(_selected_id)
         if _selected_id > 0:
             search_task = self.env['project.task'].search([('id', '=', _selected_id)], limit=1)
             if search_task.id > 0:
                 return search_task.project_id
         return None
+    
+    def _default_customer(self):
+        # _logger.debug('_default_project')
+        _selected_id = 0
+        _selected_id = self._get_search_id()
+        print(_selected_id)
+        if _selected_id > 0:
+            search_task = self.env['project.task'].search([('id', '=', _selected_id)], limit=1)
+            if search_task.id > 0:
+                return search_task.project_id.partner_id
+        return None
 
     # existing fields
     company_id = fields.Many2one('res.company', "Company", default=lambda self: self.env.company, store=True,
                                  required=True)
+    #task_id = fields.Many2one(
+    #    'project.task', 'Task', compute='_compute_task_id', store=True, readonly=False, index=True,
+    #    domain="[('company_id', '=', company_id), ('project_id.allow_timesheets', '=', True), ('project_id', '=?', project_id)]")
     task_id = fields.Many2one(
-        'project.task', 'Task', compute='_compute_task_id', store=True, readonly=False, index=True,
-        domain="[('company_id', '=', company_id), ('project_id.allow_timesheets', '=', True), ('project_id', '=?', project_id)]")
+        'project.task', string='Solution', default=_default_task_solution, store=True, readonly=False, index=True,
+        domain="[('company_id', '=', company_id), ('project_id.allow_timesheets', '=', True), ('project_id', '=?', project_id), ('is_solution', '=', True)]")
+    task_strategy_id = fields.Many2one(
+        'project.task', string='Strategy', default=_default_task_strategy, store=True, readonly=False, index=True,
+        domain="[('company_id', '=', company_id), ('project_id.allow_timesheets', '=', True), ('project_id', '=?', project_id), ('is_strategy', '=', True)]")
+    #project_id = fields.Many2one(
+    #    'project.project', 'Project', compute='_compute_project_id', store=True, readonly=False,
+    #    domain=_domain_project_id)
     project_id = fields.Many2one(
-        'project.project', 'Project', compute='_compute_project_id', store=True, readonly=False,
+        'project.project', string='CCPP', default=_default_project, store=True, readonly=False,
         domain=_domain_project_id)
     # name = fields.Char('Comments', required=False, default=_default_name)
     name = fields.Char(required=False, default=_default_name)
@@ -360,6 +394,7 @@ class RockerTimesheet(models.Model):
     department_id = fields.Many2one('hr.department', "Department", compute='_compute_department_id', store=True,
                                     compute_sudo=True)
     unit_amount = fields.Float('Actual Work', default=_default_work, required=True, help="Work amount in hours")
+    customer_id = fields.Many2one("res.partner", string="Customer", default=_default_customer)
     # 2022
 
     # def init(self):
@@ -374,6 +409,9 @@ class RockerTimesheet(models.Model):
     @api.depends('task_id', 'task_id.project_id')
     def _compute_project_id(self):
         # _logger.debug('api depends task')
+        print("Max2"*50)
+        print("task",self.task_id)
+        print("search",self._get_search_id())
         if not self.task_id and self._get_search_id() > 0:
             search_task = self.env['project.task'].search([('id', '=', self._get_search_id())], limit=1)
             if not search_task.id:
@@ -385,6 +423,7 @@ class RockerTimesheet(models.Model):
     @api.depends('project_id')
     def _compute_task_id(self):
         # _logger.debug('api depends project')
+        print("Max3"*50)
         for line in self.filtered(lambda line: not line.project_id):
             line.task_id = False
 

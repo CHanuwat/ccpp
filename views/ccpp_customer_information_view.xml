@@ -6,13 +6,34 @@
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">ccpp.customer.information</field>
         <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_groupby_year': 1, 'orderby': 'date_from DESC'}</field>
+    </record>
+
+    <record id="ccpp_customer_information_search" model="ir.ui.view">
+        <field name="name">Customer Information Search</field>
+        <field name="model">ccpp.customer.information</field>
+        <field name="arch" type="xml">
+            <search string="Search Customer Information">
+                <field name="customer_id"/>
+                <field name="province_id"/>
+                <field name="sale_area_id"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Year" name="groupby_year" context="{'group_by': 'year_text'}"/>
+                    <!--<filter string="Order Year" name="order_year" context="{'order_by': 'year_text desc'}"/>-->
+                    <filter string="Sales Area" name="groupby_sales_area" context="{'group_by': 'sale_area_id'}"/>
+                    <filter string="Province" name="groupby_province" context="{'group_by': 'province_id'}"/>
+                    <filter string="Customer Category" name="groupby_category" context="{'group_by': 'customer_category_id'}"/>
+                </group>
+            </search>
+        </field>
     </record>
 
     <record id="ccpp_customer_information_view_tree" model="ir.ui.view">
         <field name="name">ccpp.customer.information.view.tree</field>
         <field name="model">ccpp.customer.information</field>
         <field name="arch" type="xml">
-            <tree string="Customer Information" multi_edit="1" sample="1">
+            <tree string="Customer Information" multi_edit="1" sample="1" class="customer_information_tree">
                 <field name="date_from"/>
                 <field name="date_to"/>
                 <field name="customer_id"/>
@@ -32,7 +53,7 @@
         <field name="name">ccpp.customer.information.view.tree</field>
         <field name="model">ccpp.customer.information</field>
         <field name="arch" type="xml">
-            <tree string="Customer Information" multi_edit="1" sample="1" default_order="potential_ranking">
+            <tree string="Customer Information" multi_edit="1" sample="1" default_order="potential_ranking" class="customer_information_tree">
                 <field name="date_from"/>
                 <field name="date_to"/>
                 <field name="customer_id"/>
@@ -52,7 +73,7 @@
         <field name="name">ccpp.customer.information.view.tree</field>
         <field name="model">ccpp.customer.information</field>
         <field name="arch" type="xml">
-            <tree string="Customer Information" multi_edit="1" sample="1" default_order="actual_sale_ranking">
+            <tree string="Customer Information" multi_edit="1" sample="1" default_order="actual_sale_ranking" class="customer_information_tree">
                 <field name="date_from"/>
                 <field name="date_to"/>
                 <field name="customer_id"/>
@@ -72,7 +93,7 @@
         <field name="name">ccpp.customer.information.view.tree</field>
         <field name="model">ccpp.customer.information</field>
         <field name="arch" type="xml">
-            <tree string="Customer Information" multi_edit="1" sample="1" default_order="competitor_ranking">
+            <tree string="Customer Information" multi_edit="1" sample="1" default_order="competitor_ranking" class="customer_information_tree">
                 <field name="date_from"/>
                 <field name="date_to"/>
                 <field name="customer_id"/>
@@ -93,7 +114,37 @@
         <field name="model">ccpp.customer.information</field>
         <field name="arch" type="xml">
             <form string="Customer Information">
+                <header>
+                    <button name="button_active" string="Active" type="object" class="btn-primary" states="open,inactive"/>
+                    <button name="button_inactive" string="Inactive" type="object" class="btn-primary" states="active"/>
+                    <button name="button_to_open" string="To Open" type="object" class="btn-primary" states="inactive"/>
+                    <field name="state" widget="statusbar"/>
+                    
+                </header>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" name="open_sales_target" type="object" icon="fa-tasks">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Sales Target</span>
+                            </div>
+                        </button>
+                        <button class="oe_stat_button" name="open_purchase_history" type="object" icon="fa-tasks">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Purchase</span>
+                                <span class="o_stat_text">History</span>
+                            </div>
+                        </button>
+                        <button class="oe_stat_button" name="open_ccpp" type="object" icon="fa-tasks">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">CCPP</span>
+                            </div>
+                        </button>
+                        <button class="oe_stat_button" name="open_current_situation" type="object" icon="fa-tasks">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Current Situation</span>
+                            </div>
+                        </button>
+                    </div>
                     <div class="o_row" style="padding-top:5px; padding-bottom:10px">
                         
                         <div>
@@ -116,7 +167,8 @@
                     <div style="border-top: 2px solid #e6e6e6;padding: 0px;;margin-top: 10px; margin-bottom: 10px;"/>
                     <group>
                         <group>
-                            <field name="customer_id" domain="[('is_customer','=',True)]"/>
+                            <field name="company_name" invisible="True"/> <!--attrs="{'invisible': [('customer_id','!=', False)]}"/>-->
+                            <field name="customer_id" domain="[('is_customer','=',True)]" attrs="{'required': [('company_name','=',False)], 'invisible':[('company_name','!=', False),('company_name','!=','')]}"/>
                             <field name="province_id"/>
                             <field name="sale_area_id"/>
                             <field name="sale_person_id"/>
@@ -134,7 +186,7 @@
                     <div class="o_row" style="padding-top:5px">
                         <div>
                             <label class="o_label" for="potential_ranking" string="Ranking by Potential in Area" style="width:50%"/>
-                            <field name="potential_ranking" style="width:50%"/>
+                            <field name="potential_ranking" style="width:50%; padding-left:23px;"/>
                         </div>
                         <div>  
                         </div>
@@ -142,7 +194,7 @@
                     <div class="o_row" style="padding-top:5px">
                         <div>
                             <label class="o_label" for="actual_sale_ranking" string="Ranking by Winmed Actual Sales" style="width:50%"/>
-                            <field name="actual_sale_ranking" style="width:50%"/>
+                            <field name="actual_sale_ranking" style="width:50%; padding-left:10px;"/>
                         </div>
                         <div>
                             <label class="o_label" for="total_sale_revenue" string="Total Sale Revenue Last Year(THB)" style="width:50%"/>
@@ -152,7 +204,7 @@
                     <div class="o_row" style="padding-top:5px">
                         <div>
                             <label class="o_label" for="competitor_ranking" string="Ranking by Competitor's Sales" style="width:35%"/>
-                            <field name="competitor_ranking" style="width:65%"/>
+                            <field name="competitor_ranking" style="width:65%; padding-left:20px;"/>
                         </div>  
                         <div>
                         </div>

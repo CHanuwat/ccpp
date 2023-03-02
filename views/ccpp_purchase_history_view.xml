@@ -58,7 +58,7 @@
                 <field name="unit_price" invisible="True"/>
                 <field name="order_qty" sum="sum_order_qty" invisible="True"/>
                 <field name="use_qty" sum="sum_use_qty" invisible="True"/>
-                <field name="note"/>
+                <field name="note" invisible="True"/>
                 <field name="sale_person_id"/>
             </tree>
         </field>
@@ -93,13 +93,13 @@
                     <div style="border-top: 2px solid #e6e6e6;padding: 0px;;margin-top: 10px; margin-bottom: 10px;"/>
                     <group>
                         <group>
-                            <field name="customer_id"/>
+                            <field name="customer_id" domain="[('is_customer','=',True)]"/>
                             <field name="sale_person_id"/>
                         </group>
                         <group>
                         </group>
                     </group>
-                    <h2 style="color:gray; font-size:1.2em;"> Summary Information </h2>
+                    <!--<h2 style="color:gray; font-size:1.2em;"> Summary Information </h2>
                     <div style="border-top: 2px solid #e6e6e6;padding: 0px;;margin-top: 10px; margin-bottom: 10px;"/>
                      <group>
                         <group>
@@ -109,7 +109,7 @@
                         </group>
                         <group>
                         </group>
-                    </group>
+                    </group>-->
 
                     <notebook>
                         <page name="winmed_lines" string="Winmed Products">
@@ -122,7 +122,7 @@
                                     <field name="unit_price"/>
                                     <field name="order_qty"/>
                                     <field name="use_qty"/>
-                                    <field name="note"/>
+                                    <field name="note" string="Winmed Sales Strategy"/>
                                 </tree>
                             </field>
                         </page>
@@ -131,12 +131,13 @@
                                 <tree editable="bottom">
                                     <field name="product_id"/>
                                     <field name="vendor_id" domain="[('is_competitor','=',True)]"/>
+                                    <field name="potential_type" invisible="True"/>
                                     <field name="domain_key_user_ids" invisible="True"/>
                                     <field name="key_user_id" domain="[('id','in',domain_key_user_ids)]" context="{'show_title_position':True}"/>
                                     <field name="unit_price" />
                                     <field name="order_qty" />
                                     <field name="use_qty"/>
-                                    <field name="note"/>
+                                    <field name="note" string="Competitor's Sales Strategy"/>
                                 </tree>
                             </field>
                         </page>
@@ -198,6 +199,6 @@
     </record>
 
     <menuitem id="menu_ccpp_purchase_history" name="Customer Purchase History" parent="crm.crm_menu_sales" action="ccpp_purchase_history_action" sequence="103"/>
-    <menuitem id="menu_ccpp_purchase_history_by_prodecy" name="Customer Purchase History 2" parent="crm.crm_menu_sales" action="ccpp_purchase_history_action_by_product" sequence="103"/>
+    <!--<menuitem id="menu_ccpp_purchase_history_by_prodecy" name="Customer Purchase History 2" parent="crm.crm_menu_sales" action="ccpp_purchase_history_action_by_product" sequence="103"/>-->
     
 </odoo>
