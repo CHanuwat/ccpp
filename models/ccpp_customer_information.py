@@ -31,7 +31,7 @@ class CCPPCustomerInformation(models.Model):
         return randint(1, 11)
     
     def _get_default_date_from(self):
-        date_from = datetime.today().replace(day=1,month=1)
+        date_from = datetime.today()
         return date_from
     
     def _get_default_date_to(self):
@@ -53,7 +53,9 @@ class CCPPCustomerInformation(models.Model):
     total_sale_revenue = fields.Float(string="Total Sale Revenue Last Year(THB)")
     customer_category_id = fields.Many2one("ccpp.customer.category", string="Customer Category", related="customer_id.customer_category_id", store=True)
     hospital_size = fields.Integer(string="Hospital Size")
-    budget = fields.Char(string="Funding/Budget")
+    customer_budget_id = fields.Many2one("ccpp.customer.budget",string="Funding/Budget")
+    is_other_budget = fields.Boolean("Is Other Funding/Budget")
+    budget = fields.Char(string="Other Funding/Budget")
     future_plan = fields.Text(string="Future Project/Plan (โครงการในอนาคต/แผนงาน)")
     connection = fields.Text(string="Connection with other hospital (ความสัมพันธ์กับโรงพยาบาลอื่นๆ)")
     note = fields.Text(string="Note")
@@ -116,6 +118,11 @@ class CCPPCustomerInformation(models.Model):
                 #    date_to_obj = date_to_obj[2] + '/' + date_to_obj[1] + '/' + date_to_obj[0]
                 #    raise UserError("Configure customer %s period %s - %s overlap with period %s - %s"%(obj.customer_id.name,date_from_obj,date_to_obj,date_from,date_to))
                     
+    @api.onchange("date_from","date_to")
+    def onchange_date_from_to(self):
+        for obj in self:
+            if obj.date_from > obj.date_to:
+                raise UserError("Please set date from not over date to")
     
     @api.depends("total_sale_revenue")
     def _compute_actual_sale_ranking(self):

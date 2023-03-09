@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="ccpp_customer_budget_action" model="ir.actions.act_window">
+        <field name="name">Customer Funding/Budget</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">ccpp.customer.budget</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="ccpp_customer_budget_view_tree" model="ir.ui.view">
+        <field name="name">ccpp.customer.budget.view.tree</field>
+        <field name="model">ccpp.customer.budget</field>
+        <field name="arch" type="xml">
+            <tree sample="1" multi_edit="1" default_order="name">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ccpp_customer_budget_view_form" model="ir.ui.view">
+        <field name="name">ccpp.customer.budget.view.form</field>
+        <field name="model">ccpp.customer.budget</field>
+        <field name="arch" type="xml">
+            <form string="Customer Funding/Budget">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                        </group>
+                    </group>
+                </sheet>
+                <!--<div class="oe_chatter">
+                    <field name="message_follower_ids" groups="base.group_user"/>
+                    <field name="message_ids"/>
+                </div>-->
+            </form>
+        </field>
+    </record>
+
+    <menuitem id="menu_ccpp_customer_budget" name="Customer Funding/Budget" parent="crm.crm_menu_config" action="ccpp_customer_budget_action" sequence="101"/>
+</odoo>

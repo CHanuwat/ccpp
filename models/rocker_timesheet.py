@@ -395,6 +395,11 @@ class RockerTimesheet(models.Model):
                                     compute_sudo=True)
     unit_amount = fields.Float('Actual Work', default=_default_work, required=True, help="Work amount in hours")
     customer_id = fields.Many2one("res.partner", string="Customer", default=_default_customer)
+    state = fields.Selection(selection=[
+        ('open', 'Open'),
+        ('done', 'Done'),
+    ], default='open', string="Status") 
+    
     # 2022
 
     # def init(self):
@@ -866,3 +871,19 @@ class RockerTimesheet(models.Model):
             offset = tz.utcoffset(datetime.now())
 
         return dt - offset.total_seconds() / 3600
+    
+    def button_done(self):
+        for obj in self:
+            obj.state = 'done'
+
+    def button_to_open(self):
+        for obj in self:
+            obj.state = 'open'
+            
+    def update_situation(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.task_timesheet_update_all_action')
+        return action
+    
+    def open_current_situation(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.task_timesheet_update_all_action')
+        return action

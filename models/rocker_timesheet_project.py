@@ -48,6 +48,7 @@ class RockerTask(models.Model):
     name = fields.Char('Name')
     company_id = fields.Many2one('res.company', string='Company', domain="[('company_id', '=', self.env.company.id)]")
     project_id = fields.Many2one('project.project', domain=_domain_project_id)
+    priority_id = fields.Many2one(related="project_id.priority_id", store=True)
     task_id = fields.Many2one('project.task', string='Task')
     parent_id = fields.Many2one('rocker.task', string='Parent')
     user_id = fields.Many2one('res.users', string='User')

@@ -30,9 +30,15 @@ STATUS_COLOR = {
 
 STATE_COLOR = {
     'open': 0,  # green / success
+    'waiting_approve': 8,
     'process': 3,  # orangeq
     'done': 20,  # red / danger
     'cancel': 23,  # light blue
+    'delay': 24,
+    '1': 9,
+    '2': 2,
+    '3': 3,
+    '4': 4,
     False: 0,  # default grey -- for studio
 }
 
@@ -47,6 +53,15 @@ class Project(models.Model):
     department_id = fields.Many2one("hr.department",string="Department")
     employee_id = fields.Many2one("hr.employee", string="Employee")
     priority_id = fields.Many2one("ccpp.priority", string="CCPP Priority", compute="_get_priority", store=True)
+    priority_select = fields.Selection([
+        ('to_define', 'To Define'),
+        ('1', '1st'),
+        ('2', '2nd'),
+        ('3', '3rd'),
+        ('4', '4th'),
+        #('delay', 'delayed'),
+    ], compute="_get_priority", string="Priority Selection", store=True)
+    
     sale_team_id = fields.Many2one("crm.team", string="Sale Team", default="_get_default_sale_team")
     domain_task_solution_ids = fields.Many2many('project.task', string="Domain task solution")
     tasks_solution = fields.One2many('project.task', 'project_solution_id', string="Solution", context={'is_solution': True})
@@ -81,24 +96,59 @@ class Project(models.Model):
     show_critical = fields.Char(string="Customer Impact", compute="_compute_show_time")
     show_time = fields.Char(string="Time", compute="_compute_show_time")
     code = fields.Char(string="Code")
-    show_period = fields.Char(string="Period", compute="_compute_period_deadline", store=True)
+    #show_period = fields.Char(string="Period", compute="_compute_period_deadline", store=True)
+    show_period = fields.Char(string="Period")
     period_id = fields.Many2one("ccpp.period", string="Priority Period", compute="_get_priority", store=True)
-    deadline_date = fields.Date(string="Deadline", compute="_compute_period_deadline", store=True)
+    #deadline_date = fields.Date(string="Deadline", compute="_compute_period_deadline", store=True)
+    deadline_date = fields.Date(string="Deadline", compute="_compute_deadline", store=True)
     state = fields.Selection([
         ('open', 'Open'),
         ('waiting_approve', 'Waiting Approve'),
         ('process', 'On Process'),
         ('done', 'Done'),
         ('cancel', 'Cancelled'),
-        ('delay', 'delayed'),
+        #('delay', 'delayed'),
     ], default='open', index=True, string="State", track_visibility="onchange", tracking=True)
+    state_color = fields.Integer(compute='_compute_state_color')
     next_action = fields.Char("Next Action")
+    is_ccpp_done = fields.Boolean(string="Is CCPP Done", compute="_compute_ccpp_done")
+    is_delay = fields.Boolean(string="Is Delay", default="False")
+    is_approve_strategy = fields.Boolean(string="Is Approve Strategy", default=False)
+    
+    @api.depends('state')
+    def _compute_state_color(self):
+        for obj in self:         
+            obj.state_color = STATE_COLOR[obj.state]
+    
+    @api.depends("tasks_solution.child_ids.state")
+    def _compute_ccpp_done(self):
+        for obj in self:
+            is_done = True
+            print("compute")
+            print(obj.tasks_solution)
+            for solution_id in obj.tasks_solution.filtered(lambda o:o.state not in ['done','cancel']):
+                print(solution_id.name)
+                for strategy_id in solution_id.child_ids:
+                    print(strategy_id.name)
+                    if strategy_id.state not in ['done','cancel']:
+                        is_done = False
+            obj.is_ccpp_done = is_done
     
     @api.depends("tasks_solution.start_date")
-    def _compute_period_deadline(self):
+    def _compute_deadline(self):
+        for obj in self:
+            if len(obj.tasks_solution) < 2:
+                for line in obj.tasks_solution:
+                    if line.state not in ['cancel']:
+                        obj.show_period = line.show_period
+                        obj.deadline_date = line.deadline_date
+                        
+    
+    #@api.depends("tasks_solution.start_date")
+    def get_period_deadline(self):
         for obj in self:
             for line in obj.tasks_solution:
-                if line.state not in ['cancel','delay']:
+                if line.state not in ['cancel']:
                     obj.show_period = line.show_period
                     obj.deadline_date = line.deadline_date
             
@@ -142,6 +192,7 @@ class Project(models.Model):
                 priority_id = self.env['ccpp.priority'].search([('point','=',4)])
             obj.priority_id = priority_id.id
             obj.period_id = priority_id.period_id.id
+            obj.priority_select = str(priority_id.point) if priority_id else 'to_define'
                 
     #@api.onchange("is_critical", "is_not_critical", "is_short_time", "is_long_time")       
     #def onchange_unique(self):
@@ -152,29 +203,39 @@ class Project(models.Model):
     
     @api.onchange("is_critical") 
     def onchange_is_critical(self):
-        if self.is_critical:
-            self.is_not_critical = False
+        for obj in self:
+            if obj.is_critical:
+                obj.is_not_critical = False
             
     @api.onchange("is_not_critical") 
     def onchange_is_not_critical(self):
-        if self.is_not_critical:
-            self.is_critical = False
-            self.is_income_comp = False
-            self.is_effectiveness_comp = False
-            self.is_repulation_comp = False
-            self.is_competitive_comp = False
-            self.is_long_time = False
-            self.is_short_time = False
+        for obj in self:
+            if obj.is_not_critical:
+                obj.is_critical = False
+                obj.is_income_comp = False
+                obj.is_effectiveness_comp = False
+                obj.is_repulation_comp = False
+                obj.is_competitive_comp = False
+                obj.is_long_time = False
+                obj.is_short_time = False
+                #obj.write({'is_income_comp': False})
+                #obj.write({'is_effectiveness_comp': False})
+                #obj.write({'is_repulation_comp': False})
+                #obj.write({'is_competitive_comp': False})
+                #obj.write({'is_long_time': False})
+                #obj.write({'is_short_time': False})
 
     @api.onchange("is_short_time") 
     def onchange_is_short_time(self):
-        if self.is_short_time:
-            self.is_long_time = False
+        for obj in self:
+            if obj.is_short_time:
+                obj.is_long_time = False
             
     @api.onchange("is_long_time") 
     def onchange_is_long_time(self):
-        if self.is_long_time:
-            self.is_short_time = False    
+        for obj in self:
+            if obj.is_long_time:
+                obj.is_short_time = False    
     
     @api.depends('tasks')
     def domain_task_ids(self):
@@ -310,48 +371,119 @@ class Project(models.Model):
     
     def button_send_approve(self):
         for obj in self:
+            obj.check_information()
             obj.state = 'waiting_approve'
-        
+            for solution_id in obj.tasks_solution:
+                if solution_id.state == 'open':
+                    solution_id.state = 'waiting_approve'
+                for strategy_id in solution_id.child_ids:
+                    if strategy_id.state == 'open':
+                        strategy_id.state = 'waiting_approve'
+    
+    def check_information(self):
+        for obj in self:
+            if not obj.priority_id:
+                raise UserError("Please set impact to company")
+            if obj.priority_id.point > 2:
+                raise UserError("Please send only CCPP 1st and 2nd priority")
+            if not obj.partner_id:
+                raise UserError("Please select Customer")
+            if not obj.partner_contact_id:
+                raise UserError("Please select Host of CCPP")
+            for solution_id in obj.tasks_solution:
+                if not solution_id.start_date:
+                    raise UserError("Please select solution start date")
+            if not obj.tasks_solution:
+                raise UserError("Please set Solutions")
+            else:
+                for solution_id in obj.tasks_solution:
+                    if not solution_id.child_ids:
+                        raise UserError("Please set Strategy")
+                                               
     def button_approve(self):
         for obj in self:
             obj.state = 'process'
-        
+            for solution_id in obj.tasks_solution:
+                if solution_id.state == 'waiting_approve':
+                    solution_id.state = 'process'
+                for strategy_id in solution_id.child_ids:
+                    if strategy_id.state == 'waiting_approve':
+                        strategy_id.state = 'process'
+            obj.get_period_deadline()
+            
     def button_reject(self):
         for obj in self:
             obj.state = 'open'
+            for solution_id in obj.tasks_solution:
+                if solution_id.state == 'waiting_approve':
+                    solution_id.state = 'open'
+                for strategy_id in solution_id.child_ids:
+                    if strategy_id.state == 'waiting_approve':
+                        strategy_id.state = 'open'
         
     def button_done(self):
         for obj in self:
             obj.state = 'done'
+            for solution_id in obj.tasks_solution:
+                if solution_id.state == 'process':
+                    solution_id.state = 'done'
         
     def button_cancel(self):
         for obj in self:
             obj.state = 'cancel'
             for solution_id in obj.tasks_solution:
-                if solution_id.state != 'done':
+                if solution_id.state not in ['done','waiting_approve']:
                     solution_id.state = 'cancel'
+                if solution_id.state == 'waiting_approve':
+                    raise UserError("Please check solution %s is state in Waiting Approve"%solution_id.name)
                 for strategy_id in solution_id.child_ids:
-                    if strategy_id.state != 'done':
+                    if strategy_id.state not in ['done','waiting_approve']:
                         strategy_id.state = 'cancel'
+                    if strategy_id.state == 'waiting_approve':
+                        raise UserError("Please check strategy %s is state in Waiting Approve"%strategy_id.name)
         
     def button_to_open(self):
         for obj in self:
             obj.state = 'open'
-            for solution_id in obj.tasks_solution:
-                solution_id.state = 'open'
-                for strategy_id in solution_id.child_ids:
-                    strategy_id.state = 'open'
+            #for solution_id in obj.tasks_solution:
+            #    solution_id.state = 'open'
+            #    for strategy_id in solution_id.child_ids:
+            #        strategy_id.state = 'open'
             
     def check_ccpp_delayed(self):
         date_today = datetime.now().strftime("%Y-%m-%d")
         ccpp_ids = self.env['project.project'].search([('state','=','process'),('deadline_date','<',date_today)])
-        ccpp_ids.write({'state': 'delay'})
+        ccpp_ids.write({'is_delay': True})
+        for ccpp_id in ccpp_ids:
+            for solution_id in ccpp_id.tasks_solution:
+                if solution_id.state not in ['done','cancel']:
+                    #solution_id.state = 'delay'
+                    solution_id.is_delay = True
+                for strategy_id in solution_id.child_ids:
+                    if strategy_id.state not in ['done','cancel']:
+                        #strategy_id.state = 'delay'
+                        strategy_id.is_delay = True
+                
        
     # overide change color 
     @api.depends('last_update_status')
     def _compute_last_update_color(self):
         for project in self:
             project.last_update_color = STATUS_COLOR[project.last_update_status]
+    
+    def action_open_solution(self):
+        solution_ids = self.env['project.task'].search([("project_id","=",self.id),("is_solution","=",True)])
+        return {
+            'name': self.name,
+            'view_mode': 'tree,form',
+            'res_model': 'project.task',
+            'domain': [('id','in',solution_ids.ids)],
+            'type': 'ir.actions.act_window',
+            'context': self._context,
+            'views' : [(self.env.ref('ccpp.solution_tree').id, 'tree')]
+        }   
+        
+    
         
 class Task(models.Model):
     _inherit = "project.task" 
@@ -383,7 +515,7 @@ class Task(models.Model):
         ('process', 'On Process'),
         ('done', 'Done'),
         ('cancel', 'Cancelled'),
-        ('delay', 'delayed'),
+        #('delay', 'Delayed'),
     ], default='open', index=True, string="State", track_visibility="onchange", tracking=True)
     last_update_status_strategy = fields.Selection(selection=[
         ('on_track', 'On Track'),
@@ -408,7 +540,24 @@ class Task(models.Model):
     deadline_date = fields.Date(string="Deadline", compute="_compute_deadline", store=True)
     priority_line_id = fields.Date(string="Priority Line") # stamp when approve :fix me
     show_period = fields.Char(string="Period", compute="_compute_deadline", store=True)
+    is_delay = fields.Boolean(string="Is Delay")
+    is_ccpp_on_process = fields.Boolean(string="Is CCPP on process", compute="_is_on_process")
+    is_solution_on_approve = fields.Boolean(string="Is Solution on process", compute="_is_on_process")
     
+    def _is_on_process(self):
+        for obj in self:
+            is_ccpp_on_process = False
+            is_solution_on_approve = False
+            if obj.is_solution:
+                if obj.project_id.state == 'process':
+                    is_ccpp_on_process = True
+            if obj.is_strategy:
+                if obj.parent_id.project_id.state == 'process':
+                    is_ccpp_on_process = True
+                if obj.parent_id.state in ['open','waiting_approve']:
+                    is_solution_on_approve = True
+            obj.is_ccpp_on_process = is_ccpp_on_process
+            obj.is_solution_on_approve = is_solution_on_approve
     
     @api.depends('project_id.priority_id','start_date')
     def _compute_deadline(self):
@@ -741,38 +890,79 @@ class Task(models.Model):
     def button_done(self):
         for obj in self:
             obj.state = 'done'
-            obj.update_solution_done()
+            #obj.update_solution_done()
+    
+    def button_send_approve_strategy(self):
+        for obj in self:
+            obj.state = 'waiting_approve'
+            #obj.parent_id.project_id.is_approve_strategy = True
+            
+    def button_send_approve_solution(self):
+        for obj in self:
+            if not obj.start_date:
+                raise UserError("Please select solution start date")
+            if not obj.child_ids:
+                raise UserError("Please set Strategy")
+            obj.state = 'waiting_approve'
+            for strategy_id in obj.child_ids:
+                if strategy_id.state == 'open':
+                    strategy_id.state = 'waiting_approve'
         
+    def button_approve_strategy(self):
+        for obj in self:
+            #obj.is_approve_strategy = False
+            obj.state = 'process'
+            
+    def button_approve_solution(self):
+        for obj in self:
+            obj.project_id.get_period_deadline()
+            obj.state = 'process'
+            for strategy_id in obj.child_ids:
+                if strategy_id.state == 'waiting_approve':
+                    strategy_id.state = 'process'
+    
+    def button_reject_strategy(self):
+        for obj in self:
+            obj.state = 'open'
+            
+    def button_reject_solution(self):
+        for obj in self:
+            obj.state = 'open'
+            for strategy_id in obj.child_ids:
+                strategy_id.state = 'open'
+    
     def button_cancel(self):
         for obj in self:
-            obj.state = 'cancel'
             if obj.is_solution:
+                obj.state = 'cancel'
                 for strategy_id in obj.child_ids:
-                    if strategy_id.state != 'done':
+                    if strategy_id.state not in ['waiting_approve','done']:
                         strategy_id.state = 'cancel'
+                    if strategy_id.state == 'waiting_approve':
+                        raise UserError("Please check strategy %s is state in Waiting Approve"%strategy_id.name)
             if obj.is_strategy:
-                obj.update_solution_done()
+                obj.state = 'cancel'
                    
-    def button_to_process(self):
-        for obj in self:
-            obj.state = 'process'
-            obj.update_solution_process()
+    #def button_to_process(self):
+        #for obj in self:
+            #obj.state = 'process'
+            #obj.update_solution_process()
             
-    def update_solution_process(self):
-        for obj in self:
-            obj.parent_id.state = 'process'
+    #def update_solution_process(self):
+        #for obj in self:
+            #obj.parent_id.state = 'process'
             #if obj.project_id.state in ['done','cancel'] and obj.project_id.state != 'delay':
             #    obj.project_id.state = 'process'
                
-    def update_solution_done(self):
-        for obj in self:
-            if obj.is_strategy:
-                is_done = True
-                for strategy_id in obj.parent_id.child_ids:
-                    if strategy_id.state not in ['done','cancel']:
-                        is_done = False
-                if is_done:
-                    obj.parent_id.state = 'done'
+    #def update_solution_done(self):
+    #    for obj in self:
+    #        if obj.is_strategy:
+    #            is_done = True
+    #            for strategy_id in obj.parent_id.child_ids:
+    #                if strategy_id.state not in ['done','cancel']:
+    #                    is_done = False
+    #            if is_done:
+    #                obj.parent_id.state = 'done'
                     #obj.update_ccpp_done()
                         
     #def update_ccpp_done(self):
@@ -784,18 +974,31 @@ class Task(models.Model):
     #        if is_done:
     #            obj.project_id.state = 'done'
 
+    def action_open_strategy(self):
+        strategy_ids = self.env['project.task'].search([("parent_id","=",self.id),("is_strategy","=",True)])
+        return {
+            'name': self.name,
+            'view_mode': 'tree,form',
+            'res_model': 'project.task',
+            'domain': [('id','in',strategy_ids.ids)],
+            'type': 'ir.actions.act_window',
+            'context': self._context,
+            'views' : [(self.env.ref('ccpp.strategy_tree').id, 'tree')]
+        }   
+
 class ProjectUpdate(models.Model):
     _inherit = "project.update"
     _order = 'date desc, id desc'
     
     strategy_id = fields.Many2one("project.task", string="Strategy")
-    solution_id = fields.Many2one("project.task", string="Solution", related="strategy_id.parent_id")
+    solution_id = fields.Many2one("project.task", string="Solution", related="strategy_id.parent_id", store=True)
     project_id = fields.Many2one(required=False, default=False, related="strategy_id.project_id", store=True)
     customer_id = fields.Many2one("res.partner", string="Customer", required=True)
     location = fields.Char("Location")
     code = fields.Char("Situation No.")
     date = fields.Datetime(default=lambda self: fields.datetime.now(), tracking=True)
     next_action = fields.Char(string="Next Action")
+    task_id = fields.Many2one("account.analytic.line", string="Tasks")
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -850,12 +1053,21 @@ class ProjectUpdate(models.Model):
         print("Y"*100)
         if 'strategy_id' in fields and not result.get('strategy_id'):
             print("Y"*100)
-            result['strategy_id'] = self.env.context.get('active_id')
             strategy = self.env.context.get('active_id')
+            result['strategy_id'] = strategy
             strategy_id = self.env['project.task'].browse(strategy)
-            result['solution_id'] = strategy_id.parent_id.id
             result['project_id'] = strategy_id.project_id.id
+            result['solution_id'] = strategy_id.parent_id.id
             result['customer_id'] = strategy_id.project_id.partner_id.id
+        if 'task_id' in fields and self.env.context.get("update_task"):
+            task = self.env.context.get('active_id')
+            result['task_id'] = task
+            task_id = self.env['account.analytic.line'].browse(task)
+            result['project_id'] = task_id.project_id.id
+            result['solution_id'] = task_id.task_id.id
+            result['strategy_id'] = task_id.task_strategy_id.id
+            result['customer_id'] = task_id.customer_id.id
+
         return result
     
     # overide change color

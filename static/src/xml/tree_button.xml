@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<templates id="ccpp.buttons" name="ccpp.buttons" xml:space="preserve">
+<!--<templates id="ccpp.buttons" name="ccpp.buttons" xml:space="preserve">
    <t t-name="ccpp.buttons" t-extend="ListView.buttons" owl="1" >
        <t t-jquery="button.o_list_button_add" t-operation="after">
            <button type="button" class="btn btn-primary open_wizard_action">
@@ -7,4 +7,39 @@
            </button>
        </t>
    </t>
+</templates>-->
+<templates>
+    <t t-extend="ListView.buttons" t-name="max.buttons">
+        <t t-jquery="button.o_list_button_add" t-operation="after">
+            <button type="button" t-att-class="'d-none d-md-block btn' + (!widget.isMobile ? ' btn-secondary' : '') + ' o_button_upload_expense'">
+                Scan
+            </button>
+        </t>
+    </t>
 </templates>
+<template xml:space="preserve">
+
+        <t t-extend="ListView.buttons">
+
+            <t  t-jquery="button.o_list_button_add" t-operation="after">
+
+                <button t-if="widget.modelName == 'your.model.name'" type="button" class="btn btn-primary btn-sm oe_filter_button" accesskey="f">
+
+                    Advanced Filters
+
+                </button> 
+
+            </t>
+
+        </t>
+
+</template>
+<!--<templates id="template" xml:space="preserve">
+    <t t-extend="ListView.buttons">
+        <t t-jquery="div.o_list_buttons" t-operation="append">
+            <button type="object" class="btn  btn-class">
+                Open Create
+            </button>
+        </t>
+    </t>
+</templates>-->

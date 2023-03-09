@@ -14,7 +14,7 @@
                     <field name="company_id"/>
                      <separator/>
                     <searchpanel view_types="tree,calendar">
-                        <field name="task_search" expand="1" hierarchize="1" string="Projects/Tasks" icon="fa-folder-open"/>
+                        <field name="task_search" groupby="priority_id" expand="1" hierarchize="1" string="CCPP" icon="fa-folder-open"/>
                         <field name="project_id" expand="1" hierarchize="1" string="Project" icon="fa-folder-open"/>
                     </searchpanel>
                     <group expand="0" string="Group By">
@@ -32,16 +32,15 @@
                 <!--<tree js_class="rocker_tree" string="Timesheets" editable="top" create="true" delete="true" edit="true">-->
                 <tree js_class="rocker_tree" string="Timesheets" create="true" delete="true" edit="true">
                     <field name="name" string="Task" />
+                    <field name="start" required="1" string="From"/>
+                    <field name="stop" required="1" string="To"/>
                     <field name="customer_id" domain="[('is_customer','=',True)]" string="Customer"/>
                     <field name="project_id" string="CCPP"/>
                     <field name="task_id" string="Solution"/>
                     <field name="task_strategy_id" string="Strategy"/>    
-                    
                     <field name="display_name" readonly="1" invisible="1"/>
                     <field name="date" required="1" readonly="1" invisible="1" />
                     <field name="unit_amount" widget="float_time" type="measure" invisible="1"/>
-                    <field name="start" required="1" string="From"/>
-                    <field name="stop" required="1" string="To"/>
                     <field name="duration" required="1" widget="float_time" type="measure" invisible="1"/>
                     <field name="employee_id" readonly="1" optional="show" />
                     <field name="department_id" readonly="1" optional="hide" invisible="1"/>
@@ -49,6 +48,47 @@
                     <field name="user_id"  invisible="1" required="1" readonly="1"/>
                     <field name="allday" invisible="1" />
                 </tree>
+            </field>
+        </record>
+
+        <record id="ccpp_account_analytic_line_form" model="ir.ui.view">
+            <field name="name">Tasks Form</field>
+            <field name="model">account.analytic.line</field>
+            <field name="inherit_id" ref="analytic.view_account_analytic_line_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//form[1]" position="replace">
+                    <form>
+                        <header>
+                            <button name="update_situation" string="Update Situation" type="object" class="btn-primary" states="open"/>
+                            <button name="button_done" string="Done" type="object" class="btn-primary" states="open"/>
+                            <button name="button_to_open" string="To Open" type="object" class="btn-primary" states="done"/>
+                            <field name="state" widget="statusbar"/>
+                        </header>
+                        <sheet>
+                            <div class="oe_button_box" name="button_box">
+                                <button class="oe_stat_button" name="open_current_situation" type="object" icon="fa-tasks">
+                                    <div class="o_field_widget o_stat_info">
+                                        <span class="o_stat_text">Current Situation</span>
+                                    </div>
+                                </button>
+                            </div>
+                            <group>
+                                <group>
+                                    <field name="name" string="Task" readonly="True"/>
+                                    <field name="start" required="1" string="From" readonly="True"/>
+                                    <field name="stop" required="1" string="To" readonly="True"/>
+                                    <field name="employee_id" readonly="True"/>
+                                </group>
+                                <group>
+                                    <field name="customer_id" domain="[('is_customer','=',True)]" string="Customer" readonly="True"/>
+                                    <field name="project_id" string="CCPP" readonly="True"/>
+                                    <field name="task_id" string="Solution" readonly="True"/>
+                                    <field name="task_strategy_id" string="Strategy" readonly="True"/>
+                                </group>
+                            </group>  
+                        </sheet>
+                    </form>
+                </xpath>
             </field>
         </record>
 
@@ -63,6 +103,7 @@
         <record id="rocker_project_tree" model="ir.ui.view">
             <field name="name">Edit Project types</field>
             <field name="model">project.project</field>
+            <field name="priority" eval="100"/>
             <field name="arch" type="xml">
                 <tree editable="top" create="false" delete="false" import="false" string="Projects">
                     <button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>
@@ -115,7 +156,7 @@
         <record id="rocker_timesheet_form" model="ir.ui.view">
             <field name="name">rocker_timesheet_form</field>
             <field name="model">account.analytic.line</field>
-            <field name="priority" eval="3"/>
+            <field name="priority" eval="1"/>
             <field name="arch" type="xml">
                 <form string="Tasks">
                     <sheet>
@@ -133,6 +174,7 @@
                             <page name="page_details" string="Details">
                                 <group>
                                     <group>
+                                        <field name="id" invisible="True"/>
                                         <field name="customer_id" string="Customer"/>
                                         <field name="start" string="From" invisible="0" readonly="0" required="1" />
                                         <field name="stop" string="To" invisible="0" readonly="0" required="1" />
@@ -165,6 +207,9 @@
                                 </group>
                             </page>
                         </notebook>
+                        <!--<footer>
+                            <button name="update_situation" string="Update Situation" type="object" class="btn-primary" context="{'task_id': id}"/>
+                        </footer>-->
                     </sheet>
                 </form>
             </field>
@@ -175,13 +220,14 @@
             <field name="model">account.analytic.line</field>
             <field name="priority" eval="1"/>
             <field name="arch" type="xml">
-                <calendar js_class="rocker_calendar" string="Timesheets"
+                <calendar js_class="rocker_calendar" string="Tasks"
                           form_view_id="%(ccpp.rocker_timesheet_form)d"
                           date_start="start" date_stop="stop" date_delay="duration"
                           all_day="allday" color="rocker_type"
                           mode="week"
                           quick_add="false"
-                          event_open_popup="true"
+                          
+                          event_open_popup = "%(ccpp.rocker_timesheet_form)s"
                           show_unusual_days="true"
                           hide_time="false">
                     <field name="display_name"/>
@@ -189,10 +235,12 @@
                     <field name="project_id" required="1" string="CCPP"/>
                     <field name="task_id" required="1" string="Solution"/>
                     <field name="task_strategy_id" required="1" string="Strategy"/>
+                    
                     <field name="unit_amount" required="1" invisible="1"/>
                     <field name="rocker_type" filters="1" invisible="1"/>
 <!--                    <field name="company_id" required="1" readonly="1" optional="show" groups="base.group_multi_company"/>-->
                     <field name="company_id" required="1" readonly="1"/>
+                    <!--<button name="update_situation" string="Update Situation" type="object" class="btn-primary"/>-->
                 </calendar>
 
              </field>
@@ -344,7 +392,7 @@
         </record>
 
         <record id="act_rocker_timesheet_calendar" model="ir.actions.act_window">
-            <field name="name">Timesheets</field>
+            <field name="name">Tasks</field>
             <field name="res_model">account.analytic.line</field>
             <field name="view_mode">calendar,tree,form</field>
             <field name="view_id" ref="rocker_timesheet_calendar"/>

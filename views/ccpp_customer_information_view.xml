@@ -6,7 +6,7 @@
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">ccpp.customer.information</field>
         <field name="view_mode">tree,form</field>
-        <field name="context">{'search_default_groupby_year': 1, 'orderby': 'date_from DESC'}</field>
+        <field name="context">{'search_default_groupby_year': 1}</field>
     </record>
 
     <record id="ccpp_customer_information_search" model="ir.ui.view">
@@ -34,8 +34,9 @@
         <field name="model">ccpp.customer.information</field>
         <field name="arch" type="xml">
             <tree string="Customer Information" multi_edit="1" sample="1" class="customer_information_tree">
-                <field name="date_from"/>
-                <field name="date_to"/>
+                <field name="year_text" string="Year"/>
+                <field name="date_from" string="Create Date"/>
+                <!--<field name="date_to"/>-->
                 <field name="customer_id"/>
                 <field name="province_id" invisible="True"/>
                 <field name="sale_area_id" invisible="True"/>
@@ -176,17 +177,26 @@
                         <group>
                             <field name="hospital_size"/>
                             <field name="customer_category_id"/>
-                            <field name="budget"/>
+                            <label for="customer_budget_id"/>
+                            <div class="o_row" name="div_km_home_work">
+                                  
+                                  <field name="customer_budget_id" class="o_customer_information_narrow_field"/>
+                                  <field name="is_other_budget"/>
+                                  <label for="is_other_budget" string="Other"/>
+                                
+                              </div>
+                            <field name="budget" attrs="{'invisible':[('is_other_budget','=',False)]}"/>
                             <field name="active" widget="boolean_toggle"/>
                         </group>
                     </group>
+                    
                     <h2 style="color:gray; font-size:1.2em;"> Customer Ranking </h2>
                     <div style="border-top: 2px solid #e6e6e6;padding: 0px;margin-top: 10px; margin-bottom: 10px"/>
 
                     <div class="o_row" style="padding-top:5px">
                         <div>
                             <label class="o_label" for="potential_ranking" string="Ranking by Potential in Area" style="width:50%"/>
-                            <field name="potential_ranking" style="width:50%; padding-left:23px;"/>
+                            <field name="potential_ranking" style="width:50%; padding-left:26px;"/>
                         </div>
                         <div>  
                         </div>
@@ -194,7 +204,7 @@
                     <div class="o_row" style="padding-top:5px">
                         <div>
                             <label class="o_label" for="actual_sale_ranking" string="Ranking by Winmed Actual Sales" style="width:50%"/>
-                            <field name="actual_sale_ranking" style="width:50%; padding-left:10px;"/>
+                            <field name="actual_sale_ranking" style="width:50%; padding-left:11px;"/>
                         </div>
                         <div>
                             <label class="o_label" for="total_sale_revenue" string="Total Sale Revenue Last Year(THB)" style="width:50%"/>
@@ -204,7 +214,7 @@
                     <div class="o_row" style="padding-top:5px">
                         <div>
                             <label class="o_label" for="competitor_ranking" string="Ranking by Competitor's Sales" style="width:35%"/>
-                            <field name="competitor_ranking" style="width:65%; padding-left:20px;"/>
+                            <field name="competitor_ranking" style="width:65%; padding-left:18px;"/>
                         </div>  
                         <div>
                         </div>

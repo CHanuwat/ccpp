@@ -13,6 +13,7 @@
                 'project',
                 'hr',
                 'stock',
+                'board',
                 ],
     'data': [
         "data/ir_sequence.xml",
@@ -32,6 +33,8 @@
         "views/ccpp_dashboard_view.xml",
         "views/ccpp_customer_information_view.xml",
         "views/rocker_timesheet_views.xml",
+        "views/ccpp_customer_budget_view.xml",
+        "views/ccpp_approve_dashboard.xml",
         ],
     'qweb': [ 
         ],
@@ -50,6 +53,8 @@
             'ccpp/static/src/js/**/*',
             'ccpp/static/src/scss/**/*',
             'ccpp/static/src/xml/**/*',
+            'ccpp/static/src/views/*.xml',
+            'ccpp/static/src/views/*.js',
             #('remove','rocker_timesheet/static/src/scss/rocker_calendar_button.scss'),
             #('remove','rocker_timesheet/static/src/js/rocker_calendar_button.js'),
             #('remove','rocker_timesheet/static/src/scss/rocker_roller_button.scss'),
