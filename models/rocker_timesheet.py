@@ -65,6 +65,11 @@ class RockerTimesheet(models.Model):
         return expression.AND([domain,
                                ['|', ('privacy_visibility', '!=', 'followers'), ('message_partner_ids', 'in', [self.env.user.partner_id.id])]
                                ])
+        
+    def _domain_project_test_id(self):
+        ccpp_ids = self.env['project.project'].search([('user_id','=',self.env.user.id)])
+        domain = [('id', 'in', ccpp_ids.ids)]
+        return domain
 
     def _domain_project_id_search(self):
         domain = [('company_id', '=', self.env.company.id)]
@@ -330,6 +335,13 @@ class RockerTimesheet(models.Model):
                 return search_task.project_id.partner_id
         return None
 
+    @api.model
+    def _domain_customer(self):
+        customer_ids = self.env['ccpp.customer.information'].search([('user_id','=',self.env.user.id)]).mapped('customer_id')
+        print('cus ids --->',customer_ids)
+        domain = [('id', 'in', customer_ids.ids)]   
+        return domain
+
     # existing fields
     company_id = fields.Many2one('res.company', "Company", default=lambda self: self.env.company, store=True,
                                  required=True)
@@ -345,9 +357,12 @@ class RockerTimesheet(models.Model):
     #project_id = fields.Many2one(
     #    'project.project', 'Project', compute='_compute_project_id', store=True, readonly=False,
     #    domain=_domain_project_id)
+    
     project_id = fields.Many2one(
+        'project.project', string='CCPP', default=_default_project, domain=_domain_project_id, store=True, readonly=False)
+    project_test_id = fields.Many2one(
         'project.project', string='CCPP', default=_default_project, store=True, readonly=False,
-        domain=_domain_project_id)
+        domain=_domain_project_test_id)
     # name = fields.Char('Comments', required=False, default=_default_name)
     name = fields.Char(required=False, default=_default_name)
 
@@ -362,6 +377,8 @@ class RockerTimesheet(models.Model):
         related='project_id.rocker_type', compute='_compute_rocker_type')
     task_search = fields.Many2one(
         'rocker.task', 'Project', store=True, readonly=False, required=False)
+    customer_potential = fields.Many2one(
+        'customer.potential', 'Customer Potential', store=True, readonly=False, required=False)
     rocker_search_type = fields.Selection([
         ('all', 'All'),
         ('mine', 'My Tasks'),
@@ -394,11 +411,19 @@ class RockerTimesheet(models.Model):
     department_id = fields.Many2one('hr.department', "Department", compute='_compute_department_id', store=True,
                                     compute_sudo=True)
     unit_amount = fields.Float('Actual Work', default=_default_work, required=True, help="Work amount in hours")
-    customer_id = fields.Many2one("res.partner", string="Customer", default=_default_customer)
+    customer_id = fields.Many2one("res.partner", string="Customer", domain=_domain_customer)
+    customer_potential_id = fields.Many2one("res.partner", string="Customer Potential")
     state = fields.Selection(selection=[
         ('open', 'Open'),
         ('done', 'Done'),
     ], default='open', string="Status") 
+    
+    def _compute_customer(self):
+        customer_ids = self.env['ccpp.customer.information'].search([('user_id','=',self.env.user.id)]).mapped('customer_id')
+        print('cus ids --->',customer_ids)
+        domain = [('id', 'in', customer_ids.ids)]
+        return customer_ids
+    
     
     # 2022
 
@@ -625,13 +650,22 @@ class RockerTimesheet(models.Model):
                 clause[0] = 'task_search'
                 clause[1] = '<>'
                 clause[2] = ' '
+            if clause[0] == 'customer_potential':
+                # selected_id = int(clause[2])
+                if int(clause[2]) > 0:  # id > 0 when task, project row has < 1
+                    self._set_search_id(int(clause[2]))
+                else:
+                    self._set_search_id(0)
+                clause[0] = 'customer_potential'
+                clause[1] = '<>'
+                clause[2] = ' '
             i += 1
         records = super(RockerTimesheet, self).search(args, limit=limit)
         return records
 
     @api.model
     def search_panel_select_range(self, field_name, **kwargs):
-        if field_name != 'task_search':
+        if field_name not in ['task_search','customer_potential']:
             # _logger.debug('Rocker search panel NOT used')
             return super(RockerTimesheet, self).search_panel_select_range(field_name, **kwargs)
         else:
@@ -644,7 +678,7 @@ class RockerTimesheet(models.Model):
             prev_company = self.env.company.id
             _company_changed = True
             self._domain_set_search_filter('all')
-        if field_name == 'task_search':
+        if field_name in ['task_search','customer_potential']:
             if self._domain_get_search_filter() == "":
                 self._domain_set_search_filter('all')
             search_domain = self._domain_get_search_domain(self._domain_get_search_filter())

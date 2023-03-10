@@ -17,6 +17,7 @@ access_rocker_company_defaults,rocker.company.defaults,model_rocker_company_defa
 access_rocker_company_defaults_user,rocker.company.defaults.user,model_rocker_company_defaults,base.group_user,1,1,1,1
 access_ccpp_purchase_history_line,access_ccpp_purchase_history_line,model_ccpp_purchase_history_line,base.group_user,1,1,1,1
 access_ccpp_customer_budget,access_ccpp_customer_budget,model_ccpp_customer_budget,base.group_user,1,1,1,1
+access_customer_potential,access_customer_potential,model_customer_potential,base.group_user,1,1,1,1
 
 
 

@@ -232,4 +232,10 @@ class CCPPSaleTarget(models.Model):
         for obj in self:
             obj.status_color = STATUS_COLOR[obj.status]
             
+    @api.model
+    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
+        orderby = "year_selection desc"
+        res = super(CCPPSaleTarget, self).read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+        return res
+            
     

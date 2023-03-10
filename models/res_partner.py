@@ -64,4 +64,4 @@ class PartnerPosition(models.Model):
     name = fields.Char("Position Name")
     parent_partner_id = fields.Many2one("res.partner", string="Position Of", domain=[('is_company','=',True)])
     partner_lines = fields.One2many('res.partner', 'job_position_id', string='Partner')
-    active = fields.Boolean("Acrive", default=True)
+    active = fields.Boolean("Active", default=True)

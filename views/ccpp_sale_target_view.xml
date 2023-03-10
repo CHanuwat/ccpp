@@ -4,8 +4,30 @@
     <record id="ccpp_sale_target_action" model="ir.actions.act_window">
         <field name="name">Sales Target</field>
         <field name="type">ir.actions.act_window</field>
+        <field name="context">{'search_default_groupby_year': 1}</field>
         <field name="res_model">ccpp.sale.target</field>
         <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="ccpp_sale_target_search" model="ir.ui.view">
+        <field name="name">Customer Sale Target Search</field>
+        <field name="model">ccpp.sale.target</field>
+        <field name="arch" type="xml">
+            <search string="Search Sale Target">
+                <field name="year_selection" string="Year"/>
+                <field name="period" string="Period"/>
+                <separator/>
+                <filter string="Over Target" name="over_target" domain="[('status', '=', 'over')]"/>
+                <filter string="Similar Target" name="similar_target" domain="[('status', '=', 'similar')]"/>
+                <filter string="Less than Target" name="less_target" domain="[('status', '=', 'less')]"/>
+                <group expand="1" string="Group By">
+                    <filter string="Year" name="groupby_year" context="{'group_by': 'year_selection'}"/>
+                    <!--<filter string="Order Year" name="order_year" context="{'order_by': 'year_text desc'}"/>-->
+                    <filter string="Period" name="groupby_sales_area" context="{'group_by': 'period'}"/>
+                    <filter string="Status" name="groupby_status" context="{'group_by': 'status'}"/>
+                </group>
+            </search>
+        </field>
     </record>
 
     <record id="ccpp_sale_target_view_tree" model="ir.ui.view">

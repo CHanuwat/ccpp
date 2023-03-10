@@ -30,11 +30,11 @@ STATUS_COLOR = {
 
 STATE_COLOR = {
     'open': 0,  # green / success
+    'reject': 24,
     'waiting_approve': 8,
     'process': 3,  # orangeq
     'done': 20,  # red / danger
     'cancel': 23,  # light blue
-    'delay': 24,
     '1': 9,
     '2': 2,
     '3': 3,
@@ -104,6 +104,7 @@ class Project(models.Model):
     state = fields.Selection([
         ('open', 'Open'),
         ('waiting_approve', 'Waiting Approve'),
+        ('reject', 'Rejected'),
         ('process', 'On Process'),
         ('done', 'Done'),
         ('cancel', 'Cancelled'),
@@ -124,8 +125,8 @@ class Project(models.Model):
     def _compute_ccpp_done(self):
         for obj in self:
             is_done = True
-            print("compute")
-            print(obj.tasks_solution)
+            if len(obj.tasks_solution.filtered(lambda o:o.state == 'cancel')) == len(obj.tasks_solution):
+                is_done = False
             for solution_id in obj.tasks_solution.filtered(lambda o:o.state not in ['done','cancel']):
                 print(solution_id.name)
                 for strategy_id in solution_id.child_ids:
@@ -269,7 +270,7 @@ class Project(models.Model):
         for vals in vals_list:
             user_id = self.env.user
             employee_id = self.env['hr.employee'].search([('user_id','=',user_id.id)],limit=1)
-            if not employee_id:
+            if not employee_id or not employee_id.department_id:
                 raise UserError("Not recognize the department. Please Configue User to Employee to get the department")
             sale_team_ids = self.env['crm.team'].search([])
             sale_team_id = self.env['crm.team']
@@ -285,6 +286,13 @@ class Project(models.Model):
                 raise UserError("กรุณาเลือกผลกระทบต่อลูกค้าอย่างน้อย 1 ข้อ")
             if not vals.get('is_critical') and not vals.get('is_not_critical'):
                 raise UserError("กรุณาเลือกความเร่งด่วนของลูกค้าที่ต้องการความช่วยเหลือ")
+            print(self._context)
+            if self._context.get('create_from_tree') and not self._context.get('default_allow_billable'):
+                sequence_date = datetime.now().strftime("%Y-%m-%d")
+                sequence_code = 'ccpp.'+'cp.'+employee_id.department_id.code
+                code = self.env['ir.sequence'].next_by_code(sequence_code,sequence_date=sequence_date)
+                vals['code'] = code
+            
         res = super(Project, self).create(vals_list)
         #if not res.is_income_cus and not res.is_effectiveness_cus and not res.is_repulation_cus and not res.is_competitive_cus:
         #    raise UserError("กรุณาเลือกผลกระทบต่อลูกค้าอย่างน้อย 1 ข้อ")
@@ -413,13 +421,13 @@ class Project(models.Model):
             
     def button_reject(self):
         for obj in self:
-            obj.state = 'open'
+            obj.state = 'reject'
             for solution_id in obj.tasks_solution:
                 if solution_id.state == 'waiting_approve':
-                    solution_id.state = 'open'
+                    solution_id.state = 'reject'
                 for strategy_id in solution_id.child_ids:
                     if strategy_id.state == 'waiting_approve':
-                        strategy_id.state = 'open'
+                        strategy_id.state = 'reject'
         
     def button_done(self):
         for obj in self:
@@ -445,10 +453,12 @@ class Project(models.Model):
     def button_to_open(self):
         for obj in self:
             obj.state = 'open'
-            #for solution_id in obj.tasks_solution:
-            #    solution_id.state = 'open'
-            #    for strategy_id in solution_id.child_ids:
-            #        strategy_id.state = 'open'
+            for solution_id in obj.tasks_solution:
+                if solution_id.state == 'reject':
+                    solution_id.state = 'open'
+                for strategy_id in solution_id.child_ids:
+                    if strategy_id.state == 'reject':
+                        strategy_id.state = 'open'
             
     def check_ccpp_delayed(self):
         date_today = datetime.now().strftime("%Y-%m-%d")
@@ -483,7 +493,16 @@ class Project(models.Model):
             'views' : [(self.env.ref('ccpp.solution_tree').id, 'tree')]
         }   
         
-    
+    @api.model
+    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
+        orderby = "priority_id asc"
+        res = super(Project, self).read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+        return res
+        
+    def create_solution(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.open_view_task_all_ccpp')
+        action['context'] = {'is_create_solution': True, 'project_id': self.id, 'is_create_solution': True}
+        return action
         
 class Task(models.Model):
     _inherit = "project.task" 
@@ -494,6 +513,9 @@ class Task(models.Model):
             return True
         else:
             return False
+    
+    def _default_user_ids(self):
+        return self.env.user.ids
     
     is_solution = fields.Boolean(string='Is Solution', default=_get_default_level, compute="_compute_level", store=True)
     is_strategy = fields.Boolean(string='Is Strategy', default=False, compute="_compute_level", store=True)
@@ -512,6 +534,7 @@ class Task(models.Model):
     state = fields.Selection([
         ('open', 'Open'),
         ('waiting_approve', 'Waiting Approve'),
+        ('reject', 'Rejected'),
         ('process', 'On Process'),
         ('done', 'Done'),
         ('cancel', 'Cancelled'),
@@ -543,6 +566,7 @@ class Task(models.Model):
     is_delay = fields.Boolean(string="Is Delay")
     is_ccpp_on_process = fields.Boolean(string="Is CCPP on process", compute="_is_on_process")
     is_solution_on_approve = fields.Boolean(string="Is Solution on process", compute="_is_on_process")
+    user_ids = fields.Many2many(default=_default_user_ids)
     
     def _is_on_process(self):
         for obj in self:
@@ -554,7 +578,7 @@ class Task(models.Model):
             if obj.is_strategy:
                 if obj.parent_id.project_id.state == 'process':
                     is_ccpp_on_process = True
-                if obj.parent_id.state in ['open','waiting_approve']:
+                if obj.parent_id.state in ['open','reject','waiting_approve']:
                     is_solution_on_approve = True
             obj.is_ccpp_on_process = is_ccpp_on_process
             obj.is_solution_on_approve = is_solution_on_approve
@@ -568,10 +592,10 @@ class Task(models.Model):
                 start_date_obj = obj.start_date
                 priority_line_id = obj.project_id.priority_id.lines.filtered(lambda o:o.active)
                 
-                if not priority_line_id:
-                    raise UserError("Please Configure Time Frequenzy for Priority %s"%(obj.project_id.priority_id.name))
-                if len(priority_line_id) > 1:
-                    raise UserError("Configure Time Frequenzy more than 1")
+                #if not priority_line_id:
+                #    raise UserError("Please Configure Time Frequenzy for Priority %s"%(obj.project_id.priority_id.name))
+                #if len(priority_line_id) > 1:
+                #    raise UserError("Configure Time Frequenzy more than 1")
                 
                 start_period_date_obj = priority_line_id.date
                 
@@ -677,6 +701,8 @@ class Task(models.Model):
             print("X"*100)
             print(self.env.context)
             print(self._context)
+            if self._context.get('project_id'):
+                vals['project_id'] = self._context.get('project_id')
             #if self._context.get('is_solution',False) and not self._context.get('is_create_strategy',False) and self._context.get('active_id',False):
             #    params = self._context.get('params')
             #    if params:
@@ -694,7 +720,10 @@ class Task(models.Model):
             print("project solution ------>", rec.parent_id.project_solution_id,rec.parent_id.project_solution_id.department_id.code )
             
             if rec.is_solution:
-                rec.project_id = rec.project_solution_id
+                if rec.project_solution_id:
+                    rec.project_id = rec.project_solution_id
+                if rec.project_id:
+                    rec.project_solution_id = rec.project_id
             if rec.is_solution and rec.project_id.department_id:
                 if not rec.project_id.department_id.code:
                     raise UserError("Not recognize the department code. Please Configure code to Department to get the department code")
@@ -702,7 +731,6 @@ class Task(models.Model):
                 sequence_code = 'ccpp.'+'sl.'+rec.project_id.department_id.code
                 code = self.env['ir.sequence'].next_by_code(sequence_code,sequence_date=sequence_date)
                 rec.code = code
-            print()
             if rec.is_strategy and (rec.project_id.department_id or rec.project_solution_id.department_id or rec.parent_id.project_id.department_id or rec.parent_id.project_solution_id.department_id):
                 sequence_date = datetime.now().strftime("%Y-%m-%d")
                 code = ''
@@ -923,13 +951,25 @@ class Task(models.Model):
     
     def button_reject_strategy(self):
         for obj in self:
-            obj.state = 'open'
+            obj.state = 'reject'
             
     def button_reject_solution(self):
         for obj in self:
+            obj.state = 'reject'
+            for strategy_id in obj.child_ids:
+                if strategy_id.state == 'waiting_approve':
+                    strategy_id.state = 'reject'   
+    
+    def button_to_open_strategy(self):
+        for obj in self:
+            obj.state = 'open'
+            
+    def button_to_open_solution(self):
+        for obj in self:
             obj.state = 'open'
             for strategy_id in obj.child_ids:
-                strategy_id.state = 'open'
+                if strategy_id.state == 'reject':
+                    strategy_id.state = 'open'
     
     def button_cancel(self):
         for obj in self:

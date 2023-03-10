@@ -13,7 +13,7 @@ export const STATUS_COLORS = {
     'process': 3,
     'done': 20,
     'cancel': 23,
-    'delay': 24,
+    'reject': 24,
     'over': 20,
     'similar': 3,
     'less': 23,

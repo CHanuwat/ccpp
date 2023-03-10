@@ -17,10 +17,12 @@
                 <field name="customer_id"/>
                 <field name="province_id"/>
                 <field name="sale_area_id"/>
+                <field name="year_selection" filter_domain="[('year_selection', 'ilike', self)]"/>
                 <separator/>
+                <filter string="Active" name="active" domain="[('state', '=', 'active')]"/>
+                <filter string="Inactive" name="active" domain="[('state', '=', 'inactive')]"/>
                 <group expand="0" string="Group By">
-                    <filter string="Year" name="groupby_year" context="{'group_by': 'year_text'}"/>
-                    <!--<filter string="Order Year" name="order_year" context="{'order_by': 'year_text desc'}"/>-->
+                    <filter string="Year" name="groupby_year" context="{'group_by': 'year_selection'}"/>
                     <filter string="Sales Area" name="groupby_sales_area" context="{'group_by': 'sale_area_id'}"/>
                     <filter string="Province" name="groupby_province" context="{'group_by': 'province_id'}"/>
                     <filter string="Customer Category" name="groupby_category" context="{'group_by': 'customer_category_id'}"/>
@@ -33,18 +35,20 @@
         <field name="name">ccpp.customer.information.view.tree</field>
         <field name="model">ccpp.customer.information</field>
         <field name="arch" type="xml">
-            <tree string="Customer Information" multi_edit="1" sample="1" class="customer_information_tree">
-                <field name="year_text" string="Year"/>
+            <tree string="Customer Information" default_order="potential_ranking" multi_edit="1" sample="1" class="customer_information_tree">
+                <field name="year_selection" string="Year"/>
                 <field name="date_from" string="Create Date"/>
                 <!--<field name="date_to"/>-->
                 <field name="customer_id"/>
+                <field name="sale_area_id" options="{'no_wrap':False}"/>
                 <field name="province_id" invisible="True"/>
                 <field name="sale_area_id" invisible="True"/>
                 <field name="potential_ranking"/>
                 <field name="actual_sale_ranking"/>
                 <field name="total_sale_revenue" string="Winmed Actual Sales"/>
                 <field name="competitor_ranking"/>
-                <field name="active"/>
+                <field name="state"/>
+                <!--<field name="active"/>-->
                 <field name="sale_person_id"/>
             </tree>
         </field>
@@ -55,16 +59,18 @@
         <field name="model">ccpp.customer.information</field>
         <field name="arch" type="xml">
             <tree string="Customer Information" multi_edit="1" sample="1" default_order="potential_ranking" class="customer_information_tree">
-                <field name="date_from"/>
-                <field name="date_to"/>
+                <field name="year_selection" string="Year"/>
+                <field name="date_from" string="Create Date"/>
                 <field name="customer_id"/>
+                <field name="sale_area_id"/>
                 <field name="province_id" invisible="True"/>
                 <field name="sale_area_id" invisible="True"/>
                 <field name="potential_ranking"/>
                 <field name="actual_sale_ranking"/>
                 <field name="total_sale_revenue" string="Winmed Actual Sales"/>
                 <field name="competitor_ranking"/>
-                <field name="active"/>
+                <field name="state"/>
+                <!--<field name="active"/>-->
                 <field name="sale_person_id"/>
             </tree>
         </field>
@@ -75,16 +81,18 @@
         <field name="model">ccpp.customer.information</field>
         <field name="arch" type="xml">
             <tree string="Customer Information" multi_edit="1" sample="1" default_order="actual_sale_ranking" class="customer_information_tree">
-                <field name="date_from"/>
-                <field name="date_to"/>
+                <field name="year_selection" string="Year"/>
+                <field name="date_from" string="Create Date"/>
                 <field name="customer_id"/>
+                <field name="sale_area_id"/>
                 <field name="province_id" invisible="True"/>
                 <field name="sale_area_id" invisible="True"/>
                 <field name="potential_ranking"/>
                 <field name="actual_sale_ranking"/>
                 <field name="total_sale_revenue" string="Winmed Actual Sales"/>
                 <field name="competitor_ranking"/>
-                <field name="active"/>
+                <field name="state"/>
+                <!--<field name="active"/>-->
                 <field name="sale_person_id"/>
             </tree>
         </field>
@@ -95,16 +103,18 @@
         <field name="model">ccpp.customer.information</field>
         <field name="arch" type="xml">
             <tree string="Customer Information" multi_edit="1" sample="1" default_order="competitor_ranking" class="customer_information_tree">
-                <field name="date_from"/>
-                <field name="date_to"/>
+                <field name="year_selection" string="Year"/>
+                <field name="date_from" string="Create Date"/>
                 <field name="customer_id"/>
+                <field name="sale_area_id"/>
                 <field name="province_id" invisible="True"/>
                 <field name="sale_area_id" invisible="True"/>
                 <field name="potential_ranking"/>
                 <field name="actual_sale_ranking"/>
                 <field name="total_sale_revenue" string="Winmed Actual Sales"/>
                 <field name="competitor_ranking"/>
-                <field name="active"/>
+                <field name="state"/>
+                <!--<field name="active"/>-->
                 <field name="sale_person_id"/>
             </tree>
         </field>
@@ -149,17 +159,15 @@
                     <div class="o_row" style="padding-top:5px; padding-bottom:10px">
                         
                         <div>
-                            <h2> From 
+                            <h2> Create Date
                             <field name="date_from"/>  
                             </h2>
                         </div>
                         <div>
-                            <h2> To
-                            <field name="date_to"/>  
+                            <h2> Year
+                            <field name="year_selection" readonly="True" force_save="True"/>  
                             </h2>
                         
-                        </div>
-                        <div>
                         </div>
                         <div>
                         </div>
@@ -175,18 +183,20 @@
                             <field name="sale_person_id"/>
                         </group>
                         <group>
-                            <field name="hospital_size"/>
                             <field name="customer_category_id"/>
+                            <label for="hospital_size"/>
+                            <div class="o_row" name="div_size">  
+                                <field name="hospital_size" class="o_customer_information_narrow_field"/>
+                                <span>เตียง</span>
+                            </div>
                             <label for="customer_budget_id"/>
                             <div class="o_row" name="div_km_home_work">
-                                  
                                   <field name="customer_budget_id" class="o_customer_information_narrow_field"/>
                                   <field name="is_other_budget"/>
-                                  <label for="is_other_budget" string="Other"/>
-                                
-                              </div>
+                                  <label for="is_other_budget" string="Other"/>    
+                            </div>
                             <field name="budget" attrs="{'invisible':[('is_other_budget','=',False)]}"/>
-                            <field name="active" widget="boolean_toggle"/>
+                            <!--<field name="active" widget="boolean_toggle"/>-->
                         </group>
                     </group>
                     

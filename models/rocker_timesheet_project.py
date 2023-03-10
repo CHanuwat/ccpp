@@ -42,13 +42,23 @@ class RockerTask(models.Model):
                                    ['|', ('project_id.privacy_visibility', '!=', 'followers'),
                                     ('project_id.allowed_internal_user_ids', 'in', self.env.user.ids)]
                                    ])
+        #ccpp_ids = self.env['project.project'].search([('user_id','=',self.env.user.id)])
+        #domain = [('id', 'in', ccpp_ids.ids)]
+        return domain
+    
+    @api.model
+    def _domain_customer(self):
+        customer_ids = self.env['ccpp.customer.information'].search([('user_id','=',self.env.user.id)]).mapped('customer_id')
+        print('cus ids --->',customer_ids)
+        domain = [('id', 'in', customer_ids.ids)]   
         return domain
 
     id = fields.Integer('id')
     name = fields.Char('Name')
     company_id = fields.Many2one('res.company', string='Company', domain="[('company_id', '=', self.env.company.id)]")
     project_id = fields.Many2one('project.project', domain=_domain_project_id)
-    priority_id = fields.Many2one(related="project_id.priority_id", store=True)
+    #priority_id = fields.Many2one(related="project_id.priority_id", store=True)
+    customer_id = fields.Many2one('res.partner', string="Customer Potential", domain=_domain_customer)
     task_id = fields.Many2one('project.task', string='Task')
     parent_id = fields.Many2one('rocker.task', string='Parent')
     user_id = fields.Many2one('res.users', string='User')
@@ -63,6 +73,8 @@ class RockerTask(models.Model):
     def init(self):
         _logger.debug('Init: create view')
         tools.drop_view_if_exists(self.env.cr, self._table)
+        print("XXXXXXXXXXXXXXXX"*100)
+        print(self.env.user)
         # self._cr.execute("""DROP VIEW IF EXISTS ROCKER_TASK""")
         # id when taken from project_id can not be the same number than task_id, convert project_id to negative
         # odoo 14
@@ -123,6 +135,7 @@ class RockerTask(models.Model):
 					JOIN project_project p ON p.id = ct.project_id  
                     WHERE p.allow_timesheets = TRUE
                     AND p.active = TRUE
+                    AND p.state = 'process'
 					UNION ALL
 					SELECT -1 * p1.id as id, p1.name::varchar, p1.id as project_id, null as task_id, null as parent_id, p1.user_id, 
 					    p1.company_id, p1.privacy_visibility, p1.allow_timesheets,
@@ -161,3 +174,27 @@ class RockerProject(models.Model):
             'context': {},
             'target': 'main',
         }
+
+class CustomerPotential(models.Model):
+    _name = 'customer.potential'
+    _auto = False
+    _description = 'Customer Potential'
+
+    id = fields.Integer('id')
+    name = fields.Char('Name')
+    partner_id = fields.Many2one('res.partner',string='Partner')
+    company_id = fields.Many2one('res.company', string='Company', domain="[('company_id', '=', self.env.company.id)]")
+
+    @api.model
+    def init(self):
+        _logger.debug('Init: create view customer potential')
+        tools.drop_view_if_exists(self.env.cr, self._table)
+        self.env.cr.execute("""
+                    CREATE VIEW customer_potential AS
+                    (
+                        SELECT p.id as id, p.id as partner_id, p.name as name, p.company_id as company_id
+                        FROM res_partner as p
+                        WHERE p.id = 1909
+             
+                    )
+                    """)

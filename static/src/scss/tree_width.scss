@@ -15,7 +15,7 @@
   width: 190px !important;
   max-width: 200px !important;
 }
-.customer_information_tree [data-name="year_text"] {
+.customer_information_tree [data-name="year_selection"] {
   width: 50px !important;
   max-width: 50px !important;
 }
@@ -30,5 +30,13 @@
 .customer_information_tree [data-name="competitor_ranking"] {
   width: 200px !important;
   max-width: 200px !important;
+}
+
+.customer_information_tree [data-name="sale_area_id"] {
+  white-space: normal !important;
+}
+
+.customer_information_tree .o_list_renderer [data-name="sale_area_id"] {
+  white-space: normal !important;
 }
 

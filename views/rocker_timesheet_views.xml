@@ -12,10 +12,15 @@
                     <field name="project_id"/>
                     <field name="task_search"/>
                     <field name="company_id"/>
+                    <field name="project_test_id"/>
+                    <field name="customer_potential"/>
                      <separator/>
                     <searchpanel view_types="tree,calendar">
-                        <field name="task_search" groupby="priority_id" expand="1" hierarchize="1" string="CCPP" icon="fa-folder-open"/>
-                        <field name="project_id" expand="1" hierarchize="1" string="Project" icon="fa-folder-open"/>
+                        <field name="task_search" expand="1" hierarchize="1" string="CCPP" icon="fa-folder-open"/>
+                        <!--<field name="customer_potential_id" string="Customer Potential" icon="fa-folder-open"/>
+                        <field name="project_test_id" string="Project Test" icon="fa-folder-open"/>
+                        <field name="project_id" string="Project" icon="fa-folder-open"/>
+                        <field name="customer_potential" string="Customer Potential" icon="fa-folder-open"/>-->
                     </searchpanel>
                     <group expand="0" string="Group By">
                         <filter string="Sales Person" name="groupby_sales_person" context="{'group_by': 'employee_id'}"/>
@@ -47,6 +52,8 @@
                     <field name="company_id" required="1" readonly="1" optional="hide" invisible="1"/>
                     <field name="user_id"  invisible="1" required="1" readonly="1"/>
                     <field name="allday" invisible="1" />
+                    <button name="update_situation" type="object" string="Check In" class="btn btn-success fa fa-4x fa-sign-in align-middle"/>
+
                 </tree>
             </field>
         </record>
@@ -149,6 +156,17 @@
                     <field name="project_id" readonly="1"/>
                     <field name="task_id" readonly="1"/>
                     <field name="parent_id" readonly="1"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="customer_potential_tree" model="ir.ui.view">
+            <field name="name">Customer Potential</field>
+            <field name="model">customer.potential</field>
+            <field name="arch" type="xml">
+                <tree string="Customer Potential" create="false" delete="false" edit="false">
+                    <field name="name" readonly="1"/>
+                    <field name="partner_id" readonly="1"/>
                 </tree>
             </field>
         </record>
@@ -380,6 +398,23 @@
             <field name="domain">[]</field>
             <field name="view_mode">tree,form</field>
             <field name="view_id" ref="rocker_project_task_tree"/>
+            <field name="target">main</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No projects found.
+                </p>
+                <p>
+                    Track your projects every day.
+                </p>
+            </field>
+        </record>
+
+        <record id="customer_potential_action" model="ir.actions.act_window">
+            <field name="name">Customer Potential</field>
+            <field name="res_model">customer.potential</field>
+            <field name="domain">[]</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="customer_potential_tree"/>
             <field name="target">main</field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
