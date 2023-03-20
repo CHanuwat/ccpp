@@ -48,27 +48,44 @@ class CCPPCustomerInformation(models.Model):
     def _get_default_year_selection(self):
         year = datetime.today().year
         return str(year)
+    
+    def _get_default_type(self):
+        if self._context.get('default_type'):
+            default_type = self._context.get('default_type')
+        else:
+            default_type = 'customer'
+        return default_type
+    
+    def _get_default_customer(self):
+        customer_id = self.env['res.partner']
+        if self._context.get('default_my_company'):
+            customer_id = self.env.user.company_id.partner_id
+        return customer_id
         
-    name = fields.Char("Name")
+    name = fields.Char(string="Name", compute="_compute_name", store=True)
     date_from = fields.Date("From", required=True, default=_get_default_date_from)
     date_to = fields.Date("To", required=True, default=_get_default_date_to)
-    customer_id = fields.Many2one("res.partner", string="Customer")
+    customer_id = fields.Many2one("res.partner", string="Customer", default=_get_default_customer)
+    domain_customer_ids = fields.Many2many("res.partner", string="Domain Customer", compute="_compute_domain_customer_ids")
+    partner_id = fields.Many2one("res.partner", string="Contact")
+    domain_partner_ids = fields.Many2many("res.partner", string="Domain partner", compute="_compute_domain_partner_ids")
     active = fields.Boolean(string="Active", default=True)
     sale_person_id = fields.Many2one("hr.employee", string="Sales Person", default=_get_default_sale_person, required=True)
+    department_id = fields.Many2one("hr.department", string="Deparment", related="sale_person_id.department_id")
     user_id = fields.Many2one("res.users", string="User", related="sale_person_id.user_id", store=True)
     province_id = fields.Many2one("ccpp.province", string="Province", related="customer_id.province_id", store=True)
     sale_area_id = fields.Many2one("hr.work.location", string="Sales Area", related="sale_person_id.work_location_id", store=True)
-    potential_ranking = fields.Integer(string="Ranking by Potential in Area", group_operator=False)
-    competitor_ranking = fields.Integer(string="Ranking by Competitor's Sales", group_operator=False)
-    actual_sale_ranking = fields.Integer(string="Ranking by Winmed Actual Sales", compute="_compute_actual_sale_ranking", store=True, group_operator=False)
+    potential_ranking = fields.Integer(string="Potential in Area Rank", group_operator=False)
+    competitor_ranking = fields.Integer(string="Competitor's Sales Rank", group_operator=False)
+    actual_sale_ranking = fields.Integer(string="Winmed Actual Sales Rank", compute="_compute_actual_sale_ranking", store=True, group_operator=False)
     total_sale_revenue = fields.Float(string="Total Sale Revenue Last Year(THB)", default=0.0)
     customer_category_id = fields.Many2one("ccpp.customer.category", string="Customer Category", related="customer_id.customer_category_id", store=True)
     hospital_size = fields.Integer(string="Hospital Size")
     customer_budget_id = fields.Many2one("ccpp.customer.budget",string="Funding/Budget")
     is_other_budget = fields.Boolean("Is Other Funding/Budget")
     budget = fields.Char(string="Other Funding/Budget")
-    future_plan = fields.Text(string="Future Project/Plan (โครงการในอนาคต/แผนงาน)")
-    connection = fields.Text(string="Connection with other hospital (ความสัมพันธ์กับโรงพยาบาลอื่นๆ)")
+    future_plan = fields.Text(string="Future Project/Plan")
+    connection = fields.Text(string="Connection with other hospital")
     note = fields.Text(string="Note")
     #actual_sale = fields.Float(string="Actual Sale")
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
@@ -77,7 +94,12 @@ class CCPPCustomerInformation(models.Model):
     state = fields.Selection(selection=[
         ('active', 'Active'),
         ('inactive', 'Inactive')
-    ], default='active', string="Status") 
+    ], default='active', string="Status", compute="_compute_state", store=True) 
+    type = fields.Selection(selection=[
+        ('customer','Customer'),
+        ('internal','Internal'),
+        ('external','External'),
+    ], default=_get_default_type, string="Type")
     year_selection = fields.Selection(selection=[
         ('2013', '2013'),
         ('2014', '2014'),
@@ -142,6 +164,36 @@ class CCPPCustomerInformation(models.Model):
         ('2073', '2073'),
     ], required=True, string="Year", default=_get_default_year_selection)
     year_text = fields.Char("Year")
+    is_customer = fields.Boolean(string="Customer", compute="_compute_customer_type", store=True)
+    is_potential = fields.Boolean(string="Potential", compute="_compute_customer_type", store=True)
+    
+    @api.depends("customer_id")
+    def _compute_domain_partner_ids(self):
+        for obj in self:
+            partner_ids = self.env['res.partner']
+            if obj.customer_id:
+                for child_id in obj.customer_id.child_ids:
+                    partner_ids |= child_id
+            obj.domain_partner_ids = partner_ids.ids
+            
+    @api.depends("customer_id")
+    def _compute_domain_customer_ids(self):
+        for obj in self:
+            customer_ids = self.env['res.company'].search([]).mapped('partner_id')
+            obj.domain_customer_ids = customer_ids.ids
+            
+    @api.depends("customer_id")
+    def _compute_customer_type(self):
+        for obj in self:
+            is_customer = False
+            is_potential = False
+            if obj.customer_id:
+                if obj.customer_id.is_customer:
+                    is_customer = True
+                if obj.customer_id.is_potential:
+                    is_potential = True
+            obj.is_customer = is_customer
+            obj.is_potential = is_potential        
     
     @api.constrains('potential_ranking','competitor_ranking',"customer_id","year_selection")
     def constraint_customer(self):
@@ -151,19 +203,31 @@ class CCPPCustomerInformation(models.Model):
             print(obj.date_to)
             customer_potential_rank = self.env["ccpp.customer.information"].search([("sale_person_id",'=',obj.sale_person_id.id),
                                                                                     ("year_selection",'=',obj.year_selection),
+                                                                                    ("type",'=',obj.type),
                                                                                     ('potential_ranking','=',obj.potential_ranking),
                                                                                     ('potential_ranking','!=',False),
                                                                                     ('id','!=',obj.id)],limit=1)
             customer_competitor_rank = self.env["ccpp.customer.information"].search([("sale_person_id",'=',obj.sale_person_id.id),
                                                                                      ("year_selection",'=',obj.year_selection),
+                                                                                     ("type",'=',obj.type),
                                                                                     ('competitor_ranking','=',obj.competitor_ranking),
                                                                                     ('competitor_ranking','!=',False),
                                                                                     ('id','!=',obj.id)],limit=1)
-            check_customer_date_from = self.env["ccpp.customer.information"].search([("sale_person_id",'=',obj.sale_person_id.id),
-                                                                            ('id','!=',obj.id),
-                                                                            ('customer_id','=',obj.customer_id.id),
-                                                                            ('year_selection','=',obj.year_selection),
-                                                                            ],limit=1)
+            if obj.type == 'customer':
+                check_customer_date_from = self.env["ccpp.customer.information"].search([("sale_person_id",'=',obj.sale_person_id.id),
+                                                                                ('id','!=',obj.id),
+                                                                                ("type",'=',obj.type),
+                                                                                ('customer_id','=',obj.customer_id.id),
+                                                                                ('year_selection','=',obj.year_selection),
+                                                                                ],limit=1)
+            elif obj.type in ['external','internal']:
+                check_customer_date_from = self.env["ccpp.customer.information"].search([("sale_person_id",'=',obj.sale_person_id.id),
+                                                                                ('id','!=',obj.id),
+                                                                                ("type",'=',obj.type),
+                                                                                ('customer_id','=',obj.customer_id.id),
+                                                                                ('partner_id','=',obj.partner_id.id),
+                                                                                ('year_selection','=',obj.year_selection),
+                                                                                ],limit=1)
             #check_customer_date_to = self.env["ccpp.customer.information"].search([("sale_person_id",'=',obj.sale_person_id.id),
             #                                                                ('id','!=',obj.id),
             #                                                                ('customer_id','=',obj.customer_id.id),
@@ -204,20 +268,39 @@ class CCPPCustomerInformation(models.Model):
             if obj.date_from:
                 year = str(obj.date_from.year)
                 obj.year_selection = year
+  
+    @api.depends("year_selection","customer_id")
+    def _compute_state(self):
+        for obj in self:
+            name = obj.year_selection + ' ' + obj.customer_id.name
+            obj.name = name
+            
+    
+    @api.depends("active")
+    def _compute_state(self):
+        for obj in self:
+            if obj.active:
+                obj.state = 'active'
+            else:
+                obj.state = 'inactive'
     
     @api.depends("total_sale_revenue")
     def _compute_actual_sale_ranking(self):
         for obj in self:
             customer_info_ids = self.env["ccpp.customer.information"].search([('year_selection','=',obj.year_selection),
                                                                               ("sale_person_id",'=',obj.sale_person_id.id),
+                                                                              ("type",'=',obj.type),
                                                                               ("total_sale_revenue",'!=',False),
-                                                                              ],order="total_sale_revenue desc")
+                                                                              ],order="total_sale_revenue desc, date_from")
             customer_info_norank_ids = self.env["ccpp.customer.information"].search([('year_selection','=',obj.year_selection),
                                                                               ("sale_person_id",'=',obj.sale_person_id.id),
+                                                                              ("type",'=',obj.type),
                                                                               ("total_sale_revenue",'=',False),
-                                                                              ],order="date_from asc")
+                                                                              ],order="date_from desc")
             
+            print("X")
             print(customer_info_ids)
+            print("y")
             print(customer_info_norank_ids)
             rank = 1
             for info in customer_info_ids:
@@ -251,6 +334,11 @@ class CCPPCustomerInformation(models.Model):
         action['domain'] = [('id', 'in', sales_target_ids.ids)]
         return action
     
+    def open_plan_task(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.act_rocker_timesheet_calendar')
+        action['context'] = {'default_customer_id': self.customer_id}
+        return action
+    
     def open_purchase_history(self):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_purchase_history_action')
         purchase_history_ids = self.env['ccpp.purchase.history'].search([('user_id','=',self.user_id.id),('customer_id','=',self.customer_id.id)])
@@ -275,3 +363,30 @@ class CCPPCustomerInformation(models.Model):
         orderby = "year_selection desc, potential_ranking asc"
         res = super(CCPPCustomerInformation, self).read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
         return res
+    
+    def action_customer_information_manager(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_customer_information_action')
+        department_id = self.env.user.employee_id.department_id
+        information_ids = self.env['ccpp.customer.information'].search([('type','=','customer'),
+                                                                ('department_id', '=', department_id.id),
+                                                                ])
+        action['domain'] = [('id','in',information_ids.ids)]
+        return action
+    
+    def action_external_information_manager(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_external_information_action')
+        department_id = self.env.user.employee_id.department_id
+        information_ids = self.env['ccpp.customer.information'].search([('type','=','external'),
+                                                                ('department_id', '=', department_id.id),
+                                                                ])
+        action['domain'] = [('id','in',information_ids.ids)]
+        return action
+    
+    def action_internal_information_manager(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_internal_information_action')
+        department_id = self.env.user.employee_id.department_id
+        information_ids = self.env['ccpp.customer.information'].search([('type','=','internal'),
+                                                                ('department_id', '=', department_id.id),
+                                                                ])
+        action['domain'] = [('id','in',information_ids.ids)]
+        return action

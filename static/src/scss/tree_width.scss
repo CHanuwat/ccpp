@@ -12,24 +12,36 @@
 }
 
 .customer_information_tree [data-name="potential_ranking"] {
-  width: 190px !important;
-  max-width: 200px !important;
+  width: 170px !important;
+  max-width: 170px !important;
 }
 .customer_information_tree [data-name="year_selection"] {
-  width: 50px !important;
-  max-width: 50px !important;
+  width: 60px !important;
+  max-width: 60px !important;
+}
+.customer_information_tree [data-name="customer_id"] {
+  width: 280px !important;
+  max-width: 280px !important;
+}
+.customer_information_tree [data-name="sale_area_id"] {
+  width: 100px !important;
+  max-width: 100px !important;
 }
 .customer_information_tree [data-name="actual_sale_ranking"] {
-  width: 220px !important;
-  max-width: 220px !important;
+  width: 200px !important;
+  max-width: 200px !important;
 }
 .customer_information_tree [data-name="total_sale_revenue"] {
   width: 170px !important;
   max-width: 170px !important;
 }
 .customer_information_tree [data-name="competitor_ranking"] {
-  width: 200px !important;
-  max-width: 200px !important;
+  width: 180px !important;
+  max-width: 180px !important;
+}
+.customer_information_tree [data-name="state"] {
+  width: 70px !important;
+  max-width: 70px !important;
 }
 
 .customer_information_tree [data-name="sale_area_id"] {
@@ -38,5 +50,33 @@
 
 .customer_information_tree .o_list_renderer [data-name="sale_area_id"] {
   white-space: normal !important;
+}
+
+.o_calendar_renderer .fc-view .o_calendar_color_11.fc-event .fc-bg {
+  background:#bbbbbb !important;
+}
+
+.o_calendar_renderer .fc-view .o_calendar_color_6.fc-event .fc-bg {
+  background:#71639e !important;
+}
+
+.o_calendar_renderer .fc-view .o_calendar_color_11.fc-event {
+  color: #ffffff !important;
+}
+
+.o_calendar_renderer .fc-view .o_calendar_color_6.fc-event {
+  color: #ffffff !important;
+}
+
+.o_calendar_renderer .fc-view .o_calendar_color_11 {
+  background:#808080 !important;
+  border-color: #808080 !important;
+  white-space: break-space !important;
+}
+
+.o_calendar_renderer .fc-view .o_calendar_color_6 {
+  background:#808080 !important;
+  border-color: #808080 !important;
+  white-space: break-space !important;
 }
 

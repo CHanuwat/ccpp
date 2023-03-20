@@ -16,7 +16,7 @@
                     <field name="customer_potential"/>
                      <separator/>
                     <searchpanel view_types="tree,calendar">
-                        <field name="task_search" expand="1" hierarchize="1" string="CCPP" icon="fa-folder-open"/>
+                        <!--<field name="task_search" expand="1" hierarchize="1" string="CCPP" icon="fa-folder-open"/>-->
                         <!--<field name="customer_potential_id" string="Customer Potential" icon="fa-folder-open"/>
                         <field name="project_test_id" string="Project Test" icon="fa-folder-open"/>
                         <field name="project_id" string="Project" icon="fa-folder-open"/>
@@ -35,7 +35,7 @@
             <field name="model">account.analytic.line</field>
             <field name="arch" type="xml">
                 <!--<tree js_class="rocker_tree" string="Timesheets" editable="top" create="true" delete="true" edit="true">-->
-                <tree js_class="rocker_tree" string="Timesheets" create="true" delete="true" edit="true">
+                <tree js_class="rocker_tree" string="Timesheets" create="false" delete="false" edit="true">
                     <field name="name" string="Task" />
                     <field name="start" required="1" string="From"/>
                     <field name="stop" required="1" string="To"/>
@@ -52,7 +52,8 @@
                     <field name="company_id" required="1" readonly="1" optional="hide" invisible="1"/>
                     <field name="user_id"  invisible="1" required="1" readonly="1"/>
                     <field name="allday" invisible="1" />
-                    <button name="update_situation" type="object" string="Check In" class="btn btn-success fa fa-4x fa-sign-in align-middle"/>
+                    <field name="state" invisible="1" />
+                    <button name="update_situation" type="object" string="Check In" class="btn btn-success" icon="fa-sign-in" attrs="{'invisible': [('state','not in',['open'])]}"/>
 
                 </tree>
             </field>
@@ -66,45 +67,127 @@
                 <xpath expr="//form[1]" position="replace">
                     <form>
                         <header>
-                            <button name="update_situation" string="Update Situation" type="object" class="btn-primary" states="open"/>
-                            <button name="button_done" string="Done" type="object" class="btn-primary" states="open"/>
+                            <!--<button name="update_situation" string="Update Situation" type="object" class="btn-primary" states="open"/>-->
+                            <button name="button_done" string="Done" type="object" class="btn-success" states="open"/>
                             <button name="button_to_open" string="To Open" type="object" class="btn-primary" states="done"/>
                             <field name="state" widget="statusbar"/>
                         </header>
                         <sheet>
+
                             <div class="oe_button_box" name="button_box">
+                                <span style="padding-left:30px; padding-top:5px" class="oe_left">
+                                    <h1>Task</h1>
+                                </span>
                                 <button class="oe_stat_button" name="open_current_situation" type="object" icon="fa-tasks">
                                     <div class="o_field_widget o_stat_info">
                                         <span class="o_stat_text">Current Situation</span>
                                     </div>
                                 </button>
                             </div>
+                            <div class="oe_title" style="padding-top:5px; padding-bottom:10px">
+                     
+                                    <h2>
+                                        <field name="name" readonly="True"/>  
+                                    </h2>
+                            
+                            </div>
+
+                            <h2 style="color:gray; font-size:1.2em;"> Task Information </h2>
+                            <div style="border-top: 2px solid #e6e6e6;padding: 0px;;margin-top: 10px; margin-bottom: 10px;"/>  
+
                             <group>
                                 <group>
-                                    <field name="name" string="Task" readonly="True"/>
+                                    <field name="priority_id" readonly="True"/>
+                                    <field name="customer_id" domain="[('is_customer','=',True)]" string="Customer" readonly="True"/>
                                     <field name="start" required="1" string="From" readonly="True"/>
                                     <field name="stop" required="1" string="To" readonly="True"/>
-                                    <field name="employee_id" readonly="True"/>
+                                    <field name="employee_id" readonly="True" invisible="True"/>
                                 </group>
                                 <group>
-                                    <field name="customer_id" domain="[('is_customer','=',True)]" string="Customer" readonly="True"/>
+                                    
                                     <field name="project_id" string="CCPP" readonly="True"/>
                                     <field name="task_id" string="Solution" readonly="True"/>
                                     <field name="task_strategy_id" string="Strategy" readonly="True"/>
                                 </group>
+                                
                             </group>  
+                            <notebook>
+                                <page name="log_page" string="Log">
+                                    <field name="log_lines" readonly="True">
+                                        <tree edit="false" create="false" delete="false">
+                                            <field name="sequence"/>
+                                            <field name="log_text"/>
+                                            <field name="user_id" widget="many2one_avatar"/>
+                                            <field name="date"/>
+                                        </tree>
+                                    </field>
+                                </page>
+                            </notebook>
                         </sheet>
                     </form>
                 </xpath>
             </field>
         </record>
 
+        <record id="ccpp_account_analytic_line_log_form" model="ir.ui.view">
+            <field name="name">Tasks Log Form</field>
+            <field name="model">account.analytic.line.log</field>
+            <field name="priority" eval="16"/>
+            <field name="arch" type="xml">
+                <form delete="false" edit="false" create="false">
+                    <sheet>
+                        <h2 style="color:gray; font-size:1.2em;"> Task Log Information </h2>
+                        <div style="border-top: 2px solid #e6e6e6;padding: 0px;;margin-top: 10px; margin-bottom: 10px;"/>  
+
+                        <group>
+                            <group>
+                                <field name="name_from" readonly="True"/>
+                                <field name="priority_id_from" readonly="True"/>
+                                <field name="customer_id_from" readonly="True"/>
+                                <field name="start_from" readonly="True"/>
+                                <field name="stop_from" readonly="True"/>
+                                <field name="project_id_from" readonly="True"/>
+                                <field name="task_id_from" readonly="True"/>
+                                <field name="task_strategy_id_from" readonly="True"/>
+                            </group>
+                            <group>
+                                
+                                <field name="name_to" readonly="True"/>
+                                <field name="priority_id_to" readonly="True"/>
+                                <field name="customer_id_to" readonly="True"/>
+                                <field name="start_to" readonly="True"/>
+                                <field name="stop_to" readonly="True"/>
+                                <field name="project_id_to" readonly="True"/>
+                                <field name="task_id_to" readonly="True"/>
+                                <field name="task_strategy_id_to" readonly="True"/>
+                            </group>
+                            
+                        </group>  
+                        <group>
+                            <group>
+                                <field name="user_id" widget="many2one_avartar" readonly="True"/>
+                                <field name="date" readonly="True"/>
+                            </group>
+                        </group>
+                        
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
         <record id="action_open_project_edit_form" model="ir.actions.server">
-            <field name="name">Edit Project</field>
+            <field name="name">Edit CCPP</field>
             <field name="model_id" ref="ccpp.model_project_project"/>
             <!--            <field name="type">ir.actions.server</field>-->
             <field name="state">code</field>
             <field name="code">action = model.open_project_edit_form()</field>
+        </record>
+
+        <record id="action_open_solution_strategy_edit_form" model="ir.actions.server">
+            <field name="name">Edit Solution/Strategy</field>
+            <field name="model_id" ref="ccpp.model_project_task"/>
+            <field name="state">code</field>
+            <field name="code">action = model.open_solution_strategy_edit_form()</field>
         </record>
 
         <record id="rocker_project_tree" model="ir.ui.view">
@@ -177,25 +260,47 @@
             <field name="priority" eval="1"/>
             <field name="arch" type="xml">
                 <form string="Tasks">
+                    <header>
+                        <button name="duplicate_task" string="Duplicate" type="object" class="btn-primary" attrs="{'invisible': [('id', '=', False)]}"/>
+                    </header>
                     <sheet>
                         <div class="oe_title">
                             <div class="oe_edit_only">
-                                <label for="name"/>
+                                <label for="name" string="Task"/>
                             </div>
                             <h1>
-                                <field name="name" placeholder="e.g. Odoo programming" class="font-weight-bold"/>
+                                <field name="name" placeholder="Enter Task" class="font-weight-bold" required="True"/>
                             </h1>
                         </div>
-                        <label for="company_id" string="for Company: " />
-                        <field name="company_id" required="1" readonly="1" invisible="0"/>
+                        <!--<label for="company_id" string="for Company: " />-->
+                        <field name="company_id" required="1" readonly="1" invisible="1"/>
+                        <div class="o_row">
+                            <field name="is_go_ccpp_customer"/>
+                            <label for="is_go_ccpp_customer" string="CCPP Customer"/>   
+                            <field name="is_go_potential"/>
+                            <label for="is_go_potential" string="Potential"/>     
+                        </div>
+
+                        
                         <notebook>
                             <page name="page_details" string="Details">
                                 <group>
                                     <group>
                                         <field name="id" invisible="True"/>
-                                        <field name="customer_id" string="Customer"/>
+                                        <field name="priority_id" attrs="{'invisible': [('is_go_ccpp_customer','=',False)]}"/>
+                                        <field name="customer_id" string="Customer" 
+                                        attrs="{'invisible': [('is_go_potential','=',False)]}"
+                                        options="{'no_create':True}"
+                                        context="{'show_rank':True, 'order_display': 'potential_ranking'}"
+                                        domain="[('id','in',domain_customer_ids)]"/>
+                                        <field name="customer_id" string="Customer" 
+                                        attrs="{'invisible': [('is_go_ccpp_customer','=',False)]}"
+                                        options="{'no_create':True}"
+                                        domain="[('id','in',domain_customer_ids)]"/>
                                         <field name="start" string="From" invisible="0" readonly="0" required="1" />
                                         <field name="stop" string="To" invisible="0" readonly="0" required="1" />
+                                        <field name="domain_customer_ids" invisible="True"/>
+                                        
                                         <!--<label for="daystocreateshow" string="Generate" attrs="{'invisible':[('daystocreateshow','&lt;',2)]}"/>
                                         <div attrs="{'invisible':[('daystocreateshow','&lt;',2)]}">
                                             <field name="daystocreateshow"  string=" more Timesheet rows for next days" class="oe_inline"  readonly="1"/>
@@ -210,21 +315,38 @@
                                         <field name="allday" invisible="1"/>-->
                                     </group>
                                     <group>
-                                        <field name="project_id" required="0" domain="[('company_id', '=', company_id)]" string="CCPP"/>
-                                        <field name="task_id" required="0"
-                                                domain="[('project_id', '=', project_id), ('is_solution', '=', True)]" string="Solution"/>
-                                        <field name="task_strategy_id"
-                                                domain="[('project_id', '=', project_id), ('parent_id', '=', task_id), ('is_strategy', '=', True)]" string="Strategy"/>
+                                        <field name="domain_ccpp_ids" invisible="True"/>
+                                        <field name="domain_solution_ids" invisible="True"/>
+                                        <field name="domain_strategy_ids" invisible="True"/>
+
+                                        <field name="project_id" required="0" string="CCPP"
+                                        domain="[('company_id', '=', company_id),('id', 'in', domain_ccpp_ids)]"
+                                        attrs="{'invisible': [('is_go_ccpp_customer','=',False)]}"/>
+                                        <field name="task_id" required="0" string="Solution"
+                                                domain="[('project_id', '=', project_id), 
+                                                         ('is_solution', '=', True),
+                                                         ('state', '=', 'process')]"
+                                                attrs="{'invisible': [('is_go_ccpp_customer','=',False)]}"/>
+                                        <field name="task_strategy_id" string="Strategy"
+                                                domain="[('project_id', '=', project_id),
+                                                         ('parent_id', '=', task_id),
+                                                         ('is_strategy', '=', True),
+                                                         ('state', '=', 'process')]"
+                                                attrs="{'invisible': [('is_go_ccpp_customer','=',False)]}"/>
                                         <!--<label for="unit_amount"  string="Actual Work" invisible="0"/>
                                         <div>
                                             <field name="unit_amount" invisible="0" required="1" widget="float_time" class="oe_inline" readonly="0"/>
                                             <span> hours</span>
-                                        </div>
-                                        <field name="date" invisible="1" required="1"/>-->
+                                        </div>-->
+                                        <field name="date" invisible="1"/>
                                     </group>
                                 </group>
                             </page>
                         </notebook>
+                        <!--<xpath expr="//footer" position="inside">
+                            <button name="duplicate_task" string="Duplicate" type="object" class="btn-primary"/>
+                        </xpath>-->
+
                         <!--<footer>
                             <button name="update_situation" string="Update Situation" type="object" class="btn-primary" context="{'task_id': id}"/>
                         </footer>-->
@@ -241,14 +363,14 @@
                 <calendar js_class="rocker_calendar" string="Tasks"
                           form_view_id="%(ccpp.rocker_timesheet_form)d"
                           date_start="start" date_stop="stop" date_delay="duration"
-                          all_day="allday" color="rocker_type"
+                          all_day="allday" color="state"
                           mode="week"
                           quick_add="false"
-                          
+                          delete="false"
                           event_open_popup = "%(ccpp.rocker_timesheet_form)s"
                           show_unusual_days="true"
                           hide_time="false">
-                    <field name="display_name"/>
+                    <!--<field name="display_name"/>-->
                     <field name="customer_id"/>
                     <field name="project_id" required="1" string="CCPP"/>
                     <field name="task_id" required="1" string="Solution"/>
@@ -256,8 +378,10 @@
                     
                     <field name="unit_amount" required="1" invisible="1"/>
                     <field name="rocker_type" filters="1" invisible="1"/>
+                   
+                    
 <!--                    <field name="company_id" required="1" readonly="1" optional="show" groups="base.group_multi_company"/>-->
-                    <field name="company_id" required="1" readonly="1"/>
+                    <!--<field name="company_id" required="1" readonly="1"/>-->
                     <!--<button name="update_situation" string="Update Situation" type="object" class="btn-primary"/>-->
                 </calendar>
 
@@ -360,6 +484,24 @@
             <field name="name">Tasks</field>
             <field name="res_model">account.analytic.line</field>
             <field name="domain">[('user_id', '=', uid)]</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="rocker_timesheet_tree"/>
+            <field name="search_view_id" ref="rocker_timesheet_search"/>
+            <field name="context">{'search_default_groupby_month': 1}</field>
+            <field name="target">main</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No timesheets found. Let's start a new one!
+                </p>
+                <p>
+                    Track your working hours by projects every day.
+                </p>
+            </field>
+        </record>
+
+        <record id="act_rocker_timesheet_tree_by_user" model="ir.actions.act_window">
+            <field name="name">Tasks</field>
+            <field name="res_model">account.analytic.line</field>
             <field name="view_mode">tree,form</field>
             <field name="view_id" ref="rocker_timesheet_tree"/>
             <field name="search_view_id" ref="rocker_timesheet_search"/>

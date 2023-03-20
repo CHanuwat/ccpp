@@ -17,6 +17,9 @@ import urllib
 from bs4 import BeautifulSoup
 from dateutil.relativedelta import relativedelta
 import math
+import googlemaps
+from datetime import datetime
+from pprint import pprint
 
 STATUS_COLOR = {
     'on_track': 20,  # green / success
@@ -85,7 +88,7 @@ class Project(models.Model):
     
     ## impact winmed ##
     is_income_comp = fields.Boolean("Sale Revenue/Cost", default=False)
-    is_effectiveness_comp = fields.Boolean("Effectiveness/Personal Performance", default=False)
+    is_effectiveness_comp = fields.Boolean("Future Business Opportunity", default=False)
     is_repulation_comp = fields.Boolean("Repulation", default=False)
     is_competitive_comp = fields.Boolean("Competitive Advantage", default=False)
     is_short_time = fields.Boolean("Short")
@@ -103,7 +106,7 @@ class Project(models.Model):
     deadline_date = fields.Date(string="Deadline", compute="_compute_deadline", store=True)
     state = fields.Selection([
         ('open', 'Open'),
-        ('waiting_approve', 'Waiting Approve'),
+        ('waiting_approve', 'Waiting For Approval'),
         ('reject', 'Rejected'),
         ('process', 'On Process'),
         ('done', 'Done'),
@@ -113,8 +116,23 @@ class Project(models.Model):
     state_color = fields.Integer(compute='_compute_state_color')
     next_action = fields.Char("Next Action")
     is_ccpp_done = fields.Boolean(string="Is CCPP Done", compute="_compute_ccpp_done")
-    is_delay = fields.Boolean(string="Is Delay", default="False")
+    is_delay = fields.Boolean(string="Is Delay", default=False)
+    delay_date = fields.Date(string="Delayed Date")
     is_approve_strategy = fields.Boolean(string="Is Approve Strategy", default=False)
+    is_ready_create_solution = fields.Boolean(string="Is Ready Create Solution", compute="_compute_ready_create_solution")
+ 
+    def unlink(self):
+        res = super().unlink()
+        raise UserError("ระบบไม่สามารถลบ CCPP ได้ กรุณา cancel หากไม่ได้ใช้งาน")
+
+    @api.depends('tasks_solution')   
+    def _compute_ready_create_solution(self):
+        for obj in self:
+            is_ready_create_location = True
+            if obj.tasks_solution:
+                if len(obj.tasks_solution) - len(obj.tasks_solution.filtered(lambda o:o.state == 'cancel')) != 0:
+                    is_ready_create_location = False
+            obj.is_ready_create_solution = is_ready_create_location
     
     @api.depends('state')
     def _compute_state_color(self):
@@ -289,7 +307,8 @@ class Project(models.Model):
             print(self._context)
             if self._context.get('create_from_tree') and not self._context.get('default_allow_billable'):
                 sequence_date = datetime.now().strftime("%Y-%m-%d")
-                sequence_code = 'ccpp.'+'cp.'+employee_id.department_id.code
+                #sequence_code = 'ccpp.'+'cp.'+employee_id.department_id.code
+                sequence_code = 'ccpp.'+'cp'
                 code = self.env['ir.sequence'].next_by_code(sequence_code,sequence_date=sequence_date)
                 vals['code'] = code
             
@@ -299,8 +318,6 @@ class Project(models.Model):
         #if not res.is_critical and not res.is_not_critical:
         #    raise UserError("กรุณาเลือกผลกระทบต่อลูกค้าอย่างน้อย 1 ข้อ")
         return res
-    
-
     
     # replace for open project instead
     def action_view_tasks(self):
@@ -314,7 +331,8 @@ class Project(models.Model):
             raise UserError("กรุณาเลือกระยะเวลาการแก้ไขปัญหา")   
         if not self.code and self.department_id:
             sequence_date = datetime.now().strftime("%Y-%m-%d")
-            sequence_code = 'ccpp.'+'cp.'+self.department_id.code
+            #sequence_code = 'ccpp.'+'cp.'+self.department_id.code
+            sequence_code = 'ccpp.'+'cp'
             code = self.env['ir.sequence'].next_by_code(sequence_code,sequence_date=sequence_date)
             self.code = code
             
@@ -333,7 +351,8 @@ class Project(models.Model):
         self.is_long_time = False
         if not self.code and self.department_id:
             sequence_date = datetime.now().strftime("%Y-%m-%d")
-            sequence_code = 'ccpp.'+'cp.'+self.department_id.code
+            #sequence_code = 'ccpp.'+'cp.'+self.department_id.code
+            sequence_code = 'ccpp.'+'cp'
             code = self.env['ir.sequence'].next_by_code(sequence_code,sequence_date=sequence_date)
             self.code = code
             
@@ -391,7 +410,7 @@ class Project(models.Model):
     def check_information(self):
         for obj in self:
             if not obj.priority_id:
-                raise UserError("Please set impact to company")
+                raise UserError("กรุณาเลือกผลกระทบต่อบริษัทอย่างน้อย 1 ข้อ และเลือกระยะเวลาการแก้ไขปัญหา")
             if obj.priority_id.point > 2:
                 raise UserError("Please send only CCPP 1st and 2nd priority")
             if not obj.partner_id:
@@ -443,12 +462,12 @@ class Project(models.Model):
                 if solution_id.state not in ['done','waiting_approve']:
                     solution_id.state = 'cancel'
                 if solution_id.state == 'waiting_approve':
-                    raise UserError("Please check solution %s is state in Waiting Approve"%solution_id.name)
+                    raise UserError("Please check solution %s is state in Waiting For Approval"%solution_id.name)
                 for strategy_id in solution_id.child_ids:
                     if strategy_id.state not in ['done','waiting_approve']:
                         strategy_id.state = 'cancel'
                     if strategy_id.state == 'waiting_approve':
-                        raise UserError("Please check strategy %s is state in Waiting Approve"%strategy_id.name)
+                        raise UserError("Please check strategy %s is state in Waiting For Approval"%strategy_id.name)
         
     def button_to_open(self):
         for obj in self:
@@ -462,19 +481,31 @@ class Project(models.Model):
             
     def check_ccpp_delayed(self):
         date_today = datetime.now().strftime("%Y-%m-%d")
-        ccpp_ids = self.env['project.project'].search([('state','=','process'),('deadline_date','<',date_today)])
-        ccpp_ids.write({'is_delay': True})
+        ccpp_ids = self.env['project.project'].search([('state','=','process'),('deadline_date','<',date_today),('deadline_date','!=',False)])
+        ccpp_ids.write({'is_delay': True, 'delay_date': date_today})
         for ccpp_id in ccpp_ids:
             for solution_id in ccpp_id.tasks_solution:
                 if solution_id.state not in ['done','cancel']:
                     #solution_id.state = 'delay'
                     solution_id.is_delay = True
+                    solution_id.delay_date = date_today
                 for strategy_id in solution_id.child_ids:
                     if strategy_id.state not in ['done','cancel']:
                         #strategy_id.state = 'delay'
                         strategy_id.is_delay = True
+                        strategy_id.delay_date = date_today
+                        
+    def run_script_update(self):
+        ccpp_ids = self.env['project.project'].search([])
+        for ccpp_id in ccpp_ids:
+            for solution_id in ccpp_id.tasks_solution:
+                for strategy_id in solution_id.child_ids:
+                    if solution_id.start_date:
+                        strategy_id.start_date = solution_id.start_date
+                    if solution_id.deadline_date:
+                        strategy_id.deadline_date = solution_id.deadline_date
+
                 
-       
     # overide change color 
     @api.depends('last_update_status')
     def _compute_last_update_color(self):
@@ -482,15 +513,31 @@ class Project(models.Model):
             project.last_update_color = STATUS_COLOR[project.last_update_status]
     
     def action_open_solution(self):
-        solution_ids = self.env['project.task'].search([("project_id","=",self.id),("is_solution","=",True)])
+        #solution_ids = self.env['project.task'].search([("project_id","=",self.id),("is_solution","=",True)])
+        solution_ids = self.env['project.task'].search([("project_id","=",self.id)])
+        context = self.env.context.copy()
+        context = context.update({'search_default_groupby_task_type': 1})
+        #context = context.update({'default_groupby_task_type': 1})
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.action_solution_strategy_tree')
+        action['domain'] = [('id','in',solution_ids.ids)]
+        #action['context'] = {'search_default_groupby_task_type': 1}
+        action['context'] = context
+        #return action
+        print("XXX"*50)
+        print(context)
+        print(self._context)
+        print(self.env.context)
+        strategy_ids = self.env['project.task'].search([("project_id","=",self.id),('is_strategy','=',True)])
+        
         return {
             'name': self.name,
             'view_mode': 'tree,form',
             'res_model': 'project.task',
-            'domain': [('id','in',solution_ids.ids)],
+            'domain': [('id','in',strategy_ids.ids)],
             'type': 'ir.actions.act_window',
-            'context': self._context,
-            'views' : [(self.env.ref('ccpp.solution_tree').id, 'tree')]
+            'search_view_id': [self.env.ref('ccpp.strategy_search_form').id, 'search'],
+            'context': {'search_default_groupby_solution': 1},
+            'views' : [(self.env.ref('ccpp.solution_strategy_tree').id, 'tree'),(self.env.ref('project.view_task_form2').id, 'form')]
         }   
         
     @api.model
@@ -500,12 +547,42 @@ class Project(models.Model):
         return res
         
     def create_solution(self):
+        print("max"*50)
+        print(
+            "self_id", self.id
+        )
+        if not self.id:
+            raise UserError("กรุณากดบันทึก CCPP ก่อน")
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.open_view_task_all_ccpp')
-        action['context'] = {'is_create_solution': True, 'project_id': self.id, 'is_create_solution': True}
+        action['context'] = {'is_create_button_solution': True, 'project_id': self.id, 'is_create_solution': True}
+        return action
+    
+    def action_ccpp_department_approve_manager(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_ccpp_approve_dashboard_action')
+        department_id = self.env.user.employee_id.department_id
+        ccpp_ids = self.env['project.project'].search([('state', '=', 'waiting_approve'),
+                                                        ('department_id', '=', department_id.id),
+                                                        ])
+        action['domain'] = [('id','in',ccpp_ids.ids)]
+        return action
+    
+    def action_ccpp_department_group_by_priority_manager(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.action_all_ccpp_group_by_priority')
+        department_id = self.env.user.employee_id.department_id
+        ccpp_ids = self.env['project.project'].search([('department_id', '=', department_id.id)])
+        action['domain'] = [('id','in',ccpp_ids.ids)]
+        return action
+        
+    def action_ccpp_department_group_by_customer_manager(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.action_my_ccpp_group_by_customer')
+        department_id = self.env.user.employee_id.department_id
+        ccpp_ids = self.env['project.project'].search([('department_id', '=', department_id.id)])
+        action['domain'] = [('id','in',ccpp_ids.ids)]
         return action
         
 class Task(models.Model):
     _inherit = "project.task" 
+    _order = "code"
     #_rec_name = "code"
     
     def _get_default_level(self):
@@ -521,6 +598,10 @@ class Task(models.Model):
     is_strategy = fields.Boolean(string='Is Strategy', default=False, compute="_compute_level", store=True)
     is_task = fields.Boolean(string='Is Task', default=False, compute="_compute_level", store=True)
     is_subtask = fields.Boolean(string='Is SubTask', default=False, compute="_compute_level", store=True)
+    task_type = fields.Selection([
+        ('solution', 'Solution'),
+        ('strategy', 'Strategy'),
+    ], default="solution", string="Task Type", compute="_compute_level", store=True)
     project_solution_id = fields.Many2one("project.project", string="Relate Project Solution")
     code = fields.Char(string="Code")
     period_id = fields.Many2one("ccpp.period", string="Priority Period", related="project_id.period_id")
@@ -533,7 +614,7 @@ class Task(models.Model):
     last_situation_solution_id = fields.Many2one("project.update", string="Last Update Situation Solution") # last update at solution
     state = fields.Selection([
         ('open', 'Open'),
-        ('waiting_approve', 'Waiting Approve'),
+        ('waiting_approve', 'Waiting For Approval'),
         ('reject', 'Rejected'),
         ('process', 'On Process'),
         ('done', 'Done'),
@@ -563,11 +644,22 @@ class Task(models.Model):
     deadline_date = fields.Date(string="Deadline", compute="_compute_deadline", store=True)
     priority_line_id = fields.Date(string="Priority Line") # stamp when approve :fix me
     show_period = fields.Char(string="Period", compute="_compute_deadline", store=True)
-    is_delay = fields.Boolean(string="Is Delay")
-    is_ccpp_on_process = fields.Boolean(string="Is CCPP on process", compute="_is_on_process")
-    is_solution_on_approve = fields.Boolean(string="Is Solution on process", compute="_is_on_process")
+    is_delay = fields.Boolean(string="Is Delay", default=False)
+    delay_date = fields.Date(string="Delayed Date")
+    is_ccpp_on_process = fields.Boolean(string="Is CCPP on process", compute="_is_on_process", store=True)
+    is_solution_on_approve = fields.Boolean(string="Is Solution on process", compute="_is_on_process", store=True)
     user_ids = fields.Many2many(default=_default_user_ids)
+    priority_select = fields.Selection(related="project_id.priority_select")
     
+    
+    def unlink(self):
+        if self.is_solution:
+            raise UserError("ระบบไม่สามารถลบ Solution ได้ กรุณา cancel หากไม่ได้ใช้งาน")
+        if self.is_strategy:
+            raise UserError("ระบบไม่สามารถลบ Strategy ได้ กรุณา cancel หากไม่ได้ใช้งาน")
+        res = super().unlink()
+        
+    @api.depends("is_solution","project_id.state","is_strategy","parent_id.project_id.state","parent_id.state")
     def _is_on_process(self):
         for obj in self:
             is_ccpp_on_process = False
@@ -592,10 +684,10 @@ class Task(models.Model):
                 start_date_obj = obj.start_date
                 priority_line_id = obj.project_id.priority_id.lines.filtered(lambda o:o.active)
                 
-                #if not priority_line_id:
-                #    raise UserError("Please Configure Time Frequenzy for Priority %s"%(obj.project_id.priority_id.name))
-                #if len(priority_line_id) > 1:
-                #    raise UserError("Configure Time Frequenzy more than 1")
+                if not priority_line_id:
+                    raise UserError("Please Configure Time Frequenzy for Priority %s"%(obj.project_id.priority_id.name))
+                if len(priority_line_id) > 1:
+                    raise UserError("Configure Time Frequenzy more than 1")
                 
                 start_period_date_obj = priority_line_id.date
                 
@@ -673,6 +765,11 @@ class Task(models.Model):
                 
             obj.show_period = string_show_period
             obj.deadline_date = deadline_date
+            # write start date to strategy
+            for strategy_id in obj.child_ids:
+                strategy_id.show_period = string_show_period
+                strategy_id.deadline_date = deadline_date
+                strategy_id.start_date = obj.start_date
                 
     @api.depends('last_situation_id.status','last_situation_solution_id.status')
     def _compute_last_update_status(self):
@@ -701,8 +798,8 @@ class Task(models.Model):
             print("X"*100)
             print(self.env.context)
             print(self._context)
-            if self._context.get('project_id'):
-                vals['project_id'] = self._context.get('project_id')
+            #if self._context.get('project_id'):
+                #vals['project_id'] = self._context.get('project_id')
             #if self._context.get('is_solution',False) and not self._context.get('is_create_strategy',False) and self._context.get('active_id',False):
             #    params = self._context.get('params')
             #    if params:
@@ -721,16 +818,24 @@ class Task(models.Model):
             
             if rec.is_solution:
                 if rec.project_solution_id:
-                    rec.project_id = rec.project_solution_id
+                    rec.project_id = rec.project_solution_id.id
                 if rec.project_id:
-                    rec.project_solution_id = rec.project_id
+                    rec.project_solution_id = rec.project_id.id
+                if self._context.get('project_id') and self._context.get('is_create_button_solution'):
+                    rec.project_id = self._context.get('project_id')
+                    rec.project_solution_id = self._context.get('project_id')
             if rec.is_solution and rec.project_id.department_id:
                 if not rec.project_id.department_id.code:
                     raise UserError("Not recognize the department code. Please Configure code to Department to get the department code")
                 sequence_date = datetime.now().strftime("%Y-%m-%d")
-                sequence_code = 'ccpp.'+'sl.'+rec.project_id.department_id.code
+                #sequence_code = 'ccpp.'+'sl.'+rec.project_id.department_id.code
+                sequence_code = 'ccpp.'+'sl'
                 code = self.env['ir.sequence'].next_by_code(sequence_code,sequence_date=sequence_date)
                 rec.code = code
+            if rec.parent_id:
+                
+                rec.project_id = rec.parent_id.project_id.id or rec.parent_id.project_solution_id.id or self._context.get('project_id')
+            
             if rec.is_strategy and (rec.project_id.department_id or rec.project_solution_id.department_id or rec.parent_id.project_id.department_id or rec.parent_id.project_solution_id.department_id):
                 sequence_date = datetime.now().strftime("%Y-%m-%d")
                 code = ''
@@ -744,7 +849,8 @@ class Task(models.Model):
                     code = rec.parent_id.project_solution_id.department_id.code
                 else:
                     raise UserError("Not recognize the department code. Please Configure code to Department to get the department code")
-                sequence_code = 'ccpp.'+'st.'+ code
+                #sequence_code = 'ccpp.'+'st.'+ code
+                sequence_code = 'ccpp.'+'st'
                 code = self.env['ir.sequence'].next_by_code(sequence_code,sequence_date=sequence_date)
                 rec.code = code
             #if rec.is_task and rec.project_id.department_id:
@@ -752,8 +858,7 @@ class Task(models.Model):
             #    sequence_code = 'ccpp.'+'ta.'+rec.project_id.department_id.code
             #    code = self.env['ir.sequence'].next_by_code(sequence_code,sequence_date=sequence_date)
             #    rec.code = code
-            if rec.parent_id:
-                rec.project_id = rec.parent_id.project_id.id
+            
             
 
         return res
@@ -792,6 +897,10 @@ class Task(models.Model):
             obj.is_strategy = is_strategy
             obj.is_task = is_task
             obj.is_subtask = is_subtask
+            if is_solution:
+                obj.task_type = 'solution'
+            if is_strategy:
+                obj.task_type = 'strategy'
             
     @api.depends('child_ids')
     def _compute_subtask_count(self):
@@ -807,21 +916,27 @@ class Task(models.Model):
     def button_open_solution(self): 
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.open_view_task_all_ccpp')
         action['res_id'] = self.parent_id.id
+        action['context'] = {'active_id': self.parent_id.id}
         return action
     
     def button_open_project(self): 
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.open_view_project_all_ccpp')
         action['res_id'] = self.project_id.id
+        action['context'] = {'active_id': self.project_id.id}
         return action
     
     def action_open_task2(self):
-        return {
-            'view_mode': 'form',
-            'res_model': 'project.task',
-            'res_id': self.id,
-            'type': 'ir.actions.act_window',
-            'context': self._context
-        }
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.open_view_task_all_ccpp')
+        action['res_id'] = self.id
+        action['context'] = {'active_id': self.id}
+        #return {
+        #    'view_mode': 'form',
+        #    'res_model': 'project.task',
+        #    'res_id': self.id,
+        #    'type': 'ir.actions.act_window',
+        #    'context': self._context
+        #}
+        return action
     
     def solution_update_all_action(self):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.solution_update_all_action')
@@ -910,9 +1025,58 @@ class Task(models.Model):
         #longitude = location.longitude
         #print("lati -->> ",latitude, longitude)
         """
+        import socket   
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        print(s.getsockname()[0])
+        s.close()   
+        
+        
+
+        ip = requests.get('https://api.ipify.org').content.decode('utf8')
+        x = request.httprequest.environ['REMOTE_ADDR']
+        
+        headers = {"User-Agent": "Mozilla/5.0"}
+        r = requests.get('https://get.geojs.io/', headers=headers)
+        ip_request = requests.get('https://get.geojs.io/v1/ip.json', headers=headers)
+        ip_address = ip_request.json()['ip']
+        print("IP -->", ip_address)
+        url = 'https://get.geojs.io/v1/ip/geo/' + x +  '.json'
+        geo_request = requests.get(url, headers=headers)
+        geo_data = geo_request.json()
+        
+        print("new lati -->", geo_data['latitude'])
+        print("new long -->", geo_data['longitude'])
+        print("xxx->",x)
+        print('My public IP address is: {}'.format(ip))
+        
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)])
+        test = employee_id._attendance_action_change()
+        print("yyy-->",test)
         #print(resp_json_payload['results'][0]['geometry']['location'])
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.strategy_update_all_action')
         #action['display_name'] = _("%(name)s's Updates", name=self.name)
+        
+        
+
+        #gmaps = googlemaps.Client(key='AIzaSyD3nsr3IPMf1VheJjOyujfcDArTtQli0YM') key p'bank
+        gmaps = googlemaps.Client(key='AIzaSyD3nsr3IPMf1VheJjOyujfcDArTtQli0YM')
+
+        # Geocoding an address
+        geocode_result = gmaps.geocode('คณะแพทย์ศาสตร์ มหาลัยเชียงใหม่')
+
+        # Geolocation
+        geolocation_result = gmaps.geolocate(home_mobile_country_code=None,
+                                        home_mobile_network_code=None, 
+                                        radio_type=None, 
+                                        carrier=None,
+                                        consider_ip=True, 
+                                        cell_towers=None, 
+                                        wifi_access_points=None)
+
+        print("Location  : ",geolocation_result)
+        print("Geocoding : ")
+        pprint(geocode_result)
         return action
     
     def button_done(self):
@@ -924,6 +1088,8 @@ class Task(models.Model):
         for obj in self:
             obj.state = 'waiting_approve'
             #obj.parent_id.project_id.is_approve_strategy = True
+            obj.start_date = obj.parent_id.start_date
+            obj.deadline_date = obj.parent_id.deadline_date
             
     def button_send_approve_solution(self):
         for obj in self:
@@ -944,6 +1110,7 @@ class Task(models.Model):
     def button_approve_solution(self):
         for obj in self:
             obj.project_id.get_period_deadline()
+            obj.project_id.is_delay = False
             obj.state = 'process'
             for strategy_id in obj.child_ids:
                 if strategy_id.state == 'waiting_approve':
@@ -979,7 +1146,7 @@ class Task(models.Model):
                     if strategy_id.state not in ['waiting_approve','done']:
                         strategy_id.state = 'cancel'
                     if strategy_id.state == 'waiting_approve':
-                        raise UserError("Please check strategy %s is state in Waiting Approve"%strategy_id.name)
+                        raise UserError("Please check strategy %s is state in Waiting For Approval"%strategy_id.name)
             if obj.is_strategy:
                 obj.state = 'cancel'
                    
@@ -1015,16 +1182,50 @@ class Task(models.Model):
     #            obj.project_id.state = 'done'
 
     def action_open_strategy(self):
-        strategy_ids = self.env['project.task'].search([("parent_id","=",self.id),("is_strategy","=",True)])
+        #strategy_ids = self.env['project.task'].search([("parent_id","=",self.id),("is_strategy","=",True)])
+        #return {
+        #    'name': self.name,
+        #    'view_mode': 'tree,form',
+        #    'res_model': 'project.task',
+        #    'domain': [('id','in',strategy_ids.ids)],
+        #    'type': 'ir.actions.act_window',
+        #    'context': self._context,
+        #    'views' : [(self.env.ref('ccpp.strategy_tree').id, 'tree')]
+        #}   
         return {
             'name': self.name,
-            'view_mode': 'tree,form',
+            'view_mode': 'form',
             'res_model': 'project.task',
-            'domain': [('id','in',strategy_ids.ids)],
+            'res_id': self.id,
             'type': 'ir.actions.act_window',
             'context': self._context,
-            'views' : [(self.env.ref('ccpp.strategy_tree').id, 'tree')]
-        }   
+            'views' : [(self.env.ref('project.view_task_form2').id, 'form')]
+        }          
+    
+    def action_solution_department_approve_manager(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_solution_approve_dashboard_action')
+        department_id = self.env.user.employee_id.department_id
+        solution_ids = self.env['project.task'].search([('state', '=', 'waiting_approve'),
+                                                        ('project_id.department_id', '=', department_id.id),
+                                                        ('is_solution','=',True),
+                                                        ('state','=','waiting_approve'),
+                                                        ('is_ccpp_on_process','=',True),
+                                                        ])
+        action['domain'] = [('id','in',solution_ids.ids)]
+        return action
+    
+    def action_strategy_department_approve_manager(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_strategy_approve_dashboard_action')
+        department_id = self.env.user.employee_id.department_id
+        strategy_ids = self.env['project.task'].search([('state', '=', 'waiting_approve'),
+                                                        ('project_id.department_id', '=', department_id.id),
+                                                        ('is_strategy','=',True),
+                                                        ('state','=','waiting_approve'),
+                                                        ('is_ccpp_on_process','=',True),
+                                                        ('is_solution_on_approve','=',False),
+                                                        ])
+        action['domain'] = [('id','in',strategy_ids.ids)]
+        return action
 
 class ProjectUpdate(models.Model):
     _inherit = "project.update"
@@ -1039,6 +1240,12 @@ class ProjectUpdate(models.Model):
     date = fields.Datetime(default=lambda self: fields.datetime.now(), tracking=True)
     next_action = fields.Char(string="Next Action")
     task_id = fields.Many2one("account.analytic.line", string="Tasks")
+    latitude = fields.Float(string="Latitude", digits=(12,6))
+    longitude = fields.Float(string="Longitude", digits=(12,6))
+
+    def unlink(self):
+        res = super().unlink()
+        raise UserError("ระบบไม่สามารถลบเอกสารได้")
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -1052,7 +1259,8 @@ class ProjectUpdate(models.Model):
             if not update.code:
                 sequence_date = datetime.now().strftime("%Y-%m-%d")
                 try:
-                    sequence_code = 'ccpp.'+'ta.'+update.strategy_id.project_id.department_id.code
+                    #sequence_code = 'ccpp.'+'ta.'+update.strategy_id.project_id.department_id.code
+                    sequence_code = 'ccpp.'+'ta.'
                 except:
                     raise UserError("Please Check Sequence")
                 code = self.env['ir.sequence'].next_by_code(sequence_code,sequence_date=sequence_date)
@@ -1091,7 +1299,7 @@ class ProjectUpdate(models.Model):
             #result.update({'strategy_id':   result.get('project_id')})
             result.pop('project_id')
         print("Y"*100)
-        if 'strategy_id' in fields and not result.get('strategy_id'):
+        if 'strategy_id' in fields and not result.get('strategy_id') and not self.env.context.get("update_task"):
             print("Y"*100)
             strategy = self.env.context.get('active_id')
             result['strategy_id'] = strategy
@@ -1100,7 +1308,7 @@ class ProjectUpdate(models.Model):
             result['solution_id'] = strategy_id.parent_id.id
             result['customer_id'] = strategy_id.project_id.partner_id.id
         if 'task_id' in fields and self.env.context.get("update_task"):
-            task = self.env.context.get('active_id')
+            task = self.env.context.get('task_id')
             result['task_id'] = task
             task_id = self.env['account.analytic.line'].browse(task)
             result['project_id'] = task_id.project_id.id
@@ -1115,3 +1323,11 @@ class ProjectUpdate(models.Model):
     def _compute_color(self):
         for update in self:
             update.color = STATUS_COLOR[update.status]
+            
+    def get_location(self):
+        latitude = self.env.context.get("latitude", False)
+        longitude = self.env.context.get("longitude", False)
+        print("la-->",latitude)
+        print("long-->",longitude)
+        self.latitude = latitude
+        self.longitude = longitude

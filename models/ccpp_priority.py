@@ -32,7 +32,7 @@ class CCPPPrioirty(models.Model):
 class CCPPPrioirtyLine(models.Model):
     _name = "ccpp.priority.line"
 
-    priority_id = fields.Many2one("ccpp.priority", index=True, ondelete='cascade', readonly=True)
+    priority_id = fields.Many2one("ccpp.priority", index=True, ondelete='cascade', readonly=True, required=True)
     date = fields.Date(string="Start Date", required=True)
     frequency = fields.Selection(selection=[
         ('equal', 'Equal To'),

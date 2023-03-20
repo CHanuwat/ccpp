@@ -165,6 +165,7 @@ class CCPPPurchaseHistory(models.Model):
     total_use_qty = fields.Float(string="Total Used Qty", compute="_compute_total")
     note = fields.Text("Competitors' Sales Strategy")
     sale_person_id = fields.Many2one("hr.employee", string="Sales Person", required=True)
+    department_id = fields.Many2one("hr.department", string="Deparment", related="sale_person_id.department_id")
     user_id = fields.Many2one(related="sale_person_id.user_id", string="Sales User", store=True)
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
     company_partner_id = fields.Many2one("res.partner", string="Company Partner", related="company_id.partner_id")
@@ -234,6 +235,15 @@ class CCPPPurchaseHistory(models.Model):
                                                                             ])
                 if check_duplicate:
                     raise UserError("Customer %s already have Purchase History in year %s"%(obj.customer_id.name,obj.year_selection))
+
+    def action_purchase_history_manager(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_purchase_history_action')
+        department_id = self.env.user.employee_id.department_id
+        history_ids = self.env['ccpp.purchase.history'].search([
+                                                                ('department_id', '=', department_id.id),
+                                                                ])
+        action['domain'] = [('id','in',history_ids.ids)]
+        return action
             
 class CCPPPurchaseHistory(models.Model):
     _name = "ccpp.purchase.history.line"
@@ -294,5 +304,8 @@ class CCPPPurchaseHistory(models.Model):
             action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_purchase_history_action_form')
             action['res_id'] = obj.history_id.id
             return action
+        
+        
+
     
     

@@ -35,8 +35,14 @@
                         <field name="is_competitor"/>
                         <label class="o_label" for="is_competitor" string="Competitor"/>
                     </div>
-                    <div></div>
-                    <div></div>
+                    <div>
+                        <field name="is_potential"/>
+                        <label class="o_label" for="is_potential" string="Potential"/>
+                    </div>
+                    <div>
+                        <field name="is_employee"/>
+                        <label class="o_label" for="is_employee" string="Employee"/>
+                    </div>
                 </div>
             </xpath>
         </field>
@@ -107,6 +113,7 @@
         <field name="arch" type="xml">
             <tree sample="1" multi_edit="1" editable="top" string="Tree Partner Position">
                 <field name="name"/>
+                <field name="type" readonly="True"/>
                 <field name="active" widget="boolean_toggle"/>
             </tree>
         </field>
@@ -121,6 +128,7 @@
                     <group>
                         <group>
                             <field name="name"/>
+                            <field name="type" readonly="True"/>
                             <field name="active" widget="boolean_toggle"/>
                         </group>
                     </group> 

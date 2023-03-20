@@ -60,6 +60,14 @@ odoo.define('rocker_timesheet.calendar-button', function(require) {
 
     }
 
+    var RockerCalendarRenderer = CalendarRenderer.extend({
+        init: function () {
+                        debugger
+                        this._super.apply(this, arguments);
+                        console.log('Rocker model init');
+                    },
+
+    });
 
     var RockerCalendarController = CalendarController.extend({
         events: _.extend({}, CalendarController.prototype.events, {
@@ -205,7 +213,7 @@ odoo.define('rocker_timesheet.calendar-button', function(require) {
 
     var RockerCalendarView = CalendarView.extend({
         config: _.extend({}, CalendarView.prototype.config, {
-//            CalendarRenderer: RockerCalendarRenderer,
+            CalendarRenderer: RockerCalendarRenderer,
             Controller: RockerCalendarController,
             CalendarModel: RockerCalendarModel,
        }),
@@ -213,7 +221,9 @@ odoo.define('rocker_timesheet.calendar-button', function(require) {
            init: function (viewInfo, params) {
                 console.log('Rocker view init');
                 var self = this;
+                
                 this._super.apply(this, arguments);
+                debugger
                 var res = get_rocker_defaults();
                 defaultModeSet = false;   // change view mode only once
 //                console.log(this);

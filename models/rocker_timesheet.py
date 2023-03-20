@@ -18,7 +18,7 @@
 #
 #############################################################################
 
-from odoo import api, fields, models, _
+from odoo import api, fields, models, _, exceptions
 from odoo.exceptions import UserError, AccessError, Warning
 from odoo import tools
 from datetime import timedelta, datetime, date, time, timezone
@@ -49,6 +49,7 @@ class RockerTimesheet(models.Model):
     _inherit = 'account.analytic.line'
     _name = 'account.analytic.line'
     _order = "start desc"
+    #_rec_name = "display_name"
 
     @api.model
     def _default_user(self):
@@ -335,12 +336,19 @@ class RockerTimesheet(models.Model):
                 return search_task.project_id.partner_id
         return None
 
-    @api.model
     def _domain_customer(self):
         customer_ids = self.env['ccpp.customer.information'].search([('user_id','=',self.env.user.id)]).mapped('customer_id')
         print('cus ids --->',customer_ids)
         domain = [('id', 'in', customer_ids.ids)]   
         return domain
+    
+    def _get_default_customer(self):
+        customer_id = self.env['res.partner']
+        print("U"*50)
+        print(self._context)
+        if self._context.get('default_customer_id'):
+            customer_id = self._context.get('default_customer_id')
+        return customer_id
 
     # existing fields
     company_id = fields.Many2one('res.company', "Company", default=lambda self: self.env.company, store=True,
@@ -367,7 +375,7 @@ class RockerTimesheet(models.Model):
     name = fields.Char(required=False, default=_default_name)
 
     # new fields
-    display_name = fields.Char('Description', required=False, store=False, compute='_compute_display_name')
+    display_name = fields.Text('Display Name', required=False, store=False, compute='_compute_display_name')
     rocker_type = fields.Selection([
         ('internal', 'Internal'),
         ('billable', 'Billable'),
@@ -411,12 +419,99 @@ class RockerTimesheet(models.Model):
     department_id = fields.Many2one('hr.department', "Department", compute='_compute_department_id', store=True,
                                     compute_sudo=True)
     unit_amount = fields.Float('Actual Work', default=_default_work, required=True, help="Work amount in hours")
-    customer_id = fields.Many2one("res.partner", string="Customer", domain=_domain_customer)
+    customer_id = fields.Many2one("res.partner", string="Customer", required=True, default=_get_default_customer)
+    domain_customer_ids = fields.Many2many("res.partner", string="Domain Customer", compute="_compute_domain_customer_ids")
     customer_potential_id = fields.Many2one("res.partner", string="Customer Potential")
     state = fields.Selection(selection=[
         ('open', 'Open'),
         ('done', 'Done'),
     ], default='open', string="Status") 
+    account_id = fields.Many2one(required=False)
+    is_go_ccpp_customer = fields.Boolean("CCPP Customer")
+    is_go_potential = fields.Boolean("Potential")
+    priority_id = fields.Many2one('ccpp.priority', string="Priority")
+    domain_ccpp_ids = fields.Many2many("project.project", string="Domain CCPP", compute="_compute_domain_ccpp_ids")
+    domain_solution_ids = fields.Many2many("project.task", string="Domain Solution", compute="_compute_domain_solution_ids")
+    domain_strategy_ids = fields.Many2many("project.task", string="Domain Strategy", compute="_compute_domain_strategy_ids")
+    log_lines = fields.One2many("account.analytic.line.log", "analytic_line_id", string="Log")
+
+    def duplicate_task(self):
+        for obj in self:
+            new_task = obj.copy()
+        
+        return {
+            'name': new_task.name,
+            'view_mode': 'calendar',
+            'res_model': 'account.analytic.line',
+            'type': 'ir.actions.act_window',
+            'context': self._context,
+            'views' : [(self.env.ref('ccpp.rocker_timesheet_calendar').id, 'calendar')],
+            'target' : 'main'
+        }  
+
+    @api.onchange("is_go_ccpp_customer") 
+    def onchange_is_go_ccpp_customer(self):
+        for obj in self:
+            if obj.is_go_ccpp_customer:
+                obj.is_go_potential = False
+                obj.customer_id = False
+                
+    @api.onchange("is_go_potential") 
+    def onchange_is_go_potential(self):
+        for obj in self:
+            if obj.is_go_potential:
+                obj.is_go_ccpp_customer = False
+                obj.customer_id = False
+                
+    @api.depends("customer_id","priority_id")
+    def _compute_domain_ccpp_ids(self):
+        for obj in self:           
+            domain = [('user_id','=',self.env.user.id),('state','=','process')]
+            if obj.customer_id:
+                domain.append(('partner_id','=',obj.customer_id.id))
+            if obj.priority_id:
+                domain.append(('priority_id','=',obj.priority_id.id))
+            ccpp_ids = self.env['project.project'].search(domain)
+            obj.domain_ccpp_ids = ccpp_ids.ids
+            
+    @api.depends("project_id")
+    def _compute_domain_solution_ids(self):
+        for obj in self:           
+            domain = [('state','=','process')]
+            if obj.project_id:
+                domain.append(('project_id','=',obj.project_id.id))
+            solution_ids = self.env['project.task'].search(domain)
+            obj.domain_solution_ids = solution_ids.ids
+            
+    @api.depends("project_id","task_id")
+    def _compute_domain_strategy_ids(self):
+        for obj in self:
+            domain = [('state','=','process')]
+            if obj.project_id:
+                domain.append(('project_id','=',obj.project_id.id))
+            if obj.task_id:
+                domain.append(('parent_id','=',obj.task_id.id))
+            strategy_ids = self.env['project.task'].search(domain)
+            obj.domain_strategy_ids = strategy_ids
+                             
+    @api.depends("is_go_ccpp_customer","is_go_potential","priority_id")
+    def _compute_domain_customer_ids(self):
+        for obj in self:
+            customer_ids = self.env['res.partner']
+            if obj.is_go_ccpp_customer:
+                customer_ids = self.env['project.project'].search([('user_id','=',self.env.user.id),
+                                                                   ('state','=','process')]).mapped('partner_id')
+            if obj.is_go_ccpp_customer and obj.priority_id:
+                customer_ids = self.env['project.project'].search([('user_id','=',self.env.user.id),
+                                                                   ('state','=','process'),
+                                                                   ('priority_id','=',obj.priority_id.id)]).mapped('partner_id')
+            if obj.is_go_potential:
+                year = str(datetime.now().year)
+                customer_ids = self.env['ccpp.customer.information'].search([('user_id','=',self.env.user.id),
+                                                                             ('active','=',True),
+                                                                             ('year_selection','=',year),
+                                                                             ('type','=','customer')], order="potential_ranking").mapped('customer_id')
+            obj.domain_customer_ids = customer_ids.ids
     
     def _compute_customer(self):
         customer_ids = self.env['ccpp.customer.information'].search([('user_id','=',self.env.user.id)]).mapped('customer_id')
@@ -460,8 +555,10 @@ class RockerTimesheet(models.Model):
     @api.depends('name','unit_amount')
     def _compute_display_name(self):
         # _logger.debug('api depends name')
+        #for line in self:
+            #line.display_name = "%s %s %s %s %0.1f %s" % (line.task_id.name , ': ' , line.name, ' - ', line.unit_amount or 0, ' h')
         for line in self:
-            line.display_name = "%s %s %s %s %0.1f %s" % (line.task_id.name , ': ' , line.name, ' - ', line.unit_amount or 0, ' h')
+            line.display_name = "%s - %s" % (line.name,line.customer_id.name)
 
     @api.depends('user_id')
     def _compute_employee_id(self):
@@ -489,6 +586,8 @@ class RockerTimesheet(models.Model):
     @api.model
     def create(self, vals):
         # creation from hr_timesheet or time_off: set stop & duration
+        if not vals['is_go_ccpp_customer'] and not vals['is_go_potential']:
+            raise UserError("Please select CCPP Customer or Potential")
         if 'date' in vals and not 'start' in vals:
             _logger.debug('Creation comes somewhere else than Rocker')
             global default_start_time
@@ -548,7 +647,7 @@ class RockerTimesheet(models.Model):
         _selected_id = -1
         if vals.get('task_id') == False:
             # _logger.debug('Task selected from searchpanel')
-            _selected_id = _get_search_id()
+            _selected_id = self._get_search_id()
             if _selected_id > 0:
                 # _logger.debug('Selected id set, search task...')
                 search_task = self.env['project.task'].search([('id', '=', _selected_id)], limit=1)
@@ -557,9 +656,10 @@ class RockerTimesheet(models.Model):
                     return False
                 vals['task_id'] = search_task.id
                 vals['project_id'] = search_task.project_id.id
-            else:
-                raise UserError(_('Select Project & Task from drop-down fields'))
+            #else:
+                #raise UserError(_('Select Project & Task from drop-down fields'))
         if vals['name'] == False:
+            _name = 'new'
             if vals.get('task_id'):
                 _name = self.env['project.task'].browse(vals['task_id']).name
             if _name:
@@ -573,6 +673,8 @@ class RockerTimesheet(models.Model):
             project = self.env['project.project'].search([('id', '=', task.project_id.id)], limit=1)
             # _logger.debug('Added account_id: ' + str(project.analytic_account_id))
             vals['account_id'] = project.analytic_account_id.id
+            if not project.analytic_account_id.id:
+                vals['account_id'] = 1
         record = super(RockerTimesheet, self).create(vals)
         global daystocreate
         if daystocreate > 0:
@@ -604,6 +706,91 @@ class RockerTimesheet(models.Model):
             return False
 
     def write(self, vals):
+        if self.state == 'done':
+            raise UserError("Cannot edit task in state done.")
+        if (('name' in vals and vals['name'] != self.name) or \
+        ('priority_id' in vals and vals['priority_id'] != self.priority_id.id) or \
+        ('customer_id' in vals and vals['customer_id'] != self.customer_id.id) or \
+        ('start' in vals and vals['start'] != str(self.start)) or \
+        ('stop' in vals and vals['stop'] != str(self.stop)) or \
+        ('project_id' in vals and vals['project_id'] != self.project_id.id) or \
+        ('task_id' in vals and vals['task_id'] != self.task_id.id) or \
+        ('task_strategy_id' in vals and vals['task_strategy_id'] != self.task_strategy_id.id)) and self.id:
+            
+            log_text = ''
+            log_vals = {'analytic_line_id': self.id,
+                        'sequence': int(len(self.log_lines)) + 1,
+                        'date': datetime.now(),
+                        'user_id': self.env.user.id}
+        
+            if 'name' in vals and vals['name'] != self.name:
+                name = vals['name']
+                log_text += 'From Task : %s \n'%(self.name)
+                log_text += 'To Task      : %s \n'%(name)
+                log_vals.update({'name_from': self.name,
+                                 'name_to': vals['name']})
+            
+            if 'priority_id' in vals and vals['priority_id'] != self.priority_id.id:
+                priority = vals['priority_id']
+                priority_id = self.env['ccpp.priority'].browse(priority)
+                log_text += 'From Priority : %s \n'%(self.priority_id.name)
+                log_text += 'To Priority      : %s \n'%(priority_id.name)
+                log_vals.update({'priority_id_from': self.priority_id.id,
+                                 'priority_id_to': priority})
+                
+            if 'customer_id' in vals and vals['customer_id'] != self.customer_id.id:
+                customer = vals['customer_id']
+                customer_id = self.env['res.partner'].browse(customer)
+                log_text += 'From Customer : %s \n'%(self.customer_id.name)
+                log_text += 'To Customer      : %s \n'%(customer_id.name)
+                log_vals.update({'customer_id_from': self.customer_id.id,
+                                 'customer_id_to': customer})
+                
+            if 'start' in vals and vals['start'] != str(self.start):
+                start = vals['start']
+                start_show = datetime.strptime(start,"%Y-%m-%d %H:%M:%S") + timedelta(hours=7)
+                start_show = start_show.strftime("%d-%m-%Y %H:%M:%S")
+                log_text += 'From From : %s \n'%((self.start + timedelta(hours=7)).strftime("%d-%m-%Y %H:%M:%S"))
+                log_text += 'To From      : %s \n'%(start_show)
+                log_vals.update({'start_from': self.start,
+                                 'start_to': start})
+                
+            if 'stop' in vals and vals['stop'] != str(self.stop):
+                stop = vals['stop']
+                stop_show = datetime.strptime(stop,"%Y-%m-%d %H:%M:%S") + timedelta(hours=7)
+                stop_show = stop_show.strftime("%d-%m-%Y %H:%M:%S")
+                log_text += 'From To : %s \n'%((self.stop + timedelta(hours=7)).strftime("%d-%m-%Y %H:%M:%S"))
+                log_text += 'To To      : %s \n'%(stop_show)
+                log_vals.update({'stop_from': self.stop,
+                                 'stop_to': stop})
+                
+            if 'project_id' in vals and vals['project_id'] != self.project_id.id:
+                project = vals['project_id']
+                project_id = self.env['project.project'].browse(project)
+                log_text += 'From CCPP : %s \n'%(self.project_id.name)
+                log_text += 'To CCPP      : %s \n'%(project_id.name)
+                log_vals.update({'project_id_from': self.project_id.id,
+                                 'project_id_to': project})
+                
+            if 'task_id' in vals and vals['task_id'] != self.task_id.id:
+                task = vals['task_id']
+                task_id = self.env['project.task'].browse(task)
+                log_text += 'From Solution : %s \n'%(self.task_id.name)
+                log_text += 'To Solution      : %s \n'%(task_id.name)
+                log_vals.update({'task_id_from': self.task_id.id,
+                                 'task_id_to': task})
+                
+            if 'task_strategy_id' in vals and vals['task_strategy_id'] != self.task_strategy_id.id:
+                task_strategy = vals['task_strategy_id']
+                task_strategy_id = self.env['project.task'].browse(task_strategy)
+                log_text += 'From Strategy : %s \n'%(self.task_strategy_id.name)
+                log_text += 'To Strategy      : %s \n'%(task_strategy_id.name)
+                log_vals.update({'task_strategy_id_from': self.task_strategy_id.id,
+                                 'task_strategy_id_to': task_strategy})
+                            
+            log_vals.update({'log_text': log_text})
+            self.env['account.analytic.line.log'].create(log_vals)
+                
         _logger.debug('Write')
         # _logger.debug(self.holiday_id)
         # calendar changes duration if moved/sized but not unit_amount/work
@@ -626,6 +813,7 @@ class RockerTimesheet(models.Model):
         if vals.get('duration'):
             if vals['duration'] > 24:
                 raise UserError(_('One timesheet row per day...duration can not exceed 24'))
+            
         result = super(RockerTimesheet, self).write(vals)
         return result
 
@@ -915,9 +1103,36 @@ class RockerTimesheet(models.Model):
             obj.state = 'open'
             
     def update_situation(self):
-        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.task_timesheet_update_all_action')
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.task_timesheet_update_all_action_form')
+        action['context'] = {'task_id': self.id, 'update_task': True, 'active_id': self.project_id.id}
         return action
     
     def open_current_situation(self):
-        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.task_timesheet_update_all_action')
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.task_timesheet_update_all_action_tree')
         return action
+    
+class AccountAnalyticLineLog(models.Model):
+    _name = "account.analytic.line.log"
+    _order = "sequence"
+    
+    analytic_line_id = fields.Many2one("account.analytic.line", index=True, ondelete='cascade', readonly=True, required=True)
+    sequence = fields.Integer(string="No.")
+    name_from = fields.Char(string="From Task")
+    name_to = fields.Char(string="To Task")
+    priority_id_from = fields.Many2one("ccpp.priority", string="From Priority")
+    priority_id_to = fields.Many2one("ccpp.priority", string="To Priority")
+    customer_id_from = fields.Many2one("res.partner", string="From Customer")
+    customer_id_to = fields.Many2one("res.partner", string="To Customer")
+    start_from = fields.Datetime(string="From From")
+    start_to = fields.Datetime(string="To From")
+    stop_from = fields.Datetime(string="From To")
+    stop_to = fields.Datetime(string="To To")
+    project_id_from = fields.Many2one("project.project", string="From CCPP")
+    project_id_to = fields.Many2one("project.project", string="To CCPP")
+    task_id_from = fields.Many2one("project.task", string="From Solution")
+    task_id_to = fields.Many2one("project.task", string="To Solution")
+    task_strategy_id_from = fields.Many2one("project.task", string="From Strategy")
+    task_strategy_id_to = fields.Many2one("project.task", string="To Strategy")
+    user_id = fields.Many2one("res.users", string="User",default=lambda self: self.env.user)
+    log_text = fields.Text(string="Text")
+    date = fields.Datetime(string="Date")

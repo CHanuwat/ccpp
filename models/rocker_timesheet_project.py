@@ -151,7 +151,7 @@ class RockerTask(models.Model):
 class RockerProject(models.Model):
     _inherit = 'project.project'
     _name = 'project.project'
-    _description = 'Rocker Project'
+    _description = 'CCPP'
     _order = 'sequence, id'
 
     rocker_type = fields.Selection([
@@ -171,8 +171,23 @@ class RockerProject(models.Model):
             'view_type': 'form',
             'view_mode': 'form',
             'view_id': form_id.id,
-            'context': {},
-            'target': 'main',
+            'context': {'active_id': self.id},
+        }
+class RockerTask(models.Model):
+    _inherit = 'project.task'
+           
+    def open_solution_strategy_edit_form(self):
+        rec_id = self.env.context.get('active_id')
+        form_id = self.env.ref('project.view_task_form2')
+        return {
+            'name': 'Edit Solution/Strategy',
+            'type': 'ir.actions.act_window',
+            'res_model': 'project.task',
+            'res_id':  rec_id,
+            'view_type': 'form',
+            'view_mode': 'form',
+            'view_id': form_id.id,
+            'context': {'active_id': self.id},
         }
 
 class CustomerPotential(models.Model):

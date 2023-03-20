@@ -23,11 +23,18 @@
     </record>
 
     <!-- project update -->
-    <record id="task_timesheet_update_all_action" model="ir.actions.act_window">
+    <record id="task_timesheet_update_all_action_tree" model="ir.actions.act_window">
         <field name="name">Task Updates</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">project.update</field>
         <field name="domain">[('task_id', '=', active_id)]</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="task_timesheet_update_all_action_form" model="ir.actions.act_window">
+        <field name="name">Task Updates</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">project.update</field>
         <field name="context">{'update_task': True}</field>
         <field name="view_mode">form</field>
     </record>
@@ -102,12 +109,19 @@
         <field name="inherit_id" ref="project.project_update_view_form"/>
         <field eval="101" name="priority"/>
         <field name="arch" type="xml">
+            <xpath expr="//form[1]" position="attributes">
+                <attribute name="js_class">ccpp_location</attribute>
+            </xpath>
             <xpath expr="//field[@name='project_id']" position="replace">
-                <field name="task_id"/>
-                <field name="solution_id" readonly="True"/>
-                <field name="strategy_id" readonly="True"/>
-                <field name="customer_id"/>
+                <field name="task_id" string="Task" readonly="True"/>
+                <field name="customer_id" string="Customer" readonly="True"/>
+                <field name="project_id" string="CCPP" readonly="True"/>
+                <field name="solution_id" string="Solution" readonly="True"/>
+                <field name="strategy_id" string="Strategy" readonly="True"/>
+                <!--<field name="latitude"/>
+                <field name="longitude"/>
                 <field name="location"/>
+                <button name="get_location" type="object" class="btn-success o_hr_attendance_sign_in_out_icon" string="Get Location"/>-->
             </xpath>
             <xpath expr="//field[@name='name']" position="attributes">
                 <attribute name="placeholder">Enter Current Situation</attribute>
@@ -171,6 +185,12 @@
         <field name="inherit_id" ref="project.view_project_kanban"/>
         <field name="priority">201</field>
         <field name="arch" type="xml">
+            <xpath expr="//kanban[1]" position="attributes">
+                <attribute name="delete">0</attribute>
+            </xpath>
+            <xpath expr="//kanban[1]/templates[1]/t[1]/div[1]" position="attributes">
+                <attribute name="min-height">50px</attribute>
+            </xpath>
             <xpath expr="//kanban[1]/field[@name='label_tasks']" position="after">
                 <field name="code"/>
                 <field name="name"/>
@@ -182,35 +202,59 @@
             </xpath>
             <xpath expr="//kanban[1]/templates[1]/t[1]/div[1]/div[1]/div[1]/div[1]/div[1]" position="replace">
                 <div class="o_primary">
-                    <span class="o_text_overflow" t-att-title="record.code.value"><t t-esc="record.code.value"/></span>
-                    <span class="o_text_overflow text-muted" t-if="record.partner_id.value">
-                        <span class="fa fa-address-card me-2" aria-label="Partner" title="Partner"/><t t-esc="record.partner_id.value"/>
-                    </span><br/>
-                    <span class="o_text_overflow text-muted" style="padding-bottom:5px;" t-if="record.partner_contact_id.value">
-                        <span class="fa fa-user me-2" aria-label="Partner" title="Partner"/><t t-esc="record.partner_contact_id.value"/>
-                    </span><br/>
+                    <!--<span class="o_text_overflow" t-att-title="record.code.value"><t t-esc="record.code.value"/></span>-->
+                    <span></span>
+                    <t t-if="record.partner_id.value"> 
+                        <span class="o_text_overflow text-muted" >
+                            <span class="fa fa-address-card me-2" aria-label="Partner" title="Partner" style="color:#0D49FD" t-if="record.partner_id.value"/>
+                            <span t-if="record.partner_id.value" style="color:#0D49FD">
+                                <t t-esc="record.partner_id.value"/>
+                            </span>
+                        </span>
+                    </t>
+                    <br t-if="record.partner_id.value"/>
+                    <t t-if="record.partner_contact_id.value">
+                        <span class="o_text_overflow text-muted" style="padding-bottom:5px; color:#0D49FD;" t-if="record.partner_contact_id.value">
+                            <span class="fa fa-user me-2" aria-label="Partner" title="Partner" style="color:#0D49FD" t-if="record.partner_contact_id.value"/>
+                            <span t-if="record.partner_contact_id.value" style="color:#0D49FD">
+                                <t t-esc="record.partner_contact_id.value"/>
+                            </span>
+                        </span>
+                    </t>
+                    <br t-if="record.partner_contact_id.value"/>
                     <span t-if="record.name.value">
                         <span/><t t-esc="record.name.value"/>
-                    </span><br/>
+                    </span>
+                    <br t-if="record.name.value"/>
+                    <t t-if="record.next_action.value">
+                        <span style="padding-left:10px;" t-if="record.next_action.value">
+                            <span class="fa fa-tasks me-2" style="color:green;" t-if="record.next_action.value"/>
+                            <t t-esc="record.next_action.value"/> 
+                            <span t-if="record.next_action.value" class="fa fa-clock-o me-2"/>
+                        </span>
+                    </t>
+                </div>
+                    
+                   
                 
-                    <field style="padding-top:8px; padding-bottom:5px;" t-if="record.last_update_id.value &amp;&amp; widget.editable" name="last_update_status" widget="project_state_selection" options="{'color_field': 'last_update_color', 'hide_label': 1}" attrs="{'invisible':[('last_update_status','=',False)] }"/>
+                    <!--<field style="padding-top:8px; padding-bottom:5px;" t-if="record.last_update_id.value &amp;&amp; widget.editable" name="last_update_status" widget="project_state_selection" options="{'color_field': 'last_update_color', 'hide_label': 1}" attrs="{'invisible':[('last_update_status','=',False)] }"/>
                     <span style="padding-top:5px; padding-bottom:5px;" class="o_text_overflow text-primary" t-if="record.last_update_id.value">
                         <span class="me-2"/><t t-esc="record.last_update_id.value"/>
-                    </span><br/>
+                    </span><br/>-->
                     
-                </div>
+                
             </xpath>
             <xpath expr="//kanban[1]/templates[1]/t[1]/div[1]/div[2]" position="replace">
-                <div class="o_kanban_record_bottom mt-3" t-if="record.next_action.value">      
+                <!--<div class="o_kanban_record_bottom mt-3" t-if="record.next_action.value">      
                     <div class="oe_kanban_bottom_left">
                       <span style="padding-left:25px;" t-if="record.next_action.value">
                         <span class="fa fa-tasks me-2" style="color:green;"/><t t-esc="record.next_action.value"/> <span class="fa fa-clock-o me-2"/>
                     </span><br/>
                     </div>
-                    <!--<div class="oe_kanban_bottom_right">
+                    <div class="oe_kanban_bottom_right">
                         <field name="user_id" widget="many2one_avatar_user" t-if="record.user_id.raw_value"/>
-                    </div>-->
-                </div>
+                    </div>
+                </div>-->
             </xpath>
         </field>
     </record>
@@ -220,7 +264,7 @@
         <field name="res_model">project.task</field>
         <field name="view_mode">form</field>
         <field name="view_id" ref="project.view_task_form2"/>
-        <field name="target">main</field>
+        <field name="target"></field>
     </record>  
 
     <!-- ccpp project form view -->
@@ -230,19 +274,34 @@
         <field name="inherit_id" ref="project.edit_project"/>
         <field eval="101" name="priority"/>
         <field name="arch" type="xml">
+            <xpath expr="//form[1]" position="attributes">
+                <attribute name="delete">false</attribute>
+            </xpath>
             <xpath expr="//form[1]/sheet[1]/div[1]/button[1]" position="before">
-                <span style="padding-left:30px; padding-top:5px" class="oe_left">
+                <field name="is_delay" invisible="True"/>
+                <span style="padding-left:30px; padding-top:5px" class="oe_left" attrs="{'invisible':[('is_delay','=',True)]}">
                     <h1>CCPP</h1>
+                </span>
+                <span style="padding-left:30px; padding-top:5px color:red;" class="oe_left" attrs="{'invisible':[('is_delay','=',False)]}">
+                    <h1 style="color:red; padding-top:5px">CCPP Delayed</h1>
                 </span>
             </xpath>
             <xpath expr="//form[1]/header[1]/field[@name='stage_id']" position="replace">
                 <field name="state" widget="statusbar"/>
             </xpath>
+            <xpath expr="//form[1]/sheet[1]/div[2]" position="replace">
+                <div style="padding-bottom:10px; word-break: break-word;">
+                    <h3 class="d-flex flex-row">
+                        <field name="is_favorite" nolabel="1" widget="boolean_favorite" class="me-2" readonly="1"/>
+                        <field name="name" widget="text" class="o_text_overflow" placeholder="CCPP Name" attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"/>
+                    </h3>
+                </div>
+            </xpath>
             <xpath expr="//form[1]/header[1]/button[1]" position="before">
                 <field name="is_ccpp_done" invisible="True"/>
                 <button name="button_send_approve" string="Send Approve" type="object" class="btn-primary" states="open"/>
-                <button name="button_approve" string="Approve" type="object" class="btn-primary" states="waiting_approve"/>
-                <button name="button_reject" string="Reject" type="object" class="btn-danger" states="waiting_approve"/>
+                <button name="button_approve" string="Approve" type="object" class="btn-primary" states="waiting_approve" groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>
+                <button name="button_reject" string="Reject" type="object" class="btn-danger" states="waiting_approve" groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>
                 <button name="button_done" string="Done" type="object" class="btn-success" attrs="{'invisible': ['|',('state','!=','process'),('is_ccpp_done','=',False)]}"/>
                 <button name="button_cancel" string="Cancel" type="object" states="open,process"/>
                 <button name="button_to_open" string="To Open" type="object" class="btn-primary" states="reject"/>
@@ -308,13 +367,13 @@
             </xpath>-->
             <xpath expr="//form[1]/sheet[1]/group[1]/group[1]/field[@name='partner_id']" position="attributes">
                 <attribute name="domain">['|',('company_id','=',company_id),('company_id','=',False),('is_customer','=',True)]</attribute>
-                <attribute name="attrs">{'readonly': [('state', 'in', ['process','done','cancel','delay'])]}</attribute>
+                <attribute name="attrs">{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}</attribute>
                 <attribute name="options">{'no_create':True}</attribute>
             </xpath>
             <xpath expr="//form[1]/sheet[1]/group[1]/group[1]/field[@name='partner_id']" position="after">
                 <field name="domain_partner_contact_ids" invisible="True"/>
                 <field name="partner_contact_id" widget="res_partner_many2one" domain="[('id','in',domain_partner_contact_ids)]" options="{'no_create':True}"
-                context="{'show_title_position':True}" attrs="{'readonly': [('state', 'in', ['process','done','cancel','delay'])]}"/> <!--options="{'no_create':True}"/>-->
+                context="{'show_title_position':True}" attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"/> <!--options="{'no_create':True}"/>-->
                 <!--<field name="domain_job_position_ids" invisible="True"/>
                 <field name="job_position_id" domain="[('id','in',domain_job_position_ids)]" options="{'no_create': True, 'no_open': True}"/>-->
             </xpath>
@@ -339,8 +398,8 @@
                 <page name="Information" string="Information">
                     <group>
                         <group>
-                            <field name="department_id" attrs="{'readonly': [('state', 'in', ['process','done','cancel','delay'])]}"/> 
-                            <field name="user_id" attrs="{'readonly': [('state', 'in', ['process','done','cancel','delay'])]}"/>
+                            <field name="department_id" attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"/> 
+                            <field name="user_id" attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"/>
                         </group>
                     </group>
                 </page>
@@ -348,13 +407,15 @@
 
             <xpath expr="//form[1]/sheet[1]/notebook[1]/page[1]" position="before">
                 <page name="solutions" string="Solutions" >
-                    <button name="create_solution" type="object" string="Create Solution" class="btn-success" attrs="{'invisible': [('id','=',False)]}"/>
-                    <field name="tasks_solution" context="{'is_create_solution': True, 'project_id': active_id, 'default_project_id': active_id}" 
-                    attrs="{'readonly': [('state', 'in', ['done','cancel','delay'])]}" >
-                        <tree decoration-muted="is_closed == True" create="1" delete="1" edit="1">
-                            <field name="legend_normal" invisible="1"/>
+                    <field name="is_ready_create_solution" invisible="True"/>
+                    <button name="create_solution" type="object" string="Create Solution" class="btn-success" style="padding-bottom:20px" 
+                    attrs="{'invisible':[('is_ready_create_solution','=',False)]}"/>
+                    <field name="tasks_solution" style="padding-top:20px" context="{'is_create_solution': True, 'project_id': active_id, 'default_project_id': active_id}" 
+                    attrs="{'readonly': [('state','not in',['open'])]}" >
+                        <tree decoration-muted="is_closed == True" create="0" delete="0" edit="1">
+                            <!--<field name="legend_normal" invisible="1"/>
                             <field name="legend_done" invisible="1"/>
-                            <field name="legend_blocked" invisible="1"/>
+                            <field name="legend_blocked" invisible="1"/>-->
                             <field name="project_id" invisible="1"/>
                             <field name="is_closed" invisible="1"/>
                             <field name="allow_milestones" invisible="1"/>
@@ -390,90 +451,90 @@
                             <field name="last_situation_solution_id" string="Current Situation" readonly="True"/>
                             <field name="state_color" invisible="1"/>
                             <field name="state" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'state_color'}"/>
-                            <button name="action_open_task" type="object" title="View Solution" string="View Solution" class="btn btn-link float-end"/>
+                            <button name="action_open_task2" type="object" title="View Solution" string="View Solution" class="btn btn-link float-end"/>
                         </tree>
                     </field>
                 </page>
                 <page name="impact_customer" string="Critical (Impact to customer)">  
                     <br></br> 
                     <div>
-                        <h3><p style="margin: auto;font-weight: 900;text-align: center;">Impact to customer (ผลกระทบต่อลูกค้า)</p></h3>
+                        <h3><p style="margin: auto;font-weight: 900;text-align: center;">Impact to customer</p></h3>
                     </div>  
                     <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
-                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Critical CPP Criteria (เงื่อนไขของปัญหาที่วิกฤติของลูกค้า)</p>
+                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Critical CPP Criteria</p>
                     </div>
                     
                     <div class="row mt16 o_settings_container" id="impact_cus_setting">
                         <div class="col-12 col-lg-5 o_setting_box" id="is_income_cus">
                             <div class="o_setting_left_pane">
-                                <field name="is_income_cus" attrs="{'readonly': [('state', 'in', ['process','done','cancel','delay'])]}"/>
+                                <field name="is_income_cus" attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="is_income_cus"/>
-                                <div class="text-muted">
+                                <!--<div class="text-muted">
                                     เงินได้/เงินสนับสนุน
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                         <div class="col-12 col-lg-5 o_setting_box" id="is_effectiveness_cus">
                             <div class="o_setting_left_pane">
-                                <field name="is_effectiveness_cus" attrs="{'readonly': [('state', 'in', ['process','done','cancel','delay'])]}"/>
+                                <field name="is_effectiveness_cus" attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="is_effectiveness_cus"/>
-                                <div class="text-muted">
+                                <!--<div class="text-muted">
                                     ประสิทธิภาพการทำงาน/ความก้าวหน้าส่วนบุคคล
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                         <div class="col-12 col-lg-5 o_setting_box" id="is_repulation_cus">
                             <div class="o_setting_left_pane">
-                                <field name="is_repulation_cus" attrs="{'readonly': [('state', 'in', ['process','done','cancel','delay'])]}"/>
+                                <field name="is_repulation_cus" attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="is_repulation_cus"/>
-                                <div class="text-muted">
+                                <!--<div class="text-muted">
                                     ภาพลักษณ์ของลูกค้า
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                         <div class="col-12 col-lg-5 o_setting_box" id="is_competitive_cus">
                             <div class="o_setting_left_pane">
-                                <field name="is_competitive_cus" attrs="{'readonly': [('state', 'in', ['process','done','cancel','delay'])]}"/>
+                                <field name="is_competitive_cus" attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="is_competitive_cus"/>
-                                <div class="text-muted">
+                                <!--<div class="text-muted">
                                     ความได้เปรียบของคู่แข่ง
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                     </div>
                     
                     <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
-                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Time (ความเร่งด่วนของลูกค้าที่ต้องการความช่วยเหลือ)</p>
+                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Critical Urgency</p>
                     </div>
                     <div class="row mt16 o_settings_container" id="impact_time_cus_setting">
                         <div class="col-12 col-lg-5 o_setting_box" id="is_critical">
                             <div class="o_setting_left_pane">
-                                <field name="is_critical" attrs="{'readonly': [('state', 'in', ['process','done','cancel','delay'])]}"/>
+                                <field name="is_critical" attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="is_critical"/>
-                                <div class="text-muted">
+                                <!--<div class="text-muted">
                                     ต้องแก้ไขด่วน
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                         <div class="col-12 col-lg-5 o_setting_box" id="is_not_critical">
                             <div class="o_setting_left_pane">
-                                <field name="is_not_critical" attrs="{'readonly': [('state', 'in', ['process','done','cancel','delay'])]}"/>
+                                <field name="is_not_critical" attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="is_not_critical"/>
-                                <div class="text-muted">
+                                <!--<div class="text-muted">
                                     รอได้
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                     </div>
@@ -481,81 +542,81 @@
                 <page name="impact_company" string="Priority (Impact to company)">  
                     <br></br>
                     <div>
-                        <h3><p style="margin: auto;font-weight: 900;text-align: center;">Impact to Company/Winmed (ผลกระทบต่อบริษัท)</p></h3>
+                        <h3><p style="margin: auto;font-weight: 900;text-align: center;">Impact to Company/Winmed</p></h3>
                     </div>  
                     <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
-                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Priority Criteria (เงื่อนไขของลำดับความสำคัญ)</p>
+                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Priority Criteria</p>
                     </div>
                     <div class="row mt16 o_settings_container" id="impact_company_setting">
                         <div class="col-12 col-lg-5 o_setting_box" id="is_income_comp">
                             <div class="o_setting_left_pane">
-                                <field name="is_income_comp" attrs="{'readonly':['|',('show_critical','!=','Critical'),('state', 'in', ['process','done','cancel','delay'])]}" force_save="True"/>
+                                <field name="is_income_comp" attrs="{'readonly':['|',('show_critical','!=','Critical'),('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}" force_save="True"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="is_income_comp"/>
-                                <div class="text-muted">
+                                <!--<div class="text-muted">
                                     ยอดขาย/ต้นทุน
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                         <div class="col-12 col-lg-5 o_setting_box" id="is_effectiveness_comp">
                             <div class="o_setting_left_pane">
-                                <field name="is_effectiveness_comp" attrs="{'readonly':['|',('show_critical','!=','Critical'),('state', 'in', ['process','done','cancel','delay'])]}" force_save="True"/>
+                                <field name="is_effectiveness_comp" attrs="{'readonly':['|',('show_critical','!=','Critical'),('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}" force_save="True"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="is_effectiveness_comp"/>
-                                <div class="text-muted">
+                                <!--<div class="text-muted">
                                     โอกาสทางธุรกิจในอนาคต
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                         <div class="col-12 col-lg-5 o_setting_box" id="is_repulation_comp">
                             <div class="o_setting_left_pane">
-                                <field name="is_repulation_comp" attrs="{'readonly':['|',('show_critical','!=','Critical'),('state', 'in', ['process','done','cancel','delay'])]}" force_save="True"/>
+                                <field name="is_repulation_comp" attrs="{'readonly':['|',('show_critical','!=','Critical'),('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}" force_save="True"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="is_repulation_comp"/>
-                                <div class="text-muted">
+                                <!--<div class="text-muted">
                                     ภาพลักษณ์ของบริษัท
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                         <div class="col-12 col-lg-5 o_setting_box" id="is_competitive_comp">
                             <div class="o_setting_left_pane">
-                                <field name="is_competitive_comp" attrs="{'readonly':['|',('show_critical','!=','Critical'),('state', 'in', ['process','done','cancel','delay'])]}" force_save="True"/>
+                                <field name="is_competitive_comp" attrs="{'readonly':['|',('show_critical','!=','Critical'),('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}" force_save="True"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="is_competitive_comp"/>
-                                <div class="text-muted">
+                                <!--<div class="text-muted">
                                     ความได้เปรียบของคู่แข่ง
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                     </div>
                     <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
-                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Time (ระยะเวลาการแก้ไขปัญหา)</p>
+                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Time</p>
                     </div>
                     <div class="row mt16 o_settings_container" id="impact_time_cus_setting">
                         <div class="col-12 col-lg-5 o_setting_box" id="is_short_time">
                             <div class="o_setting_left_pane">
-                                <field name="is_short_time" attrs="{'readonly':['|',('show_critical','!=','Critical'),('state', 'in', ['process','done','cancel','delay'])]}" force_save="True"/>
+                                <field name="is_short_time" attrs="{'readonly':['|',('show_critical','!=','Critical'),('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}" force_save="True"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="is_short_time"/>
-                                <div class="text-muted">
+                                <!--<div class="text-muted">
                                     ใช้เวลาน้อยกว่า 4 เดือน
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                         <div class="col-12 col-lg-5 o_setting_box" id="is_long_time">
                             <div class="o_setting_left_pane">
-                                <field name="is_long_time" attrs="{'readonly':['|',('show_critical','!=','Critical'),('state', 'in', ['process','done','cancel','delay'])]}" force_save="True"/>
+                                <field name="is_long_time" attrs="{'readonly':['|',('show_critical','!=','Critical'),('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}" force_save="True"/>
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="is_long_time"/>
-                                <div class="text-muted">
+                                <!--<div class="text-muted">
                                     ใช้เวลานานกว่า 4 เดือน
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                     </div>
@@ -593,6 +654,15 @@
             </xpath>
             <xpath expr="//form[1]/div[2]" position="replace">
             </xpath>
+            <xpath expr="//form[1]/div[1]" position="replace">
+                <div class="oe_title">
+                    <label for="name" string="Name"/>
+                    <h1>
+                        <field name="name" class="o_project_name oe_inline" placeholder="CCPP Name"/>
+                    </h1>
+                </div>
+            </xpath>
+
         </field>
     </record>
 
@@ -620,10 +690,10 @@
                 <field name="is_stamp_record" invisible="True"/>
                 <div attrs="{'invisible':[('is_verify_impact_cus','=',True)]}">
                     <div>
-                        <h3><p style="margin: auto;font-weight: 900;text-align: center;">Impact to customer (ผลกระทบต่อลูกค้า)</p></h3>
+                        <h3><p style="margin: auto;font-weight: 900;text-align: center;">Impact to customer</p></h3>
                     </div>  
                     <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
-                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Critical CPP Criteria (เงื่อนไขของปัญหาที่วิกฤติของลูกค้า)</p>
+                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Critical CPP Criteria</p>
                     </div>
                     <div class="row mt16 o_settings_container" id="impact_cus_setting">
                         <div class="col-12 col-lg-5 o_setting_box" id="is_income_cus">
@@ -632,9 +702,9 @@
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="is_income_cus"/>
-                                <div class="text-muted">
+                                <!--<div class="text-muted">
                                     เงินได้/เงินสนับสนุน
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                         <div class="col-12 col-lg-5 o_setting_box" id="is_effectiveness_cus">
@@ -643,9 +713,9 @@
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="is_effectiveness_cus"/>
-                                <div class="text-muted">
+                                <!--<div class="text-muted">
                                     ประสิทธิภาพการทำงาน/ความก้าวหน้าส่วนบุคคล
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                         <div class="col-12 col-lg-5 o_setting_box" id="is_repulation_cus">
@@ -654,9 +724,9 @@
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="is_repulation_cus"/>
-                                <div class="text-muted">
+                                <!--<div class="text-muted">
                                     ภาพลักษณ์ของลูกค้า
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                         <div class="col-12 col-lg-5 o_setting_box" id="is_competitive_cus">
@@ -665,14 +735,14 @@
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="is_competitive_cus"/>
-                                <div class="text-muted">
+                                <!--<div class="text-muted">
                                     ความได้เปรียบของคู่แข่ง
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                     </div>
                     <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
-                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Time (ความเร่งด่วนของลูกค้าที่ต้องการความช่วยเหลือ)</p>
+                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Critical Urgency</p>
                     </div>
                     <div class="row mt16 o_settings_container" id="impact_time_cus_setting">
                         <div class="col-12 col-lg-5 o_setting_box" id="is_critical">
@@ -681,9 +751,9 @@
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="is_critical"/>
-                                <div class="text-muted">
+                                <!--<div class="text-muted">
                                     ต้องแก้ไขด่วน
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                         <div class="col-12 col-lg-5 o_setting_box" id="is_not_critical">
@@ -692,19 +762,19 @@
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="is_not_critical"/>
-                                <div class="text-muted">
+                                <!--<div class="text-muted">
                                     รอได้
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                     </div>
                 </div>
                 <div attrs="{'invisible':[('is_verify_impact_cus','=',False)]}">
                     <div>
-                        <h3><p style="margin: auto;font-weight: 900;text-align: center;">Impact to Company/Winmed (ผลกระทบต่อบริษัท)</p></h3>
+                        <h3><p style="margin: auto;font-weight: 900;text-align: center;">Impact to Company/Winmed</p></h3>
                     </div>  
                     <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
-                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Priority Criteria (เงื่อนไขของลำดับความสำคัญ)</p>
+                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Priority Criteria</p>
                     </div>
                     <div class="row mt16 o_settings_container" id="impact_company_setting">
                         <div class="col-12 col-lg-5 o_setting_box" id="is_income_comp">
@@ -713,9 +783,9 @@
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="is_income_comp"/>
-                                <div class="text-muted">
+                                <!--<div class="text-muted">
                                     ยอดขาย/ต้นทุน
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                         <div class="col-12 col-lg-5 o_setting_box" id="is_effectiveness_comp">
@@ -724,9 +794,9 @@
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="is_effectiveness_comp"/>
-                                <div class="text-muted">
+                                <!--<div class="text-muted">
                                     โอกาสทางธุรกิจในอนาคต
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                         <div class="col-12 col-lg-5 o_setting_box" id="is_repulation_comp">
@@ -735,9 +805,9 @@
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="is_repulation_comp"/>
-                                <div class="text-muted">
+                                <!--<div class="text-muted">
                                     ภาพลักษณ์ของบริษัท
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                         <div class="col-12 col-lg-5 o_setting_box" id="is_competitive_comp">
@@ -746,14 +816,14 @@
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="is_competitive_comp"/>
-                                <div class="text-muted">
+                                <!--<div class="text-muted">
                                     ความได้เปรียบของคู่แข่ง
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                     </div>
                     <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
-                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Time (ระยะเวลาการแก้ไขปัญหา)</p>
+                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Time</p>
                     </div>
                     <div class="row mt16 o_settings_container" id="impact_time_cus_setting">
                         <div class="col-12 col-lg-5 o_setting_box" id="is_short_time">
@@ -762,9 +832,9 @@
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="is_short_time"/>
-                                <div class="text-muted">
+                                <!--<div class="text-muted">
                                     ใช้เวลาน้อยกว่า 4 เดือน
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                         <div class="col-12 col-lg-5 o_setting_box" id="is_long_time">
@@ -773,9 +843,9 @@
                             </div>
                             <div class="o_setting_right_pane">
                                 <label for="is_long_time"/>
-                                <div class="text-muted">
+                                <!--<div class="text-muted">
                                     ใช้เวลานานกว่า 4 เดือน
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                     </div>
@@ -813,11 +883,20 @@
             </xpath>
 
             <xpath expr="//form[1]/sheet[1]/div[1]/button[1]" position="before">
-                <span style="padding-left:30px; padding-top:5px" class="oe_left" attrs="{'invisible': [('is_solution', '=', False)]}">
+                <field name="is_delay" invisible="True"/>
+                <span style="padding-left:30px; padding-top:5px" class="oe_left" attrs="{'invisible': ['|',('is_solution', '=', False),('is_delay','=',True)]}">
                     <h1>Solution</h1>
                 </span>
-                <span style="padding-left:30px; padding-top:5px" class="oe_left" attrs="{'invisible': [('is_strategy', '=', False)]}">
+                <span style="padding-left:30px; padding-top:5px color:red;" class="oe_left" attrs="{'invisible':['|',('is_solution', '=', False),('is_delay','=',False)]}">
+                    <h1 style="color:red; padding-top:5px">Solution Delayed</h1>
+                </span>
+                
+        
+                <span style="padding-left:30px; padding-top:5px" class="oe_left" attrs="{'invisible': ['|',('is_strategy', '=', False),('is_delay','=',True)]}">
                     <h1>Strategy</h1>
+                </span>
+                <span style="padding-left:30px; padding-top:5px color:red;" class="oe_left" attrs="{'invisible':['|',('is_strategy', '=', False),('is_delay','=',False)]}">
+                    <h1 style="color:red; padding-top:5px">Strategy Delayed</h1>
                 </span>
                 <span style="padding-left:30px; padding-top:5px" class="oe_left" attrs="{'invisible': [('is_task', '=', False)]}">
                     <h1>Task</h1>
@@ -826,19 +905,19 @@
                     <h1>Sub Task</h1>
                 </span>
             </xpath>
-
-            <xpath expr="//button[@name='action_assign_to_me']" position='before'>
+            <xpath expr="//button[@name='action_assign_to_me']" position='replace'/>
+            <xpath expr="//button[@name='action_assign_to_me']" position='replace'>
                 <field name="is_ccpp_on_process" invisible="True"/>
                 <field name="is_solution_on_approve" invisible="True"/>
-                <button name="button_update_strategy" type="object" class="btn-primary" string="Current Situation" attrs="{'invisible': ['|',('is_strategy', '=', False),('state','!=','process')]}"/>
+                <!--<button name="button_update_strategy" type="object" class="btn-primary" string="Current Situation" attrs="{'invisible': ['|',('is_strategy', '=', False),('state','!=','process')]}"/>-->
                 <button name="button_done" string="Done" type="object" class="btn-success" attrs="{'invisible': ['|',('is_strategy', '=', False),('state','!=','process')]}"/>
                 
                 <button name="button_send_approve_strategy" type="object" class="btn-primary" string="Send Approve Strategy" attrs="{'invisible': ['|','|','|',('is_strategy', '=', False),('state','!=','open'),('is_ccpp_on_process','=',False),('is_solution_on_approve','=',True)]}"/>
                 <button name="button_send_approve_solution" type="object" class="btn-primary" string="Send Approve Solution" attrs="{'invisible': ['|','|',('is_solution', '=', False),('state','!=','open'),('is_ccpp_on_process','=',False)]}"/>
-                <button name="button_approve_strategy" string="Approve Strategy" type="object" class="btn-primary" attrs="{'invisible': ['|','|','|',('is_strategy', '=', False),('state','!=','waiting_approve'),('is_ccpp_on_process','=',False),('is_solution_on_approve','=',True)]}"/>
-                <button name="button_approve_solution" string="Approve Solution" type="object" class="btn-primary" attrs="{'invisible': ['|','|',('is_solution', '=', False),('state','!=','waiting_approve'),('is_ccpp_on_process','=',False)]}"/>
-                <button name="button_reject_strategy" string="Reject Strategy" type="object" class="btn-danger" attrs="{'invisible': ['|','|','|',('is_strategy', '=', False),('state','!=','waiting_approve'),('is_ccpp_on_process','=',False),('is_solution_on_approve','=',True)]}"/>
-                <button name="button_reject_solution" string="Reject Solution" type="object" class="btn-danger" attrs="{'invisible': ['|','|',('is_solution', '=', False),('state','!=','waiting_approve'),('is_ccpp_on_process','=',False)]}"/>
+                <button name="button_approve_strategy" string="Approve Strategy" type="object" class="btn-primary" attrs="{'invisible': ['|','|','|',('is_strategy', '=', False),('state','!=','waiting_approve'),('is_ccpp_on_process','=',False),('is_solution_on_approve','=',True)]}" groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>
+                <button name="button_approve_solution" string="Approve Solution" type="object" class="btn-primary" attrs="{'invisible': ['|','|',('is_solution', '=', False),('state','!=','waiting_approve'),('is_ccpp_on_process','=',False)]}" groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>
+                <button name="button_reject_strategy" string="Reject Strategy" type="object" class="btn-danger" attrs="{'invisible': ['|','|','|',('is_strategy', '=', False),('state','!=','waiting_approve'),('is_ccpp_on_process','=',False),('is_solution_on_approve','=',True)]}" groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>
+                <button name="button_reject_solution" string="Reject Solution" type="object" class="btn-danger" attrs="{'invisible': ['|','|',('is_solution', '=', False),('state','!=','waiting_approve'),('is_ccpp_on_process','=',False)]}" groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_managerr"/>
                 <button name="button_to_open_strategy" string="To Open Strategy" type="object" class="btn-primary" attrs="{'invisible': ['|','|','|',('is_strategy', '=', False),('state','!=','reject'),('is_ccpp_on_process','=',False),('is_solution_on_approve','=',True)]}"/>
                 <button name="button_to_open_solution" string="To Open Solution" type="object" class="btn-primary" attrs="{'invisible': ['|','|',('is_solution', '=', False),('state','!=','reject'),('is_ccpp_on_process','=',False)]}"/>
 
@@ -850,10 +929,10 @@
                 <group>
                     <group>
                         <field name="code" string="Solution No." attrs="{'invisible': [('is_solution','=',False)]}" readonly="True"/>
-                        <field name="start_date" attrs="{'invisible': [('is_solution','=',False)], 'readonly': [('state', 'in', ['process','done','cancel','delay'])]}"/>
+                        <field name="start_date" attrs="{'invisible': [('is_solution','=',False)], 'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])], 'required': [('is_solution','=',True)]}"/>
                         <field name="code" string="Strategy No." attrs="{'invisible': [('is_strategy','=',False)]}" readonly="True"/>
                         <field name="code" string="Task No." attrs="{'invisible': [('is_task','=',False),('is_subtask','=',False)]}" readonly="True"/>
-                        <field name="evaluate_method" attrs="{'invisible': [('is_strategy','=',False)], 'readonly': [('state', 'in', ['done','cancel','delay'])]}"/>
+                        <field name="evaluate_method" attrs="{'invisible': [('is_strategy','=',False)], 'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"/>
                         <field name="next_action" attrs="{'invisible': [('is_strategy','=',False)]}" readonly="True"/>
 
                         <!--<field name="project_id" domain="[('active', '=', True), ('company_id', '=', company_id)]" widget="project_private_task" string="CCPP" />
@@ -883,9 +962,9 @@
                         <field name="active" invisible="1"/>
                         <field name="partner_phone" widget="phone" attrs="{'invisible': True}"/>
                         <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}" context="{'project_id': project_id}" invisible="True"/>
-                        <field name="legend_blocked" invisible="1"/>
+                        <!--<field name="legend_blocked" invisible="1"/>
                         <field name="legend_normal" invisible="1"/>
-                        <field name="legend_done" invisible="1"/>
+                        <field name="legend_done" invisible="1"/>-->
                         <field name="display_project_id" string="Project" attrs="{'invisible': True}" domain="[('active', '=', True), ('company_id', '=', company_id)]"/>
                         <field name="milestone_id" placeholder="e.g. Product Launch" context="{'default_project_id': project_id if not parent_id or not display_project_id else display_project_id}" attrs="{'invisible': True}"/>
                         <field name="is_solution" attrs="{'invisible': True}"/>
@@ -897,6 +976,27 @@
             </xpath>
 
             <xpath expr="//field[@name='task_properties']" position="replace">
+            </xpath>
+            
+            <xpath expr="//form[1]/sheet[1]/div[2]" position="replace">
+                <div attrs="{'invisible': [('is_solution','=',False)]}" style="padding-bottom:10px; word-break: break-word;">
+                    <h3 class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex w-100">
+                            <field name="priority" widget="priority" class="me-3" readonly="True"/>
+                            <field name="name" widget="text" class="o_task_name text-truncate w-100 w-md-75 pe-2" placeholder="Solution Name" attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"/>
+                        </div>
+                        <!--<field name="kanban_state" widget="state_selection" class=""/>-->
+                    </h3>
+                </div>
+                <div attrs="{'invisible': [('is_strategy','=',False)]}" style="padding-bottom:10px; word-break: break-word;">
+                    <h3 class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex w-100">
+                            <field name="priority" widget="priority" class="me-3" readonly="True"/>
+                            <field name="name" widget="text" class="o_task_name text-truncate w-100 w-md-75 pe-2" placeholder="Strategy Name" attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"/>
+                        </div>
+                        <!--<field name="kanban_state" widget="state_selection" class=""/>-->
+                    </h3>
+                </div>
             </xpath>
 
             <!-- timesheet page -->
@@ -911,8 +1011,8 @@
                 <field name="is_strategy" invisible="True"/>
                 <field name="is_task" invisible="True"/>
                 <field name="is_subtask" invisible="True"/>
-                <button name="action_open_task" type="object" title="View Strategy" string="View Strategy" class="btn btn-link float-end" attrs="{'invisible': [('parent.is_solution','=',False)]}"/>
-                <button name="action_open_task" type="object" title="View Task" string="View Task" class="btn btn-link float-end" attrs="{'invisible': [('parent.is_strategy','=',False)]}"/>
+                <button name="action_open_task2" type="object" title="View Strategy" string="View Strategy" class="btn btn-link float-end" attrs="{'invisible': [('parent.is_solution','=',False)]}"/>
+                <button name="action_open_task2" type="object" title="View Task" string="View Task" class="btn btn-link float-end" attrs="{'invisible': [('parent.is_strategy','=',False)]}"/>
             </xpath>
             <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='activity_ids']" position="replace">
                 <!--<field name="activity_ids" string="Next Activity" widget="list_activity" attrs="{'column_invisible': [('parent.is_solution','=',False)]}"/>-->
@@ -933,19 +1033,27 @@
             </xpath>
             <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='name']" position="attributes">
                 <attribute name="widget"></attribute>
+                <attribute name="attrs">{'readonly': [('state','not in',['open'])]}</attribute>
+                <attribute name="string">Name</attribute>
+            </xpath>
+            <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='user_ids']" position="attributes">
+                <attribute name="attrs">{'readonly': [('state','not in',['open'])]}</attribute>
             </xpath>
             <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']" position="attributes">
                 <attribute name="widget"></attribute>
                 <attribute name="context">{'search_view_ref' : 'project.view_task_search_form_extended', 'default_project_id': project_solution_id if not parent_id or not display_project_id else display_project_id, 'default_user_ids': user_ids, 'default_parent_id': id,
                                     'default_partner_id': partner_id, 'default_milestone_id': allow_milestones and milestone_id, 'search_default_display_project_id': project_id, "is_create_strategy": True}</attribute>
-                <attribute name="attrs">{'readonly': [('state', 'in', ['done','cancel','delay'])]}</attribute>
+                <attribute name="attrs">{'readonly': [('state', 'in', ['waiting_approve','reject','done','cancel','delay'])]}</attribute>
             </xpath>
             
             <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='name']" position="before">
                 <field name="code" string="Strategy No." optional="show" attrs="{'column_invisible': [('parent.is_solution','=',False)]}" readonly="True"/>
                 <field name="code" string="Task No." optional="show" attrs="{'column_invisible': [('parent.is_strategy','=',False),('parent.is_task','=',False),('parent.is_subtask','=',False)]}" readonly="True"/>
             </xpath>
-            
+            <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]" position="attributes">
+                <attribute name="delete">false</attribute>
+                <!--<attribute name="attrs">{'create': [('state','in',['open','process'])]}</attribute>-->
+            </xpath>
             <!-- page name -->
             <xpath expr="//form[1]/sheet[1]/notebook[1]/page[2]" position="after">
                 <page name="strategy_page" string="Strategy" attrs="{'invisible': [('is_solution', '=' ,False)]}">
@@ -955,7 +1063,7 @@
                     <field name="situation_ids">
                         <tree create="false" delete="false" edit="false" multi_edit="1">
                             <field name="code"/>
-                            <field name="name" string="Title"/>
+                            <field name="name" string="Name"/>
                             <field name="user_id" string="Author"/>
                             <field name="date"/>
                             <field name="next_action"/>
@@ -1048,16 +1156,6 @@
         <field name="view_id" ref="project.edit_project"/>
         <field name="target">main</field>
     </record>
-
-    <record id="open_view_task_all_ccpp" model="ir.actions.act_window">
-        <field name="name">Solution</field>
-        <field name="res_model">project.task</field>
-        <field name="view_mode">form</field>
-        <field name="view_id" ref="project.view_task_form2"/>
-        <field name="target">main</field>
-    </record>
-
-    
         
         <record id="ccpp_dashboard_project_action" model="ir.actions.act_window">
             <field name="name">CCPP</field>
@@ -1152,21 +1250,27 @@
 
     <menuitem name="Task"
             id="menu_main_task"
+            web_icon="ccpp,static/description/calendar_icon.png"
             sequence="501"/>
 
     <record model="ir.ui.menu" id="project.menu_project_management">
         <field name="action" eval="False"/>
     </record>
 
-    <menuitem name="Plan Task" id="menu_ccpp_plan_task" parent="menu_main_task" sequence="1" />
+    <menuitem name="Plan Task" id="menu_ccpp_plan_task" parent="menu_main_task" action="act_rocker_timesheet_calendar" sequence="1" />
 
-        <menuitem name="Tasks Calendar" id="menu_ccpp_task_calendar" parent="menu_ccpp_plan_task"
-        action="act_rocker_timesheet_calendar" sequence="1" />
+        <!--<menuitem name="Tasks Calendar" id="menu_ccpp_task_calendar" parent="menu_ccpp_plan_task"
+        action="act_rocker_timesheet_calendar" sequence="1" />-->
 
-    <menuitem name="Update Task" id="menu_ccpp_update_task" parent="menu_main_task" sequence="1" />
+    <menuitem name="Check In" id="menu_ccpp_update_task" parent="menu_main_task" action="act_rocker_timesheet_tree" sequence="2" />
 
-        <menuitem name="Tasks List" id="menu_ccpp_task_list" parent="menu_ccpp_update_task"
-        action="act_rocker_timesheet_tree" sequence="1" />
+        <!--<menuitem name="Tasks List" id="menu_ccpp_task_list" parent="menu_ccpp_update_task"
+        action="act_rocker_timesheet_tree" sequence="1" />-->
+
+    <menuitem name="Reporting" id="menu_ccpp_report_task" parent="menu_main_task" action="act_rocker_timesheet_tree_by_user" sequence="3" />
+
+        <!--<menuitem name="Tasks by User" id="menu_ccpp_task_list" parent="menu_ccpp_report_task"
+        action="act_rocker_timesheet_tree_by_user" sequence="1" />-->
 
     <!-- CCPP -->
 
@@ -1175,7 +1279,7 @@
         <field name="model">project.task</field>
         <field name="arch" type="xml">
             <search string="Search Solution">
-                <field name="name" string="Solution" filter_domain="['|', ('name', 'ilike', self), ('id', 'ilike', self)]"/>
+                <field name="name" string="Name" filter_domain="['|', ('name', 'ilike', self), ('id', 'ilike', self)]"/>
                 <field name="user_ids" string="User" filter_domain="[('user_ids.name', 'ilike', self), ('user_ids.active', 'in', [True, False])]"/>
                 <field name="state"/>
                 <field name="partner_id" operator="child_of"/>
@@ -1186,6 +1290,7 @@
                     <filter string="User" name="groupby_user" context="{'group_by': 'user_ids'}"/>
                     <filter string="Customer" name="groupby_customer" context="{'group_by': 'partner_id'}"/>
                     <filter string="CCPP" name="groupby_ccpp" context="{'group_by': 'project_id'}"/>
+                    <filter string="Task Type" name="groupby_task_type" context="{'group_by': 'task_type'}"/>
                 </group>
             </search>
         </field>
@@ -1208,6 +1313,7 @@
                     <filter string="Customer" name="groupby_customer" context="{'group_by': 'partner_id'}"/>
                     <filter string="CCPP" name="groupby_ccpp" context="{'group_by': 'project_id'}"/>
                     <filter string="Solution" name="groupby_solution" context="{'group_by': 'parent_id'}"/>
+                    <filter string="Task Type" name="groupby_task_type" context="{'group_by': 'task_type'}"/>
                 </group>
             </search>
         </field>
@@ -1224,9 +1330,9 @@
                 <field name="user_id" string="CCPP User"/>
                 <field name="partner_id" string="Customer" filter_domain="[('partner_id', 'child_of', self)]"/>
                 <filter string="1st Priority" name="priority_1" domain="[('priority_id.point', '=', 1)]"/>
-                <filter string="2nd Priority" name="priority_1" domain="[('priority_id.point', '=', 2)]"/>
-                <filter string="3rd Priority" name="priority_1" domain="[('priority_id.point', '=', 3)]"/>
-                <filter string="4th Priority" name="priority_1" domain="[('priority_id.point', '=', 4)]"/>
+                <filter string="2nd Priority" name="priority_2" domain="[('priority_id.point', '=', 2)]"/>
+                <filter string="3rd Priority" name="priority_3" domain="[('priority_id.point', '=', 3)]"/>
+                <filter string="4th Priority" name="priority_4" domain="[('priority_id.point', '=', 4)]"/>
                 <separator/>
                 <filter string="Open" name="open" domain="[('state', '=', 'open')]"/>
                 <filter string="Waiting Approve" name="waiting_approve" domain="[('state', '=', 'waiting_approve')]"/>
@@ -1234,6 +1340,7 @@
                 <filter string="On Process" name="on_process" domain="[('state', '=', 'process')]"/>
                 <filter string="Done" name="done" domain="[('state','=','done')]"/>
                 <filter string="Cancelled" name="cancel" domain="[('state','=','cancel')]"/>
+                <filter string="Delayed" name="delay" domain="[('is_delay','=',True)]"/>
                 <separator/>
                 <filter string="My CCPP" name="my_ccpp" domain="[('user_id', '=', uid)]"/>
                 <group expand="0" string="Group By">
@@ -1250,9 +1357,9 @@
     <record id="ccpp_user_tree_view" model="ir.ui.view">
         <field name="name">ccpp.user.tree.view</field>
         <field name="model">project.project</field>
-        <field eval="201" name="priority"/>
+        <field eval="202" name="priority"/>
         <field name="arch" type="xml">
-            <tree js_class="ccpp_tree" expand="1" default_order="partner_id">
+            <tree js_class="ccpp_tree" expand="1" default_order="partner_id" delete="0">
                 <button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>
                 <field name="name" string="CCPP" class="fw-bold"/>
                 <field name="partner_id" string="Customer"/>
@@ -1267,14 +1374,14 @@
         </field>
     </record>
 
-    <record id="action_ccpp_user_view" model="ir.actions.act_window">
-        <field name="name">CCPP</field>
+    <record id="action_my_ccpp_group_by_priority" model="ir.actions.act_window">
+        <field name="name">My CCPP Group by Priority</field>
         <field name="res_model">project.project</field>
         <field name="view_mode">tree,kanban,form</field>
-        <field name="context">{'search_default_groupby_priority': 1, 'search_default_groupby_customer': 1, 'expand': 1, 'create_from_tree': True}</field>
-        <!--<field name="domain">[('user_id', '=', uid)]</field>-->
+        <field name="context">{'search_default_groupby_priority': 1, 'show_create': '1'}</field>
+        <field name="domain">[('user_id', '=', uid)]</field>
+        <field name="view_id" ref="ccpp.ccpp_report_tree_show_create_view"/>
         <field name="search_view_id" ref="ccpp_search_form"/>
-        <field name="view_id" ref="ccpp.ccpp_user_tree_view"/>
         <field name="target">main</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
@@ -1290,9 +1397,9 @@
     <record id="ccpp_manager_tree_view" model="ir.ui.view">
         <field name="name">ccpp.manager.tree.view</field>
         <field name="model">project.project</field>
-        <field eval="201" name="priority"/>
+        <field eval="203" name="priority"/>
         <field name="arch" type="xml">
-            <tree>
+            <tree delete="0" create="0">
                 <button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>
                 <field name="name" string="CCPP" class="fw-bold"/>
                 <!--<field name="color" invisible="1"/>
@@ -1305,53 +1412,81 @@
         </field>
     </record>
 
-    <record id="action_ccpp_manager_view" model="ir.actions.act_window">
-        <field name="name">CCPP</field>
-        <field name="res_model">project.project</field>
-        <field name="view_mode">tree,kanban,form</field>
-        <field name="context">{'search_default_groupby_user': 1, 'search_default_groupby_priority': 0, 'search_default_groupby_customer': 1}</field>
-        <!--<field name="domain">[('user_id', '=', uid)]</field>-->
-        <field name="view_id" ref="ccpp.ccpp_manager_tree_view"/>
-        <field name="search_view_id" ref="ccpp_search_form"/>
-        <field name="target">main</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                No tasks found. Let's create one!
-            </p>
-            <p>
-                Keep track of the progress of your tasks from creation to completion.<br/>
-                Collaborate efficiently by chatting in real-time or via email.
-            </p>
-        </field>
+    <record id="action_all_ccpp_group_by_priority_manager" model="ir.actions.server">
+        <field name="name">All CCPP Group by Department</field>
+        <field name="model_id" ref="model_project_project"/>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="code">action = model.action_ccpp_department_group_by_priority_manager()</field>
     </record>
 
-    <record id="solution_tree" model="ir.ui.view">
+    <record id="action_all_ccpp_group_by_customer_manager" model="ir.actions.server">
+        <field name="name">All CCPP Group by Customer</field>
+        <field name="model_id" ref="model_project_project"/>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="code">action = model.action_ccpp_department_group_by_customer_manager()</field>
+    </record>
+
+    <record id="action_all_ccpp_group_by_priority" model="ir.actions.act_window">
+        <field name="name">All CCPP Group by Priority</field>
+        <field name="res_model">project.project</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="context">{'search_default_groupby_priority': 1, 'show_create': '0'}</field>
+        <field name="view_id" ref="ccpp.ccpp_report_tree_hide_create_view"/>
+        <field name="search_view_id" ref="ccpp_search_form"/>
+        <field name="target">main</field>
+    </record>
+
+    <record id="action_my_ccpp_group_by_customer" model="ir.actions.act_window">
+        <field name="name">My CCPP Group by Customer</field>
+        <field name="res_model">project.project</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="context">{'search_default_groupby_customer': 1, 'show_create': '1'}</field>
+        <field name="domain">[('user_id', '=', uid)]</field>
+        <field name="view_id" ref="ccpp.ccpp_report_tree_show_create_view"/>
+        <field name="search_view_id" ref="ccpp_search_form"/>
+        <field name="target">main</field>
+    </record>
+
+    <record id="solution_strategy_tree" model="ir.ui.view">
         <field name="name">solution.strategy.tree</field>
         <field name="model">project.task</field>
         <field eval="201" name="priority"/>
         <field name="arch" type="xml">
-            <tree>
-                <field name="name" string="Solution"/>
+            <tree delete="0" create="0" expand="1">
+                <button type="action" name="ccpp.action_open_solution_strategy_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>
+                <field name="name" string="Name" class="fw-bold"/>
                 <field name="partner_id" string="Customer"/>
+                <field name="start_date" string="Start Date"/>
                 <field name="deadline_date" string="Deadline"/>
-                <field name="last_situation_solution_id" string="Current Situation"/>
-                <field name="next_action_solution" string="Next Action"/>
+                <!--<field name="last_situation_solution_id" string="Current Situation"/>
+                <field name="next_action_solution" string="Next Action"/>-->
                 <field name="state_color" invisible="1"/>
                 <field name="state" string="State" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'state_color'}"/>
                 <field name="user_ids" widget="many2many_avatar_user" string="User"/>
-                <button name="action_open_strategy" type="object" title="View Strategy" string="View Strategy" class="btn btn-link float-end"/>
+                <!--<button name="action_open_strategy" type="object" title="View Detail" string="View Detail" class="btn btn-link float-end"/>-->
             </tree>
         </field>
     </record>
+
+    <record id="action_solution_strategy_tree" model="ir.actions.act_window">
+        <field name="name">Solution</field>
+        <field name="res_model">project.task</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="strategy_search_form"/>
+        <field name="context">{'search_default_groupby_solution': 1}</field>
+        <field name="view_id" ref="solution_strategy_tree"/>
+        <field name="target">main</field>
+    </record>  
 
     <record id="strategy_tree" model="ir.ui.view">
         <field name="name">solution.strategy.tree</field>
         <field name="model">project.task</field>
         <field eval="202" name="priority"/>
         <field name="arch" type="xml">
-            <tree>
+            <tree delete="0" create="0">
                 <field name="name" string="Strategy"/>
-                <field name="evaluate_method"/>
                 <field name="last_situation_id" string="Current Situation"/>
                 <field name="next_action" string="Next Action"/>
                 <field name="state_color" invisible="1"/>
@@ -1361,14 +1496,15 @@
         </field>
     </record>
 
-    <record id="ccpp_report_tree_view" model="ir.ui.view">
+    <record id="ccpp_report_tree_show_create_view" model="ir.ui.view">
         <field name="name">ccpp.report.tree.view</field>
         <field name="model">project.project</field>
         <field eval="201" name="priority"/>
         <field name="arch" type="xml">
-            <tree>
+            <tree delete="0" create="1">
                 <button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>
                 <field name="name" string="CCPP Name" class="fw-bold"/>
+                <field name="partner_id" string="Customer"/>
                 <!--<field name="color" invisible="1"/>
                 <field name="priority_select" string="Priority" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'color'}"/>-->
                 <field name="priority_select" decoration-danger="priority_select in ['1','2']" string="Priority"/>
@@ -1380,27 +1516,55 @@
         </field>
     </record>
 
-    <record id="action_ccpp_report_view" model="ir.actions.act_window">
-        <field name="name">CCPP</field>
+    <record id="ccpp_report_tree_hide_create_view" model="ir.ui.view">
+        <field name="name">ccpp.report.tree.view</field>
+        <field name="model">project.project</field>
+        <field eval="201" name="priority"/>
+        <field name="arch" type="xml">
+            <tree delete="0" create="0">
+                <button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>
+                <field name="name" string="CCPP Name" class="fw-bold"/>
+                <field name="partner_id" string="Customer"/>
+                <!--<field name="color" invisible="1"/>
+                <field name="priority_select" string="Priority" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'color'}"/>-->
+                <field name="priority_select" decoration-danger="priority_select in ['1','2']" string="Priority"/>
+                <field name="show_period" string="Period"/>
+                <field name="state_color" invisible="1"/>
+                <field name="state" string="State" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'state_color'}"/>
+                <button name="action_open_solution" type="object" title="View Solution" string="View Solution" class="btn btn-link float-end"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_all_ccpp_group_by_customer" model="ir.actions.act_window">
+        <field name="name">All CCPP Group by Customer</field>
         <field name="res_model">project.project</field>
-        <field name="view_mode">tree,kanban,form</field>
-        <field name="view_id" ref="ccpp.ccpp_report_tree_view"/>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="ccpp.ccpp_report_tree_hide_create_view"/>
         <field name="search_view_id" ref="ccpp_search_form"/>
         <field name="domain">[]</field>
-        <field name="context">{'search_default_groupby_priority': 0, 'search_default_groupby_customer': 1, 'search_default_groupby_ccpp': 0, 'search_default_groupby_solution': 1}</field>
+        <field name="context">{'search_default_groupby_customer': 1, 'show_create': '0'}</field>
         <field name="target">main</field>
     </record>
 
-    <menuitem name="My CCPP" id="menu_my_ccpp" parent="project.menu_main_pm" action="action_ccpp_user_view" sequence="1"/>
+    <menuitem name="My CCPP" id="menu_my_ccpp" parent="project.menu_main_pm" action="action_my_ccpp_group_by_priority" sequence="1"/>
 
-    <menuitem name="Reporting" id="menu_ccpp_report" parent="project.menu_main_pm" sequence="2"/>
+        <menuitem name="My CCPP Group by Priority" id="menu_my_ccpp_group_by_priority" parent="menu_my_ccpp" action="action_my_ccpp_group_by_priority" sequence="1"/>
 
-    <!--<menuitem name="My CCPP" id="menu_ccpp_user_view" parent="menu_my_ccpp" action="action_ccpp_user_view" sequence="1"/>-->
+        <menuitem name="My CCPP Group by Customer" id="menu_my_ccpp_group_by_customer" parent="menu_my_ccpp" action="action_my_ccpp_group_by_customer" sequence="2"/>
 
-    <menuitem name="CCPP by User" id="menu_ccpp_manager_view" parent="menu_ccpp_report" action="action_ccpp_manager_view" sequence="1" />
 
-    <menuitem name="CCPP Report" id="menu_ccpp_report_view" parent="menu_ccpp_report" action="action_ccpp_report_view" sequence="2" />
+    <!--<menuitem name="All CCPP" id="menu_all_ccpp_user" groups="ccpp.group_ccpp_user" parent="project.menu_main_pm" sequence="2"/>
 
+        <menuitem name="All CCPP Group by Priority" id="menu_all_ccpp_group_by_priority_user" parent="menu_all_ccpp_user" action="action_all_ccpp_group_by_priority_user" sequence="1" />
+
+        <menuitem name="All CCPP Group by Customer" id="menu_all_ccpp_group_by_customer_user" parent="menu_all_ccpp_user" action="action_all_ccpp_group_by_customer_user" sequence="2" />-->
+
+    <menuitem name="All CCPP" id="menu_all_ccpp_manager" groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager" parent="project.menu_main_pm" sequence="2"/>
+
+        <menuitem name="All CCPP Group by Priority" id="menu_all_ccpp_group_by_priority_manager" parent="menu_all_ccpp_manager" action="action_all_ccpp_group_by_priority_manager" sequence="1"/>
+
+        <menuitem name="All CCPP Group by Customer" id="menu_all_ccpp_group_by_customer_manager" parent="menu_all_ccpp_manager" action="action_all_ccpp_group_by_customer_manager" sequence="2"/>
 
 
 <!-- Menu / action change name -->

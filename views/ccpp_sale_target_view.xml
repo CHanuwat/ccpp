@@ -5,6 +5,7 @@
         <field name="name">Sales Target</field>
         <field name="type">ir.actions.act_window</field>
         <field name="context">{'search_default_groupby_year': 1}</field>
+        <field name="domain">[('user_id', '=', uid)]</field>
         <field name="res_model">ccpp.sale.target</field>
         <field name="view_mode">tree,form</field>
     </record>
@@ -78,19 +79,14 @@
         </field>
     </record>
 
-    <menuitem id="menu_ccpp_sale_target" name="Sales Target" parent="crm.crm_menu_sales" action="ccpp_sale_target_action" sequence="102"/>
+    <!--<menuitem id="menu_ccpp_sale_target" name="Sales Target" parent="crm.crm_menu_sales" action="ccpp_sale_target_action" sequence="102"/>-->
 
-    <record model="ir.ui.menu" id="crm.menu_crm_opportunities">
-        <field name="action" eval="False"/>
-    </record>
-    <record model="ir.ui.menu" id="crm.crm_lead_menu_my_activities">
-        <field name="action" eval="False"/>
-    </record>
-    <record model="ir.ui.menu" id="crm.sales_team_menu_team_pipeline">
-        <field name="action" eval="False"/>
-    </record>
-    <record model="ir.ui.menu" id="crm.res_partner_menu_customer">
-        <field name="action" eval="False"/>
+    <record id="ccpp_sale_target_action_manager" model="ir.actions.server">
+        <field name="name">Sales Target</field>
+        <field name="model_id" ref="model_ccpp_sale_target"/>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="code">action = model.action_sale_target_manager()</field>
     </record>
 
 </odoo>

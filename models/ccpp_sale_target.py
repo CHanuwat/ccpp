@@ -128,8 +128,9 @@ class CCPPSaleTarget(models.Model):
     date_to = fields.Date(string="Date To", readonly=True)
     target = fields.Float(string="Sales Target")
     actual = fields.Float(string="Sales Actual")
-    actual_percent = fields.Float(string="% Success", compute="_compute_actual_percent", store=True, group_operator=False)
+    actual_percent = fields.Float(string="% Success", compute="_compute_actual_percent", store=True)
     sale_person_id = fields.Many2one("hr.employee", default="_get_default_sale_person", string="Sales Person", required=True)
+    department_id = fields.Many2one("hr.department", string="Deparment", related="sale_person_id.department_id")
     status = fields.Selection(selection=[
         ('over', 'Over'),
         ('similar', 'Similar'),
@@ -238,4 +239,12 @@ class CCPPSaleTarget(models.Model):
         res = super(CCPPSaleTarget, self).read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
         return res
             
+    def action_sale_target_manager(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_sale_target_action')
+        department_id = self.env.user.employee_id.department_id
+        sale_target_ids = self.env['ccpp.sale.target'].search([
+                                                            ('department_id', '=', department_id.id),
+                                                            ])
+        action['domain'] = [('id','in',sale_target_ids.ids)]
+        return action
     

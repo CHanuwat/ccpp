@@ -4,117 +4,161 @@
     <record id="ccpp_approve_dashboard_tree" model="ir.ui.view">
         <field name="name">ccpp.approve.dashboard.tree</field>
         <field name="model">project.project</field>
-        <!--<field name="priority" eval="269"/>-->
-        <!--<field eval="301" name="priority"/>-->
+        <field name="priority" eval="1"/>
         <field name="arch" type="xml">
-            <tree> 
-                <header>
-                    <button name="button_done" class="btn-primary" type="object"/>
-                </header>
+            <tree create="0" edit="0" delete="0"> 
                 <button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>
-                <field name="name" string="CCPP Name" class="fw-bold"/>
-                <!--<field name="code" string="CCPP No."/>-->
+                <field name="name" string="Name" class="fw-bold"/>
                 <field name="partner_id" string="Customer"/>
-                <field name="priority_id" string="Priority"/>
+                <field name="priority_select" decoration-danger="priority_select in ['1','2']" string="Priority"/>
                 <field name="show_period" string="Period"/>
-                <field name="user_id" string="CCPP User"/>
-                <field name="state" string="State"/>
+                <field name="user_id" widget="many2one_avatar_user" string="User"/>
             </tree>
         </field>
     </record>
 
-    <record id="ccpp_ccpp_approve_dashboard_action" model="ir.actions.act_window">
-        <field name="name">CCPP Approve Dashboard</field>
-        <field name="type">ir.actions.act_window</field>
-        <field name="res_model">project.project</field>
-        <field name="view_mode">tree,form</field>
-        <field name="view_id" ref="ccpp.ccpp_approve_dashboard_tree"/>
-        <field name="target">main</field>
-        
-        <!--<field name="view_ids" eval="[(5, 0, 0),
-                (0, 0, {'view_mode': 'tree', 'view_id': ref('ccpp_approve_dashboard_tree')})]"/>-->
-
-    </record>
-
-    <record id="ccpp_ccpp_approve_dashboard_action_view_tree" model="ir.actions.act_window.view">
-        <field name="sequence" eval="101"/>
-        <field name="view_mode">tree</field>
-        <field name="view_id" ref="ccpp.ccpp_approve_dashboard_tree"/>
-        <field name="act_window_id" ref="ccpp.ccpp_ccpp_approve_dashboard_action"/>
-    </record>
-
-    <record id="solution_approve_dashboard_tree" model="ir.ui.view">
+    <record id="solution_strategy_approve_dashboard_tree" model="ir.ui.view">
         <field name="name">solution.approve.dashboard.tree</field>
         <field name="model">project.task</field>
+        <field name="priority" eval="1"/>
         <field name="arch" type="xml">
-            <tree>
-                <field name="project_id" string="CCPP Name"/>
-                <field name="name" string="Solution Name"/>
-                <field name="code" string="Solution No."/>
+            <tree create="0" edit="0" delete="0">
+                <button type="action" name="ccpp.action_open_solution_strategy_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>
+                <field name="is_solution" invisible="True"/>
+                <field name="is_strategy" invisible="True"/>
+                <field name="name" string="Name" class="fw-bold"/>
+                <field name="parent_id" string="Solution" invisible="context.get('hide_solution') == True"/>
+                <field name="project_id" string="CCPP"/>
                 <field name="partner_id" string="Customer"/>
+                <field name="priority_select" decoration-danger="priority_select in ['1','2']" string="Priority"/>
+                <field name="show_period" string="Period"/>
                 <field name="user_ids" widget="many2many_avatar_user" string="User"/>
             </tree>
         </field>
     </record>
 
-    <record id="ccpp_solution_approve_dashboard_action" model="ir.actions.act_window">
-        <field name="name">Solution Approve Dashboard</field>
+    <record id="ccpp_ccpp_approve_dashboard_action" model="ir.actions.act_window">
+        <field name="name">CCPP Approval</field>
         <field name="type">ir.actions.act_window</field>
-        <field name="res_model">project.task</field>
+        <field name="res_model">project.project</field>
+        <field name="domain">[('user_id','=',uid),('state','=','waiting_approve')]</field>
         <field name="view_mode">tree,form</field>
-        <field name="view_id" ref="ccpp.solution_approve_dashboard_tree"/>
+        <field name="view_id" ref="ccpp_approve_dashboard_tree"/>
         <field name="target">main</field>
     </record>
 
-    <record id="strategy_approve_dashboard_tree" model="ir.ui.view">
-        <field name="name">strategy.approve.dashboard.tree</field>
-        <field name="model">project.task</field>
-        <field name="arch" type="xml">
-            <tree>
-                <field name="project_id" string="CCPP Name"/>
-                <field name="parent_id" string="Solution Name"/>
-                <field name="name" string="Strategy Name"/>
-                <field name="code" string="Strategy No."/>
-                <field name="partner_id" string="Customer"/>
-                <field name="user_ids" string="User" widget="many2many_avatar_user"/>
-            </tree>
-        </field>
+    <record id="ccpp_solution_approve_dashboard_action" model="ir.actions.act_window">
+        <field name="name">New Solution Approval</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">project.task</field>
+        <field name="domain">[('project_id.user_id','=',uid),('is_solution','=',True),('state','=','waiting_approve'),('is_ccpp_on_process','=',True)]</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="solution_strategy_approve_dashboard_tree"/>
+        <field name="target">main</field>
     </record>
 
     <record id="ccpp_strategy_approve_dashboard_action" model="ir.actions.act_window">
-        <field name="name">Strategy Approve Dashboard</field>
+        <field name="name">New Strategy Approval</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">project.task</field>
+        <field name="domain">[('project_id.user_id','=',uid),('is_strategy','=',True),('state','=','waiting_approve'),('is_ccpp_on_process','=',True),('is_solution_on_approve','=',False)]</field>
         <field name="view_mode">tree,form</field>
-        <field name="view_id" ref="ccpp.strategy_approve_dashboard_tree"/>
+        <field name="view_id" ref="solution_strategy_approve_dashboard_tree"/>
         <field name="target">main</field>
     </record>
 
-    <record id="ccpp_approve_dashboard_view" model="ir.ui.view">
+    <record id="ccpp_approve_dashboard_view_user" model="ir.ui.view">
         <field name="name">CCPP Approve Dashboard</field>
         <field name="model">board.board</field>
         <field name="type">form</field>
         <field name="arch" type="xml">
-            <form string="Dashboard">
-                <board style="1">
-                    <column>
-                        <action string="CCPP Approve" name="%(ccpp.ccpp_ccpp_approve_dashboard_action)d" domain="[('state','=','waiting_approve')]"/>
-                        <action string="Solution Approve" name="%(ccpp.ccpp_solution_approve_dashboard_action)d" domain="[('is_solution','=',True),('state','=','waiting_approve')]"/>
-                        <action string="Strategy Approve" name="%(ccpp.ccpp_strategy_approve_dashboard_action)d" domain="[('is_strategy','=',True),('state','=','waiting_approve')]"/>
+            <form string="Dashboard" edit="0" delete="0" create="0">
+                <board style="1" edit="0" delete="0" create="0">
+                    <column edit="0" delete="0" create="0">
+                        <action string="CCPP Approval" name="%(ccpp.ccpp_ccpp_approve_dashboard_action)d" 
+                        domain="[('state','=','waiting_approve')]"/>
+                        <action string="New Solution Approval" name="%(ccpp.ccpp_solution_approve_dashboard_action)d" 
+                        domain="[('is_solution','=',True),('state','=','waiting_approve'),('is_ccpp_on_process','=',True)]"
+                        context="{'hide_solution': True}"/>
+                        <action string="New Strategy Approval" name="%(ccpp.ccpp_strategy_approve_dashboard_action)d" 
+                        domain="[('is_strategy','=',True),('state','=','waiting_approve'),('is_ccpp_on_process','=',True),('is_solution_on_approve','=',False)]"/> 
                     </column>
                 </board>
             </form>
         </field>
     </record>
 
-    <record id="ccpp_approve_dashboard_action" model="ir.actions.act_window">
+    <record id="ccpp_ccpp_approve_dashboard_action_manager" model="ir.actions.server">
+        <field name="name">CCPP Approval</field>
+        <field name="model_id" ref="model_project_project"/>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="code">action = model.action_ccpp_department_approve_manager()</field>
+    </record>
+
+    <record id="ccpp_solution_approve_dashboard_action_manager" model="ir.actions.server">
+        <field name="name">New Solution Approval</field>
+        <field name="model_id" ref="model_project_task"/>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="code">action = model.action_solution_department_approve_manager()</field>
+    </record>
+
+    <record id="ccpp_strategy_approve_dashboard_action_manager" model="ir.actions.server">
+        <field name="name">New Strategy Approval</field>
+        <field name="model_id" ref="model_project_task"/>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="code">action = model.action_strategy_department_approve_manager()</field>
+    </record>
+
+    <record id="ccpp_approve_dashboard_view_manager" model="ir.ui.view">
+        <field name="name">CCPP Approve Dashboard</field>
+        <field name="model">board.board</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form string="Dashboard" edit="0" delete="0" create="0">
+                <board style="1" edit="0" delete="0" create="0">
+                    <column edit="0" delete="0" create="0">
+                        <action string="CCPP Approval" name="%(ccpp.ccpp_ccpp_approve_dashboard_action_manager)d" />
+                        <action string="New Solution Approval" name="%(ccpp.ccpp_solution_approve_dashboard_action_manager)d" 
+                        domain="[('is_solution','=',True),('state','=','waiting_approve'),('is_ccpp_on_process','=',True)]"
+                        context="{'hide_solution': True}"/>
+                        <action string="New Strategy Approval" name="%(ccpp.ccpp_strategy_approve_dashboard_action_manager)d" 
+                        domain="[('is_strategy','=',True),('state','=','waiting_approve'),('is_ccpp_on_process','=',True),('is_solution_on_approve','=',False)]"/> 
+                    </column>
+                </board>
+            </form>
+        </field>
+    </record>
+
+    <record id="ccpp_approve_dashboard_action_user" model="ir.actions.act_window">
         <field name="name">CCPP Approval</field>
         <field name="res_model">board.board</field>
         <field name="view_mode">form</field>
         <field name="usage">menu</field>
-        <field name="view_id" ref="ccpp_approve_dashboard_view"/>
+        <field name="view_id" ref="ccpp_approve_dashboard_view_user"/>
     </record>
 
-    <menuitem name="CCPP Approval" id="menu_ccpp_approve_dashboard" parent="project.menu_main_pm" action="ccpp_approve_dashboard_action" sequence="3" />
+    <record id="ccpp_approve_dashboard_action_manager" model="ir.actions.act_window">
+        <field name="name">CCPP Approval</field>
+        <field name="res_model">board.board</field>
+        <field name="view_mode">form</field>
+        <field name="usage">menu</field>
+        <field name="view_id" ref="ccpp_approve_dashboard_view_manager"/>
+    </record>
+
+    <!--<menuitem name="CCPP Approval" id="menu_ccpp_approve_dashboard_user" groups="ccpp.group_ccpp_user" parent="project.menu_main_pm" action="ccpp_approve_dashboard_action_user" sequence="3" />-->
+    <!--<menuitem name="CCPP Approval" id="menu_ccpp_approve_dashboard_manager" groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager" parent="project.menu_main_pm" action="ccpp_approve_dashboard_action_manager" sequence="4" />-->
+    <menuitem name="Approval" id="menu_ccpp_approve_dashboard_user_parent" groups="ccpp.group_ccpp_backoffice_user,ccpp.group_ccpp_frontoffice_user" parent="project.menu_main_pm" sequence="4" />
+        <menuitem name="CCPP Approval" id="menu_ccpp_approve_dashboard_user" action="ccpp_ccpp_approve_dashboard_action" parent="menu_ccpp_approve_dashboard_user_parent" sequence="1" />
+        <menuitem name="New Solution Approval" id="menu_solution_approve_dashboard_user" action="ccpp_solution_approve_dashboard_action" parent="menu_ccpp_approve_dashboard_user_parent" sequence="2" />
+        <menuitem name="New Strategy Approval" id="menu_strategy_approve_dashboard_user" action="ccpp_strategy_approve_dashboard_action" parent="menu_ccpp_approve_dashboard_user_parent" sequence="3" />
+
+    <menuitem name="Approval" id="menu_ccpp_approve_dashboard_manager_parent" groups="ccpp.group_ccpp_backoffice_manager,ccpp.group_ccpp_frontoffice_manager" parent="project.menu_main_pm" sequence="5" />
+        <menuitem name="CCPP Approval" id="menu_ccpp_approve_dashboard_manager" action="ccpp_ccpp_approve_dashboard_action_manager" parent="menu_ccpp_approve_dashboard_manager_parent" sequence="1" />
+        <menuitem name="New Solution Approval" id="menu_solution_approve_dashboard_manager" action="ccpp_solution_approve_dashboard_action_manager" parent="menu_ccpp_approve_dashboard_manager_parent" sequence="2" />
+        <menuitem name="New Strategy Approval" id="menu_strategy_approve_dashboard_manager" action="ccpp_strategy_approve_dashboard_action_manager" parent="menu_ccpp_approve_dashboard_manager_parent" sequence="3" />
+    
     
 </odoo>

@@ -19,3 +19,4 @@ from . import rocker_timesheet_defaults
 from . import rocker_timesheet_project
 from . import rocker_timesheet
 from . import ccpp_customer_budget
+from . import hr_employee

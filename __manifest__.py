@@ -17,8 +17,8 @@
                 ],
     'data': [
         "data/ir_sequence.xml",
+        "data/groups.xml",
         "security/ir.model.access.csv",
-        "views/project_view.xml",
         "views/ccpp_department_view.xml",
         "views/ccpp_priority_view.xml",
         "views/hr_department_view.xml",
@@ -33,8 +33,10 @@
         "views/ccpp_dashboard_view.xml",
         "views/ccpp_customer_information_view.xml",
         "views/rocker_timesheet_views.xml",
+        "views/project_view.xml",
         "views/ccpp_customer_budget_view.xml",
         "views/ccpp_approve_dashboard.xml",
+        "views/ccpp_crm_menu.xml",
         ],
     'qweb': [ 
         ],
