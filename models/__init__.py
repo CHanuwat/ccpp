@@ -20,3 +20,6 @@ from . import rocker_timesheet_project
 from . import rocker_timesheet
 from . import ccpp_customer_budget
 from . import hr_employee
+from . import hr_job
+from . import res_users
+from . import ccpp_wizard_reject

@@ -17,14 +17,14 @@ class Partner(models.Model):
         return is_potential
     
     def _get_default_is_company(self):
-        if self._context.get('create_potential'):
+        if self._context.get('create_potential') or self._context.get('create_external_customer'):
             is_company = True
         else:
             is_company = False
         return is_company
     
     def _get_default_is_customer(self):
-        if self._context.get('create_external'):
+        if self._context.get('create_external_customer') or self._context.get('create_external_contact'):
             is_customer = True
         else:
             is_customer = False
@@ -32,7 +32,7 @@ class Partner(models.Model):
     
     def _get_default_parent_id(self):
         parent_id = self.env['res.partner']
-        if self._context.get('create_external'):
+        if self._context.get('create_external_contact'):
             if self._context.get('external_parent'):
                 parent_id = self._context.get('external_parent')
                 partner_id = self.env['res.partner'].browse(parent_id)

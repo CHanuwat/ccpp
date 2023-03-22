@@ -19,6 +19,7 @@ access_ccpp_purchase_history_line,access_ccpp_purchase_history_line,model_ccpp_p
 access_ccpp_customer_budget,access_ccpp_customer_budget,model_ccpp_customer_budget,base.group_user,1,1,1,1
 access_customer_potential,access_customer_potential,model_customer_potential,base.group_user,1,1,1,1
 access_account_analytic_line_log,access_account_analytic_line_log,model_account_analytic_line_log,base.group_user,1,1,1,1
+access_ccpp_wizard_reject,access_ccpp_wizard_reject,model_ccpp_wizard_reject,base.group_user,1,1,1,1
 
 
 

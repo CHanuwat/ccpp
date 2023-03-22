@@ -36,6 +36,10 @@
         "views/project_view.xml",
         "views/ccpp_customer_budget_view.xml",
         "views/ccpp_approve_dashboard.xml",
+        "views/hr_job_view.xml",
+        "views/ccpp_wizard_reject_view.xml",
+        "views/hr_employee_view.xml",
+        "views/ccpp_project_update_template.xml",
         "views/ccpp_crm_menu.xml",
         ],
     'qweb': [ 

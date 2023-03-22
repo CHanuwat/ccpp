@@ -9,6 +9,8 @@ from pprint import pprint
 class HrEmployeePrivate(models.Model):
     _inherit = "hr.employee"
     
+    job_lines = fields.One2many("hr.job", 'employee_id', string="Job Lines")
+    
     @api.constrains('name')
     def _constrains_name(self):
         for obj in self:
@@ -45,4 +47,20 @@ class HrEmployeePrivate(models.Model):
                     'job_position_id': job_position_id.id,
                     'is_employee': True,
                 })
+                
+    def write(self, vals):
+        if 'job_id' in vals:
+            partner_id = self.work_contact_id
+            job_id = self.env['hr.job'].browse(vals['job_id'])
+            job_position_id = self.env['res.partner.position'].search([('name','=',job_id.name),('type','=','internal')],limit=1)
+            if not job_position_id:
+                job_position_id = self.env['res.partner.position'].sudo().create({
+                    'name': job_id.name,
+                    'type': 'internal',
+                })
+            partner_id.job_position_id = job_position_id.id
+            partner_id.parent_id = self.address_id.id
+            partner_id.is_employee = True
+        res = super(HrEmployeePrivate, self).write(vals)
+        return res
 

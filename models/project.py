@@ -47,14 +47,24 @@ STATE_COLOR = {
 
 class Project(models.Model):
     _inherit = "project.project"
-    #_rec_name = 'code'
+    _desciption = "CCPP"
+    #_rec_name = 'rec_name'
+
+    def _get_default_job(self):
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        #if not employee_id:
+        #    print(self.env.user.name)
+        #    raise UserError("Not recognize the Employee. Please Configure User to Employee to get the job")
+        return employee_id.job_id
 
     def _get_default_sale_team(self):
         print("x*50"+"pass pass pass")
         return self.env['crm.team'].search([('user_id','=',self.env.user.id)], limit=1)
 
-    department_id = fields.Many2one("hr.department",string="Department")
-    employee_id = fields.Many2one("hr.employee", string="Employee")
+    rec_name = fields.Char(string="Record Name", default='CCPP')
+    department_id = fields.Many2one("hr.department",string="Department", related="job_id.department_id")
+    employee_id = fields.Many2one("hr.employee", string="User", related="job_id.employee_id")
+    job_id = fields.Many2one("hr.job", string="Job Position", default=_get_default_job, required=True, track_visibility="onchange")#default=_get_default_job,     
     priority_id = fields.Many2one("ccpp.priority", string="CCPP Priority", compute="_get_priority", store=True)
     priority_select = fields.Selection([
         ('to_define', 'To Define'),
@@ -68,31 +78,33 @@ class Project(models.Model):
     sale_team_id = fields.Many2one("crm.team", string="Sale Team", default="_get_default_sale_team")
     domain_task_solution_ids = fields.Many2many('project.task', string="Domain task solution")
     tasks_solution = fields.One2many('project.task', 'project_solution_id', string="Solution", context={'is_solution': True})
-    name = fields.Char(string="Name of CCPP", translate=False)
+    name = fields.Char(string="Name of CCPP", translate=False, track_visibility="onchange")
     user_id = fields.Many2one(related="employee_id.user_id", string="CCPP User", store=True)
     color = fields.Integer(related="priority_id.color", store=True)
-    
+    domain_partner_ids = fields.Many2many("res.partner", string="Domain Customer", compute="_compute_domain_partner_ids")
+    partner_id = fields.Many2one('res.partner', track_visibility="onchange", domain="[('id','in',domain_partner_ids)]")
+
     # Host CCPP
-    partner_contact_id = fields.Many2one("res.partner", string="Host of CCPP")
+    partner_contact_id = fields.Many2one("res.partner", string="Host of CCPP", track_visibility="onchange")
     domain_partner_contact_ids = fields.Many2many("res.partner", string="Domain partner contact", compute="_compute_domain_partner_contact_ids")
-    job_position_id = fields.Many2one("res.partner.position", string="Host of CCPP", related="partner_contact_id.job_position_id")
+    job_position_id = fields.Many2one("res.partner.position", string="Contact Job Position", related="partner_contact_id.job_position_id")
     domain_job_position_ids = fields.Many2many("res.partner.position", string="Domain Job Position", compute="_compute_domain_job_position_ids")
     
     ## impact customer ##
-    is_income_cus = fields.Boolean("Income/Funding", default=False)
-    is_effectiveness_cus = fields.Boolean("Effectiveness/Personal Performance", default=False)
-    is_repulation_cus = fields.Boolean("Repulation", default=False)
-    is_competitive_cus = fields.Boolean("Competitive Advantage", default=False)
-    is_critical = fields.Boolean("Need help Now!", default=False)
-    is_not_critical = fields.Boolean("I can wait", default=False)
+    is_income_cus = fields.Boolean("Income/Funding", default=False, track_visibility="onchange")
+    is_effectiveness_cus = fields.Boolean("Effectiveness/Personal Performance", default=False, track_visibility="onchange")
+    is_repulation_cus = fields.Boolean("Repulation", default=False, track_visibility="onchange")
+    is_competitive_cus = fields.Boolean("Competitive Advantage", default=False, track_visibility="onchange")
+    is_critical = fields.Boolean("Need help Now!", default=False, track_visibility="onchange")
+    is_not_critical = fields.Boolean("I can wait", default=False, track_visibility="onchange")
     
     ## impact winmed ##
-    is_income_comp = fields.Boolean("Sale Revenue/Cost", default=False)
-    is_effectiveness_comp = fields.Boolean("Future Business Opportunity", default=False)
-    is_repulation_comp = fields.Boolean("Repulation", default=False)
-    is_competitive_comp = fields.Boolean("Competitive Advantage", default=False)
-    is_short_time = fields.Boolean("Short")
-    is_long_time = fields.Boolean("Long")
+    is_income_comp = fields.Boolean("Sale Revenue/Cost", default=False, track_visibility="onchange")
+    is_effectiveness_comp = fields.Boolean("Future Business Opportunity", default=False, track_visibility="onchange")
+    is_repulation_comp = fields.Boolean("Repulation", default=False, track_visibility="onchange")
+    is_competitive_comp = fields.Boolean("Competitive Advantage", default=False, track_visibility="onchange")
+    is_short_time = fields.Boolean("Short", track_visibility="onchange")
+    is_long_time = fields.Boolean("Long", track_visibility="onchange")
     
     is_verify_impact_cus = fields.Boolean("Verify impact Customer", default=False)
     is_stamp_record = fields.Boolean("Aready have record", default=False)
@@ -100,10 +112,10 @@ class Project(models.Model):
     show_time = fields.Char(string="Time", compute="_compute_show_time")
     code = fields.Char(string="Code")
     #show_period = fields.Char(string="Period", compute="_compute_period_deadline", store=True)
-    show_period = fields.Char(string="Period")
+    show_period = fields.Char(string="Period", track_visibility="onchange")
     period_id = fields.Many2one("ccpp.period", string="Priority Period", compute="_get_priority", store=True)
     #deadline_date = fields.Date(string="Deadline", compute="_compute_period_deadline", store=True)
-    deadline_date = fields.Date(string="Deadline", compute="_compute_deadline", store=True)
+    deadline_date = fields.Date(string="Deadline", compute="_compute_deadline", store=True, track_visibility="onchange")
     state = fields.Selection([
         ('open', 'Open'),
         ('waiting_approve', 'Waiting For Approval'),
@@ -120,6 +132,7 @@ class Project(models.Model):
     delay_date = fields.Date(string="Delayed Date")
     is_approve_strategy = fields.Boolean(string="Is Approve Strategy", default=False)
     is_ready_create_solution = fields.Boolean(string="Is Ready Create Solution", compute="_compute_ready_create_solution")
+    reason_reject = fields.Text(string="Comment Rejection",track_visibility="onchange")
  
     def unlink(self):
         res = super().unlink()
@@ -274,6 +287,17 @@ class Project(models.Model):
                     partner_contact_ids |= child_id
             obj.domain_partner_contact_ids = partner_contact_ids.ids
             
+    @api.depends("job_id")
+    def _compute_domain_partner_ids(self):
+        for obj in self:
+            customer_ids = self.env['ccpp.customer.information']
+            if obj.job_id:
+                customer_ids = self.env['ccpp.customer.information'].search([('job_id','=',obj.job_id.id)]).mapped('customer_id')
+                customer_name = self.env['ccpp.customer.information'].search([('job_id','=',obj.job_id.id)]).mapped('customer_id.name')
+                print(customer_name)
+            obj.domain_partner_ids = customer_ids.ids
+    
+    
     @api.depends("partner_id")
     def _compute_domain_job_position_ids(self):
         for obj in self:
@@ -306,6 +330,7 @@ class Project(models.Model):
                 raise UserError("กรุณาเลือกความเร่งด่วนของลูกค้าที่ต้องการความช่วยเหลือ")
             print(self._context)
             if self._context.get('create_from_tree') and not self._context.get('default_allow_billable'):
+            #if not self._context.get('default_allow_billable'):
                 sequence_date = datetime.now().strftime("%Y-%m-%d")
                 #sequence_code = 'ccpp.'+'cp.'+employee_id.department_id.code
                 sequence_code = 'ccpp.'+'cp'
@@ -430,6 +455,7 @@ class Project(models.Model):
     def button_approve(self):
         for obj in self:
             obj.state = 'process'
+            obj.reason_reject = False
             for solution_id in obj.tasks_solution:
                 if solution_id.state == 'waiting_approve':
                     solution_id.state = 'process'
@@ -447,6 +473,19 @@ class Project(models.Model):
                 for strategy_id in solution_id.child_ids:
                     if strategy_id.state == 'waiting_approve':
                         strategy_id.state = 'reject'
+                        
+    def button_reject_wizard(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_wizard_reject_action')
+        action['context'] = {'default_ccpp': self.id}
+        return action
+        #return {
+        #    'view_mode': 'form',
+        #    'res_model': 'ccpp.wizard.reject',
+        #    'type': 'ir.actions.act_window',
+        #    'context': {'default_ccpp': self.id},
+        #    'views' : [(self.env.ref('ccpp.').id, 'form')]
+        #} 
+        
         
     def button_done(self):
         for obj in self:
@@ -496,14 +535,20 @@ class Project(models.Model):
                         strategy_id.delay_date = date_today
                         
     def run_script_update(self):
-        ccpp_ids = self.env['project.project'].search([])
-        for ccpp_id in ccpp_ids:
-            for solution_id in ccpp_id.tasks_solution:
-                for strategy_id in solution_id.child_ids:
-                    if solution_id.start_date:
-                        strategy_id.start_date = solution_id.start_date
-                    if solution_id.deadline_date:
-                        strategy_id.deadline_date = solution_id.deadline_date
+        employee_ids = self.env['hr.employee'].search([])
+        for employee_id in employee_ids:
+            for job_id in employee_id.job_lines:
+                employee_id.job_id = job_id.id
+                break
+        # update start date & deadline
+        #ccpp_ids = self.env['project.project'].search([])
+        #for ccpp_id in ccpp_ids:
+        #    for solution_id in ccpp_id.tasks_solution:
+        #        for strategy_id in solution_id.child_ids:
+        #            if solution_id.start_date:
+        #                strategy_id.start_date = solution_id.start_date
+        #            if solution_id.deadline_date:
+        #                strategy_id.deadline_date = solution_id.deadline_date
 
                 
     # overide change color 
@@ -559,31 +604,81 @@ class Project(models.Model):
     
     def action_ccpp_department_approve_manager(self):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_ccpp_approve_dashboard_action')
-        department_id = self.env.user.employee_id.department_id
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        job_ids = self.get_child_job(employee_id.job_lines)
         ccpp_ids = self.env['project.project'].search([('state', '=', 'waiting_approve'),
-                                                        ('department_id', '=', department_id.id),
+                                                        ('job_id', 'in', job_ids.ids),
                                                         ])
         action['domain'] = [('id','in',ccpp_ids.ids)]
         return action
     
     def action_ccpp_department_group_by_priority_manager(self):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.action_all_ccpp_group_by_priority')
-        department_id = self.env.user.employee_id.department_id
-        ccpp_ids = self.env['project.project'].search([('department_id', '=', department_id.id)])
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        job_ids = self.get_child_job(employee_id.job_lines)
+        ccpp_ids = self.env['project.project'].search([('job_id', 'in', job_ids.ids)])
         action['domain'] = [('id','in',ccpp_ids.ids)]
         return action
         
     def action_ccpp_department_group_by_customer_manager(self):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.action_my_ccpp_group_by_customer')
-        department_id = self.env.user.employee_id.department_id
-        ccpp_ids = self.env['project.project'].search([('department_id', '=', department_id.id)])
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        job_ids = self.get_child_job(employee_id.job_lines)
+        ccpp_ids = self.env['project.project'].search([('job_id', 'in', job_ids.ids)])
         action['domain'] = [('id','in',ccpp_ids.ids)]
         return action
+    
+    @api.model
+    def retrieve_dashboard(self):
+        result = {
+            'priority_1': 0,
+            'priority_2': 0,
+            'priority_3': 0,
+            'priority_4': 0,
+            'delay': 0,
+        }
+
+        ccpp = self.env['project.project']
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        
+        result['priority_1'] = ccpp.search_count([('priority_id.point','=',1),('job_id', '=', employee_id.job_id.id)])
+        result['priority_2'] = ccpp.search_count([('priority_id.point','=',2),('job_id', '=', employee_id.job_id.id)])
+        result['priority_3'] = ccpp.search_count([('priority_id.point','=',3),('job_id', '=', employee_id.job_id.id)])
+        result['priority_4'] = ccpp.search_count([('priority_id.point','=',4),('job_id', '=', employee_id.job_id.id)])
+        result['delay'] = ccpp.search_count([('is_delay','=',True),('job_id', '=', employee_id.job_id.id)])
+        return result
+        
+    @api.model
+    def retrieve_dashboard_manager(self):
+        result = {
+            'priority_1': 0,
+            'priority_2': 0,
+            'priority_3': 0,
+            'priority_4': 0,
+            'delay': 0,
+        }
+        ccpp = self.env['project.project']
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        job_ids = self.get_child_job(employee_id.job_lines)
+        result['priority_1'] = ccpp.search_count([('priority_id.point','=',1),('job_id', 'in', job_ids.ids)])
+        result['priority_2'] = ccpp.search_count([('priority_id.point','=',2),('job_id', 'in', job_ids.ids)])
+        result['priority_3'] = ccpp.search_count([('priority_id.point','=',3),('job_id', 'in', job_ids.ids)])
+        result['priority_4'] = ccpp.search_count([('priority_id.point','=',4),('job_id', 'in', job_ids.ids)])
+        result['delay'] = ccpp.search_count([('is_delay','=',True),('job_id', 'in', job_ids.ids)])
+        return result        
+
+    def get_child_job(self,job_lines,job_ids=False):
+        if not job_ids:
+            job_ids = self.env['hr.job']
+        for job_id in job_lines:
+            job_ids |= job_id
+            job_ids |= self.get_child_job(job_id.child_lines, job_ids)   
+        return job_ids
         
 class Task(models.Model):
     _inherit = "project.task" 
     _order = "code"
-    #_rec_name = "code"
+    #_rec_name = "rec_name"
     
     def _get_default_level(self):
         if self._context.get('is_create_solution'):
@@ -594,10 +689,11 @@ class Task(models.Model):
     def _default_user_ids(self):
         return self.env.user.ids
     
-    is_solution = fields.Boolean(string='Is Solution', default=_get_default_level, compute="_compute_level", store=True)
-    is_strategy = fields.Boolean(string='Is Strategy', default=False, compute="_compute_level", store=True)
-    is_task = fields.Boolean(string='Is Task', default=False, compute="_compute_level", store=True)
-    is_subtask = fields.Boolean(string='Is SubTask', default=False, compute="_compute_level", store=True)
+    rec_name = fields.Char(string="Record Name", compute="_compute_rec_name", store=True)
+    is_solution = fields.Boolean(string='Is Solution', default=_get_default_level, compute="_compute_level", store=True, track_visibility="onchange")
+    is_strategy = fields.Boolean(string='Is Strategy', default=False, compute="_compute_level", store=True, track_visibility="onchange")
+    is_task = fields.Boolean(string='Is Task', default=False, compute="_compute_level", store=True, track_visibility="onchange")
+    is_subtask = fields.Boolean(string='Is SubTask', default=False, compute="_compute_level", store=True, track_visibility="onchange")
     task_type = fields.Selection([
         ('solution', 'Solution'),
         ('strategy', 'Strategy'),
@@ -606,9 +702,10 @@ class Task(models.Model):
     code = fields.Char(string="Code")
     period_id = fields.Many2one("ccpp.period", string="Priority Period", related="project_id.period_id")
     partner_id = fields.Many2one(related="project_id.partner_id")
-    job_position_id = fields.Many2one("res.partner.position", string="Host of CCPP",related="project_id.job_position_id")
+    job_position_id = fields.Many2one("res.partner.position", string="Contact Job Position",related="project_id.job_position_id")
+    job_id = fields.Many2one("hr.job", string="Job Position", related="project_id.job_id")
     priority_id = fields.Many2one("ccpp.priority", string="Priority", related="project_id.priority_id")
-    evaluate_method = fields.Char("วิธีวัดผล/เป้าหมาย")
+    evaluate_method = fields.Char("วิธีวัดผล/เป้าหมาย", track_visibility="onchange")
     situation_ids = fields.One2many("project.update", 'strategy_id', string="Current Situation")
     last_situation_id = fields.Many2one("project.update", string="Last Update Situation Strategy") # last update at strategy
     last_situation_solution_id = fields.Many2one("project.update", string="Last Update Situation Solution") # last update at solution
@@ -640,17 +737,17 @@ class Task(models.Model):
     state_color = fields.Integer(compute='_compute_state_color')
     next_action_solution = fields.Char(string="Next Action Solution")
     next_action = fields.Char(string="Next Action")
-    start_date = fields.Date(string="Start Date")
-    deadline_date = fields.Date(string="Deadline", compute="_compute_deadline", store=True)
+    start_date = fields.Date(string="Start Date",track_visibility="onchange")
+    deadline_date = fields.Date(string="Deadline", compute="_compute_deadline", store=True, track_visibility="onchange")
     priority_line_id = fields.Date(string="Priority Line") # stamp when approve :fix me
-    show_period = fields.Char(string="Period", compute="_compute_deadline", store=True)
-    is_delay = fields.Boolean(string="Is Delay", default=False)
-    delay_date = fields.Date(string="Delayed Date")
+    show_period = fields.Char(string="Period", compute="_compute_deadline", store=True, track_visibility="onchange")
+    is_delay = fields.Boolean(string="Is Delay", default=False, track_visibility="onchange")
+    delay_date = fields.Date(string="Delayed Date", track_visibility="onchange")
     is_ccpp_on_process = fields.Boolean(string="Is CCPP on process", compute="_is_on_process", store=True)
     is_solution_on_approve = fields.Boolean(string="Is Solution on process", compute="_is_on_process", store=True)
     user_ids = fields.Many2many(default=_default_user_ids)
     priority_select = fields.Selection(related="project_id.priority_select")
-    
+    reason_reject = fields.Text(string="Comment Rejection",track_visibility="onchange")
     
     def unlink(self):
         if self.is_solution:
@@ -658,6 +755,14 @@ class Task(models.Model):
         if self.is_strategy:
             raise UserError("ระบบไม่สามารถลบ Strategy ได้ กรุณา cancel หากไม่ได้ใช้งาน")
         res = super().unlink()
+    
+    @api.depends("parent_id","is_solution","project_id.state","is_strategy","parent_id.project_id.state","parent_id.state")
+    def _compute_rec_name(self):
+        for obj in self:
+            if obj.is_solution:
+                obj.rec_name = 'Solution'
+            elif obj.is_strategy:
+                obj.rec_name = 'Strategy'
         
     @api.depends("is_solution","project_id.state","is_strategy","parent_id.project_id.state","parent_id.state")
     def _is_on_process(self):
@@ -680,6 +785,7 @@ class Task(models.Model):
         for obj in self:
             deadline_date = False
             string_show_period = False
+            #priority_line_id = obj.project_id.priority_id.lines.filtered(lambda o:o.active)
             if obj.project_id.priority_id and obj.start_date and obj.project_id.priority_id.point <= 2:
                 start_date_obj = obj.start_date
                 priority_line_id = obj.project_id.priority_id.lines.filtered(lambda o:o.active)
@@ -765,6 +871,7 @@ class Task(models.Model):
                 
             obj.show_period = string_show_period
             obj.deadline_date = deadline_date
+            #obj.priority_line_id = priority_line_id
             # write start date to strategy
             for strategy_id in obj.child_ids:
                 strategy_id.show_period = string_show_period
@@ -1105,6 +1212,7 @@ class Task(models.Model):
     def button_approve_strategy(self):
         for obj in self:
             #obj.is_approve_strategy = False
+            obj.reason_reject = False
             obj.state = 'process'
             
     def button_approve_solution(self):
@@ -1112,6 +1220,7 @@ class Task(models.Model):
             obj.project_id.get_period_deadline()
             obj.project_id.is_delay = False
             obj.state = 'process'
+            obj.reason_reject = False
             for strategy_id in obj.child_ids:
                 if strategy_id.state == 'waiting_approve':
                     strategy_id.state = 'process'
@@ -1120,12 +1229,22 @@ class Task(models.Model):
         for obj in self:
             obj.state = 'reject'
             
+    def button_reject_strategy_wizard(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_wizard_reject_action')
+        action['context'] = {'default_strategy': self.id}
+        return action        
+            
     def button_reject_solution(self):
         for obj in self:
             obj.state = 'reject'
             for strategy_id in obj.child_ids:
                 if strategy_id.state == 'waiting_approve':
                     strategy_id.state = 'reject'   
+                    
+    def button_reject_solution_wizard(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_wizard_reject_action')
+        action['context'] = {'default_solution': self.id}
+        return action       
     
     def button_to_open_strategy(self):
         for obj in self:
@@ -1204,9 +1323,11 @@ class Task(models.Model):
     
     def action_solution_department_approve_manager(self):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_solution_approve_dashboard_action')
-        department_id = self.env.user.employee_id.department_id
+        #department_id = self.env.user.employee_id.department_id
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        job_ids = self.get_child_job(employee_id.job_lines)
         solution_ids = self.env['project.task'].search([('state', '=', 'waiting_approve'),
-                                                        ('project_id.department_id', '=', department_id.id),
+                                                        ('project_id.job_id', 'in', job_ids.ids),
                                                         ('is_solution','=',True),
                                                         ('state','=','waiting_approve'),
                                                         ('is_ccpp_on_process','=',True),
@@ -1216,9 +1337,10 @@ class Task(models.Model):
     
     def action_strategy_department_approve_manager(self):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_strategy_approve_dashboard_action')
-        department_id = self.env.user.employee_id.department_id
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        job_ids = self.get_child_job(employee_id.job_lines)
         strategy_ids = self.env['project.task'].search([('state', '=', 'waiting_approve'),
-                                                        ('project_id.department_id', '=', department_id.id),
+                                                        ('project_id.job_id', 'in', job_ids.ids),
                                                         ('is_strategy','=',True),
                                                         ('state','=','waiting_approve'),
                                                         ('is_ccpp_on_process','=',True),
@@ -1242,6 +1364,7 @@ class ProjectUpdate(models.Model):
     task_id = fields.Many2one("account.analytic.line", string="Tasks")
     latitude = fields.Float(string="Latitude", digits=(12,6))
     longitude = fields.Float(string="Longitude", digits=(12,6))
+    status = fields.Selection(default='on_track')
 
     def unlink(self):
         res = super().unlink()
@@ -1266,6 +1389,8 @@ class ProjectUpdate(models.Model):
                 code = self.env['ir.sequence'].next_by_code(sequence_code,sequence_date=sequence_date)
                 update.code = code or 'New'
             update.strategy_id.state = 'process'
+            if update.task_id:
+                update.task_id.button_done()
             update.update_solution_process()
         return res
     
@@ -1331,3 +1456,7 @@ class ProjectUpdate(models.Model):
         print("long-->",longitude)
         self.latitude = latitude
         self.longitude = longitude
+        
+    def button_done(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.act_rocker_timesheet_tree')
+        return action

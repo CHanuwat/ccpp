@@ -112,6 +112,11 @@
             <xpath expr="//form[1]" position="attributes">
                 <attribute name="js_class">ccpp_location</attribute>
             </xpath>
+            <xpath expr="//form[1]/sheet[1]" position="before">
+                <header>
+                    <button name="button_done" type="object" class="btn-success" string="Done"/>
+                </header>
+            </xpath>
             <xpath expr="//field[@name='project_id']" position="replace">
                 <field name="task_id" string="Task" readonly="True"/>
                 <field name="customer_id" string="Customer" readonly="True"/>
@@ -123,12 +128,21 @@
                 <field name="location"/>
                 <button name="get_location" type="object" class="btn-success o_hr_attendance_sign_in_out_icon" string="Get Location"/>-->
             </xpath>
+            <xpath expr="//field[@name='status']" position="replace">
+            </xpath>
             <xpath expr="//field[@name='name']" position="attributes">
                 <attribute name="placeholder">Enter Current Situation</attribute>
+            </xpath>
+            <xpath expr="//field[@name='description']" position="attributes">
+                <attribute name="placeholder">Enter Description</attribute>
+            </xpath>
+            <xpath expr="//field[@name='name']" position="before">
+                <label for="name" string="Current Situation"/>
             </xpath>
             <xpath expr="//form[1]/sheet[1]/div[1]" position="after">
                 <div class="oe_title">
                     <h1>
+                        <label for="next_action" string="Next Action"/>
                         <field name="next_action" class="o_text_overflow" placeholder="Enter Next Action"/>
                     </h1>
                 </div>
@@ -160,6 +174,8 @@
                 <field name="strategy_id"/>
             </xpath>
             <xpath expr="//tree[1]/field[@name='progress_percentage']" position="replace">
+            </xpath>
+            <xpath expr="//tree[1]/field[@name='status']" position="replace">
             </xpath>
         </field>
     </record>
@@ -300,8 +316,8 @@
             <xpath expr="//form[1]/header[1]/button[1]" position="before">
                 <field name="is_ccpp_done" invisible="True"/>
                 <button name="button_send_approve" string="Send Approve" type="object" class="btn-primary" states="open"/>
-                <button name="button_approve" string="Approve" type="object" class="btn-primary" states="waiting_approve" groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>
-                <button name="button_reject" string="Reject" type="object" class="btn-danger" states="waiting_approve" groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>
+                <button name="button_approve" string="Approve" type="object" class="btn-primary" states="waiting_approve" /><!--groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>-->
+                <button name="button_reject_wizard" string="Reject" type="object" class="btn-danger" states="waiting_approve"/><!--groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>-->
                 <button name="button_done" string="Done" type="object" class="btn-success" attrs="{'invisible': ['|',('state','!=','process'),('is_ccpp_done','=',False)]}"/>
                 <button name="button_cancel" string="Cancel" type="object" states="open,process"/>
                 <button name="button_to_open" string="To Open" type="object" class="btn-primary" states="reject"/>
@@ -365,15 +381,18 @@
                     </group>
                 </group>
             </xpath>-->
-            <xpath expr="//form[1]/sheet[1]/group[1]/group[1]/field[@name='partner_id']" position="attributes">
-                <attribute name="domain">['|',('company_id','=',company_id),('company_id','=',False),('is_customer','=',True)]</attribute>
-                <attribute name="attrs">{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}</attribute>
-                <attribute name="options">{'no_create':True}</attribute>
+                
+            <xpath expr="//form[1]/sheet[1]/group[1]/group[1]/field[@name='partner_id']" position="replace">
+                <field name="domain_partner_ids" invisible="True"/>
+                <field name="partner_id" attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"
+                options="{'no_create':True}" domain="[('id','in',domain_partner_ids)]"/>
             </xpath>
+                
             <xpath expr="//form[1]/sheet[1]/group[1]/group[1]/field[@name='partner_id']" position="after">
                 <field name="domain_partner_contact_ids" invisible="True"/>
                 <field name="partner_contact_id" widget="res_partner_many2one" domain="[('id','in',domain_partner_contact_ids)]" options="{'no_create':True}"
                 context="{'show_title_position':True}" attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"/> <!--options="{'no_create':True}"/>-->
+                <field name="reason_reject" readonly="True" attrs="{'invisible': [('reason_reject','=',False)]}" style="color:red;"/>
                 <!--<field name="domain_job_position_ids" invisible="True"/>
                 <field name="job_position_id" domain="[('id','in',domain_job_position_ids)]" options="{'no_create': True, 'no_open': True}"/>-->
             </xpath>
@@ -386,10 +405,6 @@
                 <attribute name="string">Note</attribute>
             </xpath>
 
-            <xpath expr="//field[@name='partner_id']" position="attributes">
-                <attribute name="domain">[('child_ids','!=',False)]</attribute>
-            </xpath>
-
             <xpath expr="//form[1]/sheet[1]/notebook[1]/page[@name='description']/field[@name='description']" position="attributes">
                 <attribute name="placeholder">'CCPP Note'</attribute>
             </xpath>
@@ -398,8 +413,9 @@
                 <page name="Information" string="Information">
                     <group>
                         <group>
-                            <field name="department_id" attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"/> 
-                            <field name="user_id" attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"/>
+                            <field name="department_id" attrs="{'readonly': True}"/> 
+                            <field name="job_id" attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"/>
+                            <field name="employee_id" attrs="{'readonly': True}" string="CCPP User"/>
                         </group>
                     </group>
                 </page>
@@ -914,10 +930,10 @@
                 
                 <button name="button_send_approve_strategy" type="object" class="btn-primary" string="Send Approve Strategy" attrs="{'invisible': ['|','|','|',('is_strategy', '=', False),('state','!=','open'),('is_ccpp_on_process','=',False),('is_solution_on_approve','=',True)]}"/>
                 <button name="button_send_approve_solution" type="object" class="btn-primary" string="Send Approve Solution" attrs="{'invisible': ['|','|',('is_solution', '=', False),('state','!=','open'),('is_ccpp_on_process','=',False)]}"/>
-                <button name="button_approve_strategy" string="Approve Strategy" type="object" class="btn-primary" attrs="{'invisible': ['|','|','|',('is_strategy', '=', False),('state','!=','waiting_approve'),('is_ccpp_on_process','=',False),('is_solution_on_approve','=',True)]}" groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>
-                <button name="button_approve_solution" string="Approve Solution" type="object" class="btn-primary" attrs="{'invisible': ['|','|',('is_solution', '=', False),('state','!=','waiting_approve'),('is_ccpp_on_process','=',False)]}" groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>
-                <button name="button_reject_strategy" string="Reject Strategy" type="object" class="btn-danger" attrs="{'invisible': ['|','|','|',('is_strategy', '=', False),('state','!=','waiting_approve'),('is_ccpp_on_process','=',False),('is_solution_on_approve','=',True)]}" groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>
-                <button name="button_reject_solution" string="Reject Solution" type="object" class="btn-danger" attrs="{'invisible': ['|','|',('is_solution', '=', False),('state','!=','waiting_approve'),('is_ccpp_on_process','=',False)]}" groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_managerr"/>
+                <button name="button_approve_strategy" string="Approve Strategy" type="object" class="btn-primary" attrs="{'invisible': ['|','|','|',('is_strategy', '=', False),('state','!=','waiting_approve'),('is_ccpp_on_process','=',False),('is_solution_on_approve','=',True)]}"/><!--groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>-->
+                <button name="button_approve_solution" string="Approve Solution" type="object" class="btn-primary" attrs="{'invisible': ['|','|',('is_solution', '=', False),('state','!=','waiting_approve'),('is_ccpp_on_process','=',False)]}"/><!-- groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>-->
+                <button name="button_reject_strategy_wizard" string="Reject Strategy" type="object" class="btn-danger" attrs="{'invisible': ['|','|','|',('is_strategy', '=', False),('state','!=','waiting_approve'),('is_ccpp_on_process','=',False),('is_solution_on_approve','=',True)]}"/><!-- groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>-->
+                <button name="button_reject_solution_wizard" string="Reject Solution" type="object" class="btn-danger" attrs="{'invisible': ['|','|',('is_solution', '=', False),('state','!=','waiting_approve'),('is_ccpp_on_process','=',False)]}"/><!-- groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_managerr"/>-->
                 <button name="button_to_open_strategy" string="To Open Strategy" type="object" class="btn-primary" attrs="{'invisible': ['|','|','|',('is_strategy', '=', False),('state','!=','reject'),('is_ccpp_on_process','=',False),('is_solution_on_approve','=',True)]}"/>
                 <button name="button_to_open_solution" string="To Open Solution" type="object" class="btn-primary" attrs="{'invisible': ['|','|',('is_solution', '=', False),('state','!=','reject'),('is_ccpp_on_process','=',False)]}"/>
 
@@ -934,6 +950,7 @@
                         <field name="code" string="Task No." attrs="{'invisible': [('is_task','=',False),('is_subtask','=',False)]}" readonly="True"/>
                         <field name="evaluate_method" attrs="{'invisible': [('is_strategy','=',False)], 'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"/>
                         <field name="next_action" attrs="{'invisible': [('is_strategy','=',False)]}" readonly="True"/>
+                        <field name="reason_reject" readonly="True" attrs="{'invisible': [('reason_reject','=',False)]}" style="color:red;"/>
 
                         <!--<field name="project_id" domain="[('active', '=', True), ('company_id', '=', company_id)]" widget="project_private_task" string="CCPP" />
                         <field name="parent_id" string="Solution" attrs="{'invisible': [('is_solution','=',True)]}"/>
@@ -1375,21 +1392,17 @@
     </record>
 
     <record id="action_my_ccpp_group_by_priority" model="ir.actions.act_window">
-        <field name="name">My CCPP Group by Priority</field>
+        <field name="name">My CCPP</field>
         <field name="res_model">project.project</field>
         <field name="view_mode">tree,kanban,form</field>
-        <field name="context">{'search_default_groupby_priority': 1, 'show_create': '1'}</field>
+        <field name="context">{'search_default_groupby_priority': 1, 'show_create': '1', 'my_ccpp': True}</field>
         <field name="domain">[('user_id', '=', uid)]</field>
         <field name="view_id" ref="ccpp.ccpp_report_tree_show_create_view"/>
         <field name="search_view_id" ref="ccpp_search_form"/>
         <field name="target">main</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                No tasks found. Let's create one!
-            </p>
-            <p>
-                Keep track of the progress of your tasks from creation to completion.<br/>
-                Collaborate efficiently by chatting in real-time or via email.
+                No CCPP found. Let's create one!
             </p>
         </field>
     </record>
@@ -1429,10 +1442,10 @@
     </record>
 
     <record id="action_all_ccpp_group_by_priority" model="ir.actions.act_window">
-        <field name="name">All CCPP Group by Priority</field>
+        <field name="name">All CCPP</field>
         <field name="res_model">project.project</field>
         <field name="view_mode">tree,kanban,form</field>
-        <field name="context">{'search_default_groupby_priority': 1, 'show_create': '0'}</field>
+        <field name="context">{'search_default_groupby_priority': 1, 'show_create': '0', 'all_ccpp': True}</field>
         <field name="view_id" ref="ccpp.ccpp_report_tree_hide_create_view"/>
         <field name="search_view_id" ref="ccpp_search_form"/>
         <field name="target">main</field>
@@ -1442,11 +1455,16 @@
         <field name="name">My CCPP Group by Customer</field>
         <field name="res_model">project.project</field>
         <field name="view_mode">tree,kanban,form</field>
-        <field name="context">{'search_default_groupby_customer': 1, 'show_create': '1'}</field>
+        <field name="context">{'search_default_groupby_customer': 1, 'show_create': '1', 'create_from_tree': True}</field>
         <field name="domain">[('user_id', '=', uid)]</field>
         <field name="view_id" ref="ccpp.ccpp_report_tree_show_create_view"/>
         <field name="search_view_id" ref="ccpp_search_form"/>
         <field name="target">main</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No CCPP found. Let's create one!
+            </p>
+        </field>
     </record>
 
     <record id="solution_strategy_tree" model="ir.ui.view">
@@ -1501,7 +1519,7 @@
         <field name="model">project.project</field>
         <field eval="201" name="priority"/>
         <field name="arch" type="xml">
-            <tree delete="0" create="1">
+            <tree delete="0" create="1" expand="1" js_class="ccpp_dashboard_list">
                 <button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>
                 <field name="name" string="CCPP Name" class="fw-bold"/>
                 <field name="partner_id" string="Customer"/>
@@ -1521,7 +1539,7 @@
         <field name="model">project.project</field>
         <field eval="201" name="priority"/>
         <field name="arch" type="xml">
-            <tree delete="0" create="0">
+            <tree delete="0" create="0" expand="1" js_class="ccpp_dashboard_list_manager">
                 <button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>
                 <field name="name" string="CCPP Name" class="fw-bold"/>
                 <field name="partner_id" string="Customer"/>
@@ -1549,9 +1567,9 @@
 
     <menuitem name="My CCPP" id="menu_my_ccpp" parent="project.menu_main_pm" action="action_my_ccpp_group_by_priority" sequence="1"/>
 
-        <menuitem name="My CCPP Group by Priority" id="menu_my_ccpp_group_by_priority" parent="menu_my_ccpp" action="action_my_ccpp_group_by_priority" sequence="1"/>
+        <!--<menuitem name="My CCPP Group by Priority" id="menu_my_ccpp_group_by_priority" parent="menu_my_ccpp" action="action_my_ccpp_group_by_priority" sequence="1"/>
 
-        <menuitem name="My CCPP Group by Customer" id="menu_my_ccpp_group_by_customer" parent="menu_my_ccpp" action="action_my_ccpp_group_by_customer" sequence="2"/>
+        <menuitem name="My CCPP Group by Customer" id="menu_my_ccpp_group_by_customer" parent="menu_my_ccpp" action="action_my_ccpp_group_by_customer" sequence="2"/>-->
 
 
     <!--<menuitem name="All CCPP" id="menu_all_ccpp_user" groups="ccpp.group_ccpp_user" parent="project.menu_main_pm" sequence="2"/>
@@ -1560,11 +1578,11 @@
 
         <menuitem name="All CCPP Group by Customer" id="menu_all_ccpp_group_by_customer_user" parent="menu_all_ccpp_user" action="action_all_ccpp_group_by_customer_user" sequence="2" />-->
 
-    <menuitem name="All CCPP" id="menu_all_ccpp_manager" groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager" parent="project.menu_main_pm" sequence="2"/>
+    <menuitem name="All CCPP" id="menu_all_ccpp_manager" groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager" action="action_all_ccpp_group_by_priority_manager" parent="project.menu_main_pm" sequence="2"/>
 
-        <menuitem name="All CCPP Group by Priority" id="menu_all_ccpp_group_by_priority_manager" parent="menu_all_ccpp_manager" action="action_all_ccpp_group_by_priority_manager" sequence="1"/>
+        <!--<menuitem name="All CCPP Group by Priority" id="menu_all_ccpp_group_by_priority_manager" parent="menu_all_ccpp_manager" action="action_all_ccpp_group_by_priority_manager" sequence="1"/>
 
-        <menuitem name="All CCPP Group by Customer" id="menu_all_ccpp_group_by_customer_manager" parent="menu_all_ccpp_manager" action="action_all_ccpp_group_by_customer_manager" sequence="2"/>
+        <menuitem name="All CCPP Group by Customer" id="menu_all_ccpp_group_by_customer_manager" parent="menu_all_ccpp_manager" action="action_all_ccpp_group_by_customer_manager" sequence="2"/>-->
 
 
 <!-- Menu / action change name -->
@@ -1638,5 +1656,5 @@
         <record model="ir.ui.menu" id="project.menu_project_tags_act">
             <field name="action" eval="False"/>
         </record>
-    
+
 </odoo>

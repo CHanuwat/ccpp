@@ -41,6 +41,7 @@
                     <filter string="Sales Area" name="groupby_sales_area" context="{'group_by': 'sale_area_id'}"/>
                     <filter string="Province" name="groupby_province" context="{'group_by': 'province_id'}"/>
                     <filter string="Customer Category" name="groupby_category" context="{'group_by': 'customer_category_id'}"/>
+                    <filter string="Job Position" name="groupby_job" context="{'group_by': 'job_id'}"/>
                 </group>
             </search>
         </field>
@@ -62,9 +63,10 @@
                 <field name="actual_sale_ranking" decoration-danger="actual_sale_ranking in [1,2,3,4,5,6,7,8,9,10]"/>
                 <field name="total_sale_revenue"  string="Winmed Actual Sales"/>
                 <field name="competitor_ranking" decoration-danger="competitor_ranking in [1,2,3,4,5,6,7,8,9,10]"/>
-                <field name="state"/>
+                <!--<field name="state"/>-->
                 <!--<field name="active"/>-->
-                <field name="sale_person_id"/>
+                <!--<field name="sale_person_id"/>-->
+                <field name="job_id"/>
             </tree>
         </field>
     </record>
@@ -73,7 +75,7 @@
         <field name="name">ccpp.customer.information.view.tree</field>
         <field name="model">ccpp.customer.information</field>
         <field name="arch" type="xml">
-            <tree string="Customer Information" multi_edit="1" sample="1" default_order="potential_ranking" class="customer_information_tree">
+            <tree string="Customer Information" expand="1" multi_edit="1" sample="1" default_order="potential_ranking" class="customer_information_tree">
                 <field name="year_selection" string="Year"/>
                 <field name="date_from" string="Create Date" optional="hide"/>
                 <field name="customer_id"/>
@@ -84,9 +86,10 @@
                 <field name="actual_sale_ranking" decoration-danger="actual_sale_ranking in [1,2,3,4,5,6,7,8,9,10]"/>
                 <field name="total_sale_revenue"  string="Winmed Actual Sales"/>
                 <field name="competitor_ranking" decoration-danger="competitor_ranking in [1,2,3,4,5,6,7,8,9,10]"/>
-                <field name="state"/>
+                <!--<field name="state"/>-->
                 <!--<field name="active"/>-->
-                <field name="sale_person_id"/>
+                <!--<field name="sale_person_id"/>-->
+                <field name="job_id"/>
             </tree>
         </field>
     </record>
@@ -95,7 +98,7 @@
         <field name="name">ccpp.customer.information.view.tree</field>
         <field name="model">ccpp.customer.information</field>
         <field name="arch" type="xml">
-            <tree string="Customer Information" multi_edit="1" sample="1" default_order="actual_sale_ranking" class="customer_information_tree">
+            <tree string="Customer Information" expand="1" multi_edit="1" sample="1" default_order="actual_sale_ranking" class="customer_information_tree">
                 <field name="year_selection" string="Year"/>
                 <field name="date_from" string="Create Date" optional="hide"/>
                 <field name="customer_id"/>
@@ -106,9 +109,10 @@
                 <field name="actual_sale_ranking" decoration-danger="actual_sale_ranking in [1,2,3,4,5,6,7,8,9,10]"/>
                 <field name="total_sale_revenue"  string="Winmed Actual Sales"/>
                 <field name="competitor_ranking" decoration-danger="competitor_ranking in [1,2,3,4,5,6,7,8,9,10]"/>
-                <field name="state"/>
+                <!--<field name="state"/>-->
                 <!--<field name="active"/>-->
-                <field name="sale_person_id"/>
+                <!--<field name="sale_person_id"/>-->
+                <field name="job_id"/>
             </tree>
         </field>
     </record>
@@ -117,7 +121,7 @@
         <field name="name">ccpp.customer.information.view.tree</field>
         <field name="model">ccpp.customer.information</field>
         <field name="arch" type="xml">
-            <tree string="Customer Information" multi_edit="1" sample="1" default_order="competitor_ranking" class="customer_information_tree">
+            <tree string="Customer Information" expand="1" multi_edit="1" sample="1" default_order="competitor_ranking" class="customer_information_tree">
                 <field name="year_selection" string="Year"/>
                 <field name="date_from" string="Create Date" optional="hide"/>
                 <field name="customer_id"/>
@@ -128,9 +132,10 @@
                 <field name="actual_sale_ranking" decoration-danger="actual_sale_ranking in [1,2,3,4,5,6,7,8,9,10]"/>
                 <field name="total_sale_revenue"  string="Winmed Actual Sales"/>
                 <field name="competitor_ranking" decoration-danger="competitor_ranking in [1,2,3,4,5,6,7,8,9,10]"/>
-                <field name="state"/>
+                <!--<field name="state"/>-->
                 <!--<field name="active"/>-->
-                <field name="sale_person_id"/>
+                <!--<field name="sale_person_id"/>-->
+                <field name="job_id"/>
             </tree>
         </field>
     </record>
@@ -209,7 +214,8 @@
                             </div>
                             <field name="province_id"/>
                             <field name="sale_area_id"/>
-                            <field name="sale_person_id"/>
+                            <field name="job_id"/>
+                            <field name="sale_person_id" readonly="True"/>
                         </group>
                         <group>
                             <field name="customer_category_id"/>
@@ -265,10 +271,10 @@
                     <field style="padding:20px;" placeholder="Type Future Project/Plan" name="future_plan" nolabel="True" type="html" options="{'collaborative': true, 'resizable': false}"/>
 
                     <h4 style="margin-top: 10px;">Connection with other hospital</h4>         
-                    <field style="padding:20px;" placeholder="Type Connection" name="future_plan" nolabel="True" type="html" options="{'collaborative': true, 'resizable': false}"/>
+                    <field style="padding:20px;" placeholder="Type Connection" name="connection" nolabel="True" type="html" options="{'collaborative': true, 'resizable': false}"/>
 
                     <h4 style="margin-top: 10px;">Note</h4>         
-                    <field style="padding:20px;" placeholder="Type Note" name="future_plan" nolabel="True" type="html" options="{'collaborative': true, 'resizable': false}"/>
+                    <field style="padding:20px;" placeholder="Type Note" name="note" nolabel="True" type="html" options="{'collaborative': true, 'resizable': false}"/>
                     
                 </sheet>
                 <div class="oe_chatter">
@@ -285,23 +291,24 @@
         <field name="name">ccpp.internal.information.view.tree</field>
         <field name="model">ccpp.customer.information</field>
         <field name="arch" type="xml">
-            <tree string="Customer Information" default_order="potential_ranking" multi_edit="1" sample="1" class="customer_information_tree">
+            <tree string="Customer Information" expand="1" default_order="potential_ranking" multi_edit="1" sample="1" class="customer_information_tree">
                 <field name="year_selection" string="Year"/>
                 <field name="date_from" string="Create Date" optional="hide"/>
                 <!--<field name="date_to"/>-->
                 <field name="customer_id"/>
                 <field name="partner_id"/>
-                <field name="state"/>
-                <field name="sale_person_id" string="Person"/>
+                <!--<field name="state"/>-->
+                <field name="sale_person_id" string="User"/>
+                <field name="job_id"/>
             </tree>
         </field>
     </record>
 
     <record id="ccpp_internal_information_search" model="ir.ui.view">
-        <field name="name">Internal Information Search</field>
+        <field name="name">Internal Customer Search</field>
         <field name="model">ccpp.customer.information</field>
         <field name="arch" type="xml">
-            <search string="Search Internal Information">
+            <search string="Search Internal Customer">
                 <field name="customer_id"/>
                 <field name="year_selection" filter_domain="[('year_selection', 'ilike', self)]"/>
                 <separator/>
@@ -310,13 +317,14 @@
                 <group expand="0" string="Group By">
                     <filter string="Year" name="groupby_year" context="{'group_by': 'year_selection'}"/>
                     <filter string="Customer Category" name="groupby_category" context="{'group_by': 'customer_category_id'}"/>
+                    <filter string="Job Position" name="groupby_job" context="{'group_by': 'job_id'}"/>
                 </group>
             </search>
         </field>
     </record>
 
     <record id="ccpp_internal_information_action" model="ir.actions.act_window">
-        <field name="name">Internal Information</field>
+        <field name="name">Internal Customer</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">ccpp.customer.information</field>
         <field name="view_mode">tree,form</field>
@@ -389,7 +397,8 @@
                             />
                             <field name="domain_partner_ids" invisible="True"/>
                             <field name="partner_id" context="{'show_title_position':True}" options="{'no_create':True}" domain="[('id','in',domain_partner_ids)]" required="True"/>
-                            <field name="sale_person_id" string="Person"/>
+                            <field name="job_id"/>
+                            <field name="sale_person_id" string="User" readonly="True"/>
                         </group>
                         <group>
                             <field name="customer_category_id"/>
@@ -401,7 +410,7 @@
                     <field style="padding:20px;" placeholder="Type Future Project/Plan" name="future_plan" nolabel="True" type="html" options="{'collaborative': true, 'resizable': false}"/>
 
                     <h4 style="margin-top: 10px;">Note</h4>         
-                    <field style="padding:20px;" placeholder="Type Note" name="future_plan" nolabel="True" type="html" options="{'collaborative': true, 'resizable': false}"/>
+                    <field style="padding:20px;" placeholder="Type Note" name="note" nolabel="True" type="html" options="{'collaborative': true, 'resizable': false}"/>
                     
                 </sheet>
                 <div class="oe_chatter">
@@ -418,14 +427,15 @@
         <field name="name">ccpp.external.information.view.tree</field>
         <field name="model">ccpp.customer.information</field>
         <field name="arch" type="xml">
-            <tree string="External Information" default_order="potential_ranking" multi_edit="1" sample="1" class="customer_information_tree">
+            <tree string="External Information" expand="1" default_order="potential_ranking" multi_edit="1" sample="1" class="customer_information_tree">
                 <field name="year_selection" string="Year"/>
                 <field name="date_from" string="Create Date" optional="hide"/>
                 <!--<field name="date_to"/>-->
                 <field name="customer_id"/>
                 <field name="partner_id"/>
-                <field name="state"/>
-                <field name="sale_person_id" string="Person"/>
+                <!--<field name="state"/>-->
+                <field name="sale_person_id" string="User"/>
+                <field name="job_id"/>
             </tree>
         </field>
     </record>
@@ -443,13 +453,14 @@
                 <group expand="0" string="Group By">
                     <filter string="Year" name="groupby_year" context="{'group_by': 'year_selection'}"/>
                     <filter string="Customer Category" name="groupby_category" context="{'group_by': 'customer_category_id'}"/>
+                    <filter string="Job Position" name="groupby_job" context="{'group_by': 'job_id'}"/>
                 </group>
             </search>
         </field>
     </record>
 
     <record id="ccpp_external_information_action" model="ir.actions.act_window">
-        <field name="name">External Information</field>
+        <field name="name">External Customer</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">ccpp.customer.information</field>
         <field name="view_mode">tree,form</field>
@@ -516,10 +527,13 @@
                             <field name="company_name" invisible="True"/> <!--attrs="{'invisible': [('customer_id','!=', False)]}"/>-->
                             <field name="customer_id" 
                             attrs="{'required': [('company_name','=',False)], 'invisible':[('company_name','!=', False),('company_name','!=','')]}"
+                            options="{'no_quick_create': True}"
+                            context="{'create_external_customer':True}"
                             />
                             <field name="domain_partner_ids" invisible="True"/>
-                            <field name="partner_id" context="{'show_title_position':True, 'create_external':True, 'external_parent': customer_id}" domain="[('id','in',domain_partner_ids)]" required="True" options="{'no_quick_create': True}"/>
-                            <field name="sale_person_id" string="Person"/>
+                            <field name="partner_id" context="{'show_title_position':True, 'create_external_contact':True, 'external_parent': customer_id}" domain="[('id','in',domain_partner_ids)]" required="True" options="{'no_quick_create': True}"/>
+                            <field name="job_id"/>
+                            <field name="sale_person_id" string="User" readonly="True"/>
                         </group>
                         <group>
                             <field name="customer_category_id"/>
@@ -531,7 +545,7 @@
                     <field style="padding:20px;" placeholder="Type Future Project/Plan" name="future_plan" nolabel="True" type="html" options="{'collaborative': true, 'resizable': false}"/>
 
                     <h4 style="margin-top: 10px;">Note</h4>         
-                    <field style="padding:20px;" placeholder="Type Note" name="future_plan" nolabel="True" type="html" options="{'collaborative': true, 'resizable': false}"/>
+                    <field style="padding:20px;" placeholder="Type Note" name="note" nolabel="True" type="html" options="{'collaborative': true, 'resizable': false}"/>
                     
                 </sheet>
                 <div class="oe_chatter">

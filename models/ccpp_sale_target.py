@@ -130,7 +130,8 @@ class CCPPSaleTarget(models.Model):
     actual = fields.Float(string="Sales Actual")
     actual_percent = fields.Float(string="% Success", compute="_compute_actual_percent", store=True)
     sale_person_id = fields.Many2one("hr.employee", default="_get_default_sale_person", string="Sales Person", required=True)
-    department_id = fields.Many2one("hr.department", string="Deparment", related="sale_person_id.department_id")
+    job_id = fields.Many2one("hr.job", string="Job Position",  related="sale_person_id.job_id", store=True, required=True, track_visibility="onchange")#default=_get_default_job,
+    department_id = fields.Many2one("hr.department", string="Deparment", related="job_id.department_id")
     status = fields.Selection(selection=[
         ('over', 'Over'),
         ('similar', 'Similar'),

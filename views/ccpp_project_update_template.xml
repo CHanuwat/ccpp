@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<odoo>
+    <template id="project_update_default_description_inherit_ccpp" inherit_id="project.project_update_default_description">
+        <!--As this template is rendered in an html field, the spaces may be interpreted as nbsp while editing. -->
+        <xpath expr="//div[@name='summary']" position="replace">
+        </xpath>
+    </template>
+
+</odoo>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="view_employee_form_inherit_ccpp" model="ir.ui.view">
+        <field name="name">view.employee.form.inherit.ccpp</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            
+            <xpath expr="//form[1]/sheet[1]/notebook[1]" position="inside">
+                <page name="job_positions" string="Job Positions">
+                    <field name="job_lines" widget="many2many" options="{'no_create': True, 'no_quick_create': True, 'no_create_edit': True}"/>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

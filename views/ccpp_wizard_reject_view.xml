@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="ccpp_wizard_reject_action" model="ir.actions.act_window">
+        <field name="name">Reject</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">ccpp.wizard.reject</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="ccpp_wizard_reject_view_form" model="ir.ui.view">
+        <field name="name">ccpp.wizard.reject.view.form</field>
+        <field name="model">ccpp.wizard.reject</field>
+        <field name="arch" type="xml">
+            <form string="Reject">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="ccpp_id" attrs="{'invisible': [('ccpp_id','=',False)]}" readonly="True" force_save="True"/>
+                            <field name="solution_id" attrs="{'invisible': [('solution_id','=',False)]}" readonly="True" force_save="True"/>
+                            <field name="strategy_id" attrs="{'invisible': [('strategy_id','=',False)]}" readonly="True" force_save="True"/>
+                            <field name="reason_reject" required="True"/>
+                            
+                        </group>
+                    </group>
+                    <footer>
+                        <button name="button_confirm" string="Reject" type="object" class="btn-danger"/>
+                        <button special="cancel" data-hotkey="z" string="Cancel" />
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+</odoo>

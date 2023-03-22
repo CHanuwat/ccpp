@@ -438,16 +438,18 @@ class RockerTimesheet(models.Model):
     def duplicate_task(self):
         for obj in self:
             new_task = obj.copy()
-        
-        return {
-            'name': new_task.name,
-            'view_mode': 'calendar',
-            'res_model': 'account.analytic.line',
-            'type': 'ir.actions.act_window',
-            'context': self._context,
-            'views' : [(self.env.ref('ccpp.rocker_timesheet_calendar').id, 'calendar')],
-            'target' : 'main'
-        }  
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.act_rocker_timesheet_calendar')
+        action['context'] = self._context 
+        return action
+        #return {
+        #    'name': new_task.name,
+        #    'view_mode': 'calendar',
+        #    'res_model': 'account.analytic.line',
+        #    'type': 'ir.actions.act_window',
+        #    'context': self._context,
+        #    'views' : [(self.env.ref('ccpp.rocker_timesheet_calendar').id, 'calendar')],
+        #    'target' : 'main'
+        #}  
 
     @api.onchange("is_go_ccpp_customer") 
     def onchange_is_go_ccpp_customer(self):
@@ -466,12 +468,14 @@ class RockerTimesheet(models.Model):
     @api.depends("customer_id","priority_id")
     def _compute_domain_ccpp_ids(self):
         for obj in self:           
-            domain = [('user_id','=',self.env.user.id),('state','=','process')]
+            domain = []
+            ccpp_ids = self.env['project.project']
             if obj.customer_id:
+                domain = [('user_id','=',self.env.user.id),('state','=','process')]
                 domain.append(('partner_id','=',obj.customer_id.id))
-            if obj.priority_id:
-                domain.append(('priority_id','=',obj.priority_id.id))
-            ccpp_ids = self.env['project.project'].search(domain)
+                if obj.priority_id:
+                    domain.append(('priority_id','=',obj.priority_id.id))
+                ccpp_ids = self.env['project.project'].search(domain)
             obj.domain_ccpp_ids = ccpp_ids.ids
             
     @api.depends("project_id")
@@ -498,19 +502,24 @@ class RockerTimesheet(models.Model):
     def _compute_domain_customer_ids(self):
         for obj in self:
             customer_ids = self.env['res.partner']
-            if obj.is_go_ccpp_customer:
-                customer_ids = self.env['project.project'].search([('user_id','=',self.env.user.id),
-                                                                   ('state','=','process')]).mapped('partner_id')
+            employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+            #if obj.is_go_ccpp_customer:
+            #    customer_ids = self.env['project.project'].search([('user_id','=',self.env.user.id),
+            #                                                       ('state','=','process')]).mapped('partner_id')
             if obj.is_go_ccpp_customer and obj.priority_id:
-                customer_ids = self.env['project.project'].search([('user_id','=',self.env.user.id),
+                customer_ids = self.env['project.project'].search([('job_id','=',employee_id.job_id.id),
                                                                    ('state','=','process'),
                                                                    ('priority_id','=',obj.priority_id.id)]).mapped('partner_id')
             if obj.is_go_potential:
                 year = str(datetime.now().year)
-                customer_ids = self.env['ccpp.customer.information'].search([('user_id','=',self.env.user.id),
+                customer_ids = self.env['ccpp.customer.information'].search([('job_id','=',employee_id.job_id.id),
                                                                              ('active','=',True),
                                                                              ('year_selection','=',year),
-                                                                             ('type','=','customer')], order="potential_ranking").mapped('customer_id')
+                                                                             ('type','in',['customer','external'])], order="potential_ranking").mapped('customer_id')
+                customer_ids |= self.env['ccpp.customer.information'].search([('job_id','=',employee_id.job_id.id),
+                                                                             ('active','=',True),
+                                                                             ('year_selection','=',year),
+                                                                             ('type','in',['internal'])], order="potential_ranking").mapped('partner_id')
             obj.domain_customer_ids = customer_ids.ids
     
     def _compute_customer(self):
@@ -619,7 +628,7 @@ class RockerTimesheet(models.Model):
                         # btw....remember to check odoo global defaults....working day is it 8 or 7.5 hours
                         # vals['allday'] = True
                         vals['allday'] = False
-                    else:
+                    else:  
                         vals['allday'] = False
 
             else:   # can not tell if it comes from sales tiimesheet or just hr_timesheet but who cares
@@ -631,7 +640,7 @@ class RockerTimesheet(models.Model):
             _logger.debug('Values:')
             _logger.debug(vals)
 
-
+            print("X"*100)
             record = super(RockerTimesheet, self).create(vals)
             return record
         # Rocker specific data
@@ -675,15 +684,19 @@ class RockerTimesheet(models.Model):
             vals['account_id'] = project.analytic_account_id.id
             if not project.analytic_account_id.id:
                 vals['account_id'] = 1
+        print("Y"*100)
         record = super(RockerTimesheet, self).create(vals)
         global daystocreate
-        if daystocreate > 0:
+        #if daystocreate > 0:
+        if False:
             i = 0
             while i < daystocreate:
                 _logger.debug('Create more ' + str(i))
                 vals['date'] = fields.Datetime.from_string(vals['date']) + timedelta(days=1)
                 vals['start'] = fields.Datetime.from_string(vals['start']) + timedelta(days=1)
                 vals['stop'] = fields.Datetime.from_string(vals['stop']) + timedelta(days=1)
+                print("Z"*100)
+                print(daystocreate)
                 record = super(RockerTimesheet, self).create(vals)
                 i += 1
         self._set_rolling(False)  # default is Create button with default starty & Stop, Rolling is set is Rolling button clicked
