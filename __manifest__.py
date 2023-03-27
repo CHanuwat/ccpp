@@ -53,6 +53,8 @@
             #('remove','rocker_timesheet/static/src/xml/**/*'),
             #'ccpp/static/src/xml/**/*.xml',
             #'ccpp/static/src/xml/tree_button.xml',
+            #('ccpp/static/src/views_qweb/*.xml'),
+            #('ccpp/static/src/views_qweb/*.js'),
     ],
     'web.assets_backend': [
             #'ccpp/static/src/sneat-bootstrap-html-admin-template/**/*',    

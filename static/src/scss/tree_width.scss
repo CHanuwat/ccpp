@@ -80,3 +80,22 @@
   white-space: break-space !important;
 }
 
+.ccpp_list [data-name="code"] {
+  width: 150px !important;
+  max-width: 150px !important;
+}
+
+.ccpp_list [data-name="name"] {
+  width: 400px !important;
+  max-width: 400px !important;
+}
+
+.task_list [data-name="name"] {
+  width: 300px !important;
+  max-width: 300px !important;
+}
+
+.task_list [data-name="task_strategy_id"] {
+  width: 200px !important;
+  max-width: 200px !important;
+}

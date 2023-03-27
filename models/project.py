@@ -324,6 +324,7 @@ class Project(models.Model):
             vals['employee_id'] = employee_id.id
             vals['department_id'] = employee_id.department_id.id
             vals['sale_team_id'] = sale_team_id.id
+            print()
             if not vals.get('is_income_cus') and not vals.get('is_effectiveness_cus') and not vals.get('is_repulation_cus') and not vals.get('is_competitive_cus'):
                 raise UserError("กรุณาเลือกผลกระทบต่อลูกค้าอย่างน้อย 1 ข้อ")
             if not vals.get('is_critical') and not vals.get('is_not_critical'):
@@ -575,7 +576,7 @@ class Project(models.Model):
         strategy_ids = self.env['project.task'].search([("project_id","=",self.id),('is_strategy','=',True)])
         
         return {
-            'name': self.name,
+            'name': 'Solution & Strategy',
             'view_mode': 'tree,form',
             'res_model': 'project.task',
             'domain': [('id','in',strategy_ids.ids)],
@@ -600,6 +601,7 @@ class Project(models.Model):
             raise UserError("กรุณากดบันทึก CCPP ก่อน")
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.open_view_task_all_ccpp')
         action['context'] = {'is_create_button_solution': True, 'project_id': self.id, 'is_create_solution': True}
+        action['target'] = 'new'
         return action
     
     def action_ccpp_department_approve_manager(self):
@@ -628,6 +630,13 @@ class Project(models.Model):
         action['domain'] = [('id','in',ccpp_ids.ids)]
         return action
     
+    def action_my_ccpp_group_by_priority_user(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.action_my_ccpp_group_by_priority')
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        ccpp_ids = self.env['project.project'].search([('job_id', '=', employee_id.job_id.id),('job_id','!=',False)])
+        action['domain'] = [('id','in',ccpp_ids.ids)]
+        return action
+    
     @api.model
     def retrieve_dashboard(self):
         result = {
@@ -640,12 +649,12 @@ class Project(models.Model):
 
         ccpp = self.env['project.project']
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-        
-        result['priority_1'] = ccpp.search_count([('priority_id.point','=',1),('job_id', '=', employee_id.job_id.id)])
-        result['priority_2'] = ccpp.search_count([('priority_id.point','=',2),('job_id', '=', employee_id.job_id.id)])
-        result['priority_3'] = ccpp.search_count([('priority_id.point','=',3),('job_id', '=', employee_id.job_id.id)])
-        result['priority_4'] = ccpp.search_count([('priority_id.point','=',4),('job_id', '=', employee_id.job_id.id)])
-        result['delay'] = ccpp.search_count([('is_delay','=',True),('job_id', '=', employee_id.job_id.id)])
+        if employee_id.job_id:
+            result['priority_1'] = ccpp.search_count([('priority_id.point','=',1),('job_id', '=', employee_id.job_id.id)])
+            result['priority_2'] = ccpp.search_count([('priority_id.point','=',2),('job_id', '=', employee_id.job_id.id)])
+            result['priority_3'] = ccpp.search_count([('priority_id.point','=',3),('job_id', '=', employee_id.job_id.id)])
+            result['priority_4'] = ccpp.search_count([('priority_id.point','=',4),('job_id', '=', employee_id.job_id.id)])
+            result['delay'] = ccpp.search_count([('is_delay','=',True),('job_id', '=', employee_id.job_id.id)])
         return result
         
     @api.model
@@ -1348,6 +1357,14 @@ class Task(models.Model):
                                                         ])
         action['domain'] = [('id','in',strategy_ids.ids)]
         return action
+    
+    def get_child_job(self,job_lines,job_ids=False):
+        if not job_ids:
+            job_ids = self.env['hr.job']
+        for job_id in job_lines:
+            job_ids |= job_id
+            job_ids |= self.get_child_job(job_id.child_lines, job_ids)   
+        return job_ids
 
 class ProjectUpdate(models.Model):
     _inherit = "project.update"

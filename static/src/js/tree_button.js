@@ -1,4 +1,4 @@
-odoo.define('ccpp.tree_button', function (require) {
+/*odoo.define('ccpp.tree_button', function (require) {
     "use strict";
     var ListController = require('web.ListController');
     var ListView = require('web.ListView');
@@ -29,4 +29,4 @@ odoo.define('ccpp.tree_button', function (require) {
        }),
     });
     viewRegistry.add('button_in_tree', SaleOrderListView);
-    });
+    });*/

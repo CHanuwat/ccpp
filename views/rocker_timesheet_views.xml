@@ -37,19 +37,19 @@
             <field name="model">account.analytic.line</field>
             <field name="arch" type="xml">
                 <!--<tree js_class="rocker_tree" string="Timesheets" editable="top" create="true" delete="true" edit="true">-->
-                <tree js_class="rocker_tree" string="Timesheets" create="false" delete="false" edit="true">
+                <tree js_class="rocker_tree" string="Timesheets" create="false" delete="false" edit="true" class="task_list" expand="1">
                     <field name="name" string="Task" />
                     <field name="start" required="1" string="From"/>
                     <field name="stop" required="1" string="To"/>
                     <field name="customer_id" domain="[('is_customer','=',True)]" string="Customer"/>
-                    <field name="project_id" string="CCPP"/>
-                    <field name="task_id" string="Solution"/>
+                    <!--<field name="project_id" string="CCPP"/>-->
+                    <!--<field name="task_id" string="Solution"/>-->
                     <field name="task_strategy_id" string="Strategy"/>    
                     <field name="display_name" readonly="1" invisible="1"/>
                     <field name="date" required="1" readonly="1" invisible="1" />
                     <field name="unit_amount" widget="float_time" type="measure" invisible="1"/>
                     <field name="duration" required="1" widget="float_time" type="measure" invisible="1"/>
-                    <field name="employee_id" readonly="1" optional="show" />
+                    <!--<field name="employee_id" readonly="1" optional="show" />-->
                     <field name="department_id" readonly="1" optional="hide" invisible="1"/>
                     <field name="company_id" required="1" readonly="1" optional="hide" invisible="1"/>
                     <field name="user_id"  invisible="1" required="1" readonly="1"/>

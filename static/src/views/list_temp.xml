@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    
+	<t t-name="create_test" t-inherit="web.ListView.Buttons" t-inherit-mode="primary" owl="1" >
+		<xpath expr="//button[hasclass('o_list_button_add')]" position="after">
+			<button name="action_open_solution" type="object" class="btn btn-primary open_create_ccpp" href="https://www.bizople.com/remix-icons" target="_blank">
+				Create Test
+			</button>
+		</xpath>
+	</t>
+    
+</templates>

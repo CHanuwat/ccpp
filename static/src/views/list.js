@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { ExpenseDashboard } from '../components/expense_dashboard';
+import { CCPPDashboard } from '../ccpp_dashboard';
 import { ExpenseMobileQRCode } from '../mixins/qrcode';
 import { ExpenseDocumentUpload, ExpenseDocumentDropZone } from '../mixins/document_upload';
 
@@ -14,7 +14,7 @@ import { ListRenderer } from "@web/views/list/list_renderer";
 
 const { onWillStart } = owl;
 
-export class ExpenseListController extends ListController {
+export class CCPPListController extends ListController {
     setup() {
         super.setup();
         this.orm = useService('orm');
@@ -67,28 +67,26 @@ export class ExpenseListController extends ListController {
     }
 
 }
-patch(ExpenseListController.prototype, 'expense_list_controller_upload', ExpenseDocumentUpload);
+patch(CCPPListController.prototype, 'expense_list_controller_upload', ExpenseDocumentUpload);
 
-export class ExpenseListRenderer extends ListRenderer {}
-patch(ExpenseListRenderer.prototype, 'expense_list_renderer_qrcode', ExpenseMobileQRCode);
-patch(ExpenseListRenderer.prototype, 'expense_list_renderer_qrcode_dzone', ExpenseDocumentDropZone);
-ExpenseListRenderer.template = 'ccpp.ListRenderer';
+export class CCPPListRenderer extends ListRenderer {}
+CCPPListRenderer.template = 'ccpp.ListRenderer';
 
-export class ExpenseDashboardListRenderer extends ExpenseListRenderer {}
+/*export class CCPPDashboardListRenderer extends CCPPListRenderer {}
 
-ExpenseDashboardListRenderer.components = { ...ExpenseDashboardListRenderer.components, ExpenseDashboard};
-ExpenseDashboardListRenderer.template = 'ccpp.DashboardListRenderer';
+CCPPDashboardListRenderer.components = { ...CCPPDashboardListRenderer.components, CCPPDashboard};
+CCPPDashboardListRenderer.template = 'ccpp.DashboardListRenderer'; */
 
 registry.category('views').add('ccpp_tree', {
     ...listView,
     buttonTemplate: 'ccpp.ListButtons',
-    Controller: ListController,
-    Renderer: ListRenderer,
+    Controller: CCPPListController,
+    Renderer: CCPPListRenderer,
 });
 
-registry.category('views').add('hr_expense_dashboard_tree', {
+/*registry.category('views').add('hr_expense_dashboard_tree', {
     ...listView,
     buttonTemplate: 'hr_expense.ListButtons',
-    Controller: ExpenseListController,
+    Controller: CCPPListController,
     Renderer: ExpenseDashboardListRenderer,
-});
+});*/

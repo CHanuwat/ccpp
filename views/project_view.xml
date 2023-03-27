@@ -295,10 +295,10 @@
             </xpath>
             <xpath expr="//form[1]/sheet[1]/div[1]/button[1]" position="before">
                 <field name="is_delay" invisible="True"/>
-                <span style="padding-left:30px; padding-top:5px" class="oe_left" attrs="{'invisible':[('is_delay','=',True)]}">
+                <span style="padding-left:30px;" class="oe_left" attrs="{'invisible':[('is_delay','=',True)]}">
                     <h1>CCPP</h1>
                 </span>
-                <span style="padding-left:30px; padding-top:5px color:red;" class="oe_left" attrs="{'invisible':[('is_delay','=',False)]}">
+                <span style="padding-left:30px; color:red;" class="oe_left" attrs="{'invisible':[('is_delay','=',False)]}">
                     <h1 style="color:red; padding-top:5px">CCPP Delayed</h1>
                 </span>
             </xpath>
@@ -315,7 +315,7 @@
             </xpath>
             <xpath expr="//form[1]/header[1]/button[1]" position="before">
                 <field name="is_ccpp_done" invisible="True"/>
-                <button name="button_send_approve" string="Send Approve" type="object" class="btn-primary" states="open"/>
+                <button name="button_send_approve" string="Send Approve" type="object" class="btn-primary" attrs="{'invisible':['|',('id','=',False),('state','!=','open')]}"/>
                 <button name="button_approve" string="Approve" type="object" class="btn-primary" states="waiting_approve" /><!--groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>-->
                 <button name="button_reject_wizard" string="Reject" type="object" class="btn-danger" states="waiting_approve"/><!--groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>-->
                 <button name="button_done" string="Done" type="object" class="btn-success" attrs="{'invisible': ['|',('state','!=','process'),('is_ccpp_done','=',False)]}"/>
@@ -334,9 +334,9 @@
                         <span class="o_stat_text">
                             Current Situation
                         </span>
-                        <br/>
+                        <!--<br/>
                         <field name="last_update_color" invisible="1"/>
-                        <field name="last_update_status" readonly="1" widget="status_with_color" options="{'color_field': 'last_update_color'}" attrs="{'invisible': [('last_update_status','=','to_define')]}"/>
+                        <field name="last_update_status" readonly="1" widget="status_with_color" options="{'color_field': 'last_update_color'}" attrs="{'invisible': [('last_update_status','=','to_define')]}"/>-->
                     </div>
                 </button>
             </xpath>
@@ -366,6 +366,8 @@
             </xpath>
             <xpath expr="//form[1]/sheet[1]/group[1]/group[1]/field[@name='tag_ids']" position="replace">
             </xpath>
+            <xpath expr="//form[1]/sheet[1]/group[1]/group[1]/field[@name='company_id']" position="replace">
+            </xpath>
             <!--<xpath expr="//page[@name='settings']//group[1]" position="before">
                 <group>
                     <group>
@@ -384,14 +386,22 @@
                 
             <xpath expr="//form[1]/sheet[1]/group[1]/group[1]/field[@name='partner_id']" position="replace">
                 <field name="domain_partner_ids" invisible="True"/>
-                <field name="partner_id" attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"
-                options="{'no_create':True}" domain="[('id','in',domain_partner_ids)]"/>
+                <field name="partner_id" 
+                attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"
+                options="{'no_create':True}" 
+                domain="[('id','in',domain_partner_ids)]"
+                required="True"/>
             </xpath>
                 
             <xpath expr="//form[1]/sheet[1]/group[1]/group[1]/field[@name='partner_id']" position="after">
                 <field name="domain_partner_contact_ids" invisible="True"/>
-                <field name="partner_contact_id" widget="res_partner_many2one" domain="[('id','in',domain_partner_contact_ids)]" options="{'no_create':True}"
-                context="{'show_title_position':True}" attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"/> <!--options="{'no_create':True}"/>-->
+                <field name="partner_contact_id" 
+                widget="res_partner_many2one" 
+                domain="[('id','in',domain_partner_contact_ids)]" 
+                options="{'no_create':True}"
+                context="{'show_title_position':True}" 
+                attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"
+                required="True"/> <!--options="{'no_create':True}"/>-->
                 <field name="reason_reject" readonly="True" attrs="{'invisible': [('reason_reject','=',False)]}" style="color:red;"/>
                 <!--<field name="domain_job_position_ids" invisible="True"/>
                 <field name="job_position_id" domain="[('id','in',domain_job_position_ids)]" options="{'no_create': True, 'no_open': True}"/>-->
@@ -416,6 +426,7 @@
                             <field name="department_id" attrs="{'readonly': True}"/> 
                             <field name="job_id" attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"/>
                             <field name="employee_id" attrs="{'readonly': True}" string="CCPP User"/>
+                            <field name="company_id" attrs="{'readonly': True}"/>
                         </group>
                     </group>
                 </page>
@@ -428,7 +439,7 @@
                     attrs="{'invisible':[('is_ready_create_solution','=',False)]}"/>
                     <field name="tasks_solution" style="padding-top:20px" context="{'is_create_solution': True, 'project_id': active_id, 'default_project_id': active_id}" 
                     attrs="{'readonly': [('state','not in',['open'])]}" >
-                        <tree decoration-muted="is_closed == True" create="0" delete="0" edit="1">
+                        <tree decoration-muted="is_closed == True" create="0" delete="0" edit="1" multi_edit="false">
                             <!--<field name="legend_normal" invisible="1"/>
                             <field name="legend_done" invisible="1"/>
                             <field name="legend_blocked" invisible="1"/>-->
@@ -436,38 +447,38 @@
                             <field name="is_closed" invisible="1"/>
                             <field name="allow_milestones" invisible="1"/>
                             <field name="sequence" widget="handle"/>
-                            <field name="priority" widget="priority" optional="show" nolabel="1"/>
-                            <field name="id" optional="hide"/>
+                            <field name="priority" widget="priority" invisible="True" optional="" nolabel="1"/>
+                            <field name="id" invisible="True" optional=""/>
                             <field name="child_text" invisible="1"/>
                             <field name="allow_subtasks" invisible="1"/>
-                            <field name="code" string="Solution No." optional="show"/>
-                            <field name="name"/>
+                            <field name="code" string="Solution No." optional=""/>
+                            <field name="name" string="Solution Title"/>
                             <field name="start_date"/>
                             <field name="deadline_date"/>
                             <field name="show_period"/>
-                            <field name="display_project_id" string="Project" optional="hide" options="{'no_open': 1}"/>
+                            <field name="display_project_id" string="Project" invisible="True" optional="" options="{'no_open': 1}"/>
                             <field name="milestone_id"
-                                optional="hide"
+                                invisible="True" optional=""
                                 context="{'default_project_id': display_project_id or project_id}"
                                 attrs="{'invisible': [('allow_milestones', '=', False)], 'column_invisible': [('allow_milestones', '=', False)]}"
                             />
-                            <field name="partner_id" optional="hide"/>
-                            <field name="user_ids" widget="many2many_avatar_user" optional="show" domain="[('share', '=', False), ('active', '=', True)]"/>
-                            <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                            <field name="partner_id" invisible="True" optional=""/>
+                            <field name="user_ids" widget="many2many_avatar_user" invisible="True" optional="" domain="[('share', '=', False), ('active', '=', True)]"/>
+                            <field name="company_id" groups="base.group_multi_company" invisible="True" optional=""/>
                             <field name="company_id" invisible="1"/>
-                            <field name="activity_ids" string="Next Activity" widget="list_activity" optional="hide"/>
+                            <field name="activity_ids" string="Next Activity" widget="list_activity" invisible="True" optional=""/>
                             <!--<field name="date_deadline" attrs="{'invisible': [('is_closed', '=', True)]}" optional="show"/>-->
-                            <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" optional="hide"/>
+                            <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" invisible="True" optional=""/>
                             <field name="rating_last_text" string="Rating" decoration-danger="rating_last_text == 'ko'"
                                 decoration-warning="rating_last_text == 'ok'" decoration-success="rating_last_text == 'top'"
                                 attrs="{'invisible': [('rating_last_text', '=', 'none')]}"
-                                class="fw-bold" widget="badge" optional="hide"/>
+                                class="fw-bold" widget="badge" invisible="True" optional=""/>
                             <!--<field name="kanban_state" widget="state_selection" optional="show" options="{'hide_label': True}" nolabel="1"/>
                             <field name="stage_id" optional="show" context="{'default_project_id': project_id}"/>-->
-                            <field name="last_situation_solution_id" string="Current Situation" readonly="True"/>
+                            <field name="last_situation_solution_id" invisible="True" string="Current Situation" readonly="True"/>
                             <field name="state_color" invisible="1"/>
                             <field name="state" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'state_color'}"/>
-                            <button name="action_open_task2" type="object" title="View Solution" string="View Solution" class="btn btn-link float-end"/>
+                            <!--<button name="action_open_task2" type="object" title="View Solution" string="View Solution" class="btn btn-link float-end ri-eye-line"/>-->
                         </tree>
                     </field>
                 </page>
@@ -1028,7 +1039,9 @@
                 <field name="is_strategy" invisible="True"/>
                 <field name="is_task" invisible="True"/>
                 <field name="is_subtask" invisible="True"/>
-                <button name="action_open_task2" type="object" title="View Strategy" string="View Strategy" class="btn btn-link float-end" attrs="{'invisible': [('parent.is_solution','=',False)]}"/>
+                <!--<button name="action_open_task2" type="object" title="View Strategy" string="View Strategy" class="btn btn-link float-end" attrs="{'invisible': [('parent.is_solution','=',False)]}"/>-->
+                <button name="button_done" type="object" string="Done" class="btn-success ri-arrow-right-up-line me-2" attrs="{'invisible': [('state','!=','process')]}"/>
+                <button name="button_cancel" type="object" string="Cancel" class="btn-secondary-ccpp"   attrs="{'invisible': [('state','!=','process')]}"/>
                 <button name="action_open_task2" type="object" title="View Task" string="View Task" class="btn btn-link float-end" attrs="{'invisible': [('parent.is_strategy','=',False)]}"/>
             </xpath>
             <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='activity_ids']" position="replace">
@@ -1051,10 +1064,14 @@
             <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='name']" position="attributes">
                 <attribute name="widget"></attribute>
                 <attribute name="attrs">{'readonly': [('state','not in',['open'])]}</attribute>
-                <attribute name="string">Name</attribute>
+                <attribute name="string">Strategy Title</attribute>
             </xpath>
-            <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='user_ids']" position="attributes">
+            <!--<xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='user_ids']" position="attributes">
                 <attribute name="attrs">{'readonly': [('state','not in',['open'])]}</attribute>
+            </xpath>-->
+            <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='user_ids']" position="replace">
+            </xpath>
+            <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='priority']" position="replace">
             </xpath>
             <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']" position="attributes">
                 <attribute name="widget"></attribute>
@@ -1064,13 +1081,54 @@
             </xpath>
             
             <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='name']" position="before">
-                <field name="code" string="Strategy No." optional="show" attrs="{'column_invisible': [('parent.is_solution','=',False)]}" readonly="True"/>
-                <field name="code" string="Task No." optional="show" attrs="{'column_invisible': [('parent.is_strategy','=',False),('parent.is_task','=',False),('parent.is_subtask','=',False)]}" readonly="True"/>
+                <field name="code" string="Strategy No." attrs="{'column_invisible': [('parent.is_solution','=',False)]}" readonly="True"/>
+                <field name="code" string="Task No." attrs="{'column_invisible': [('parent.is_strategy','=',False),('parent.is_task','=',False),('parent.is_subtask','=',False)]}" readonly="True"/>
             </xpath>
             <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]" position="attributes">
                 <attribute name="delete">false</attribute>
                 <!--<attribute name="attrs">{'create': [('state','in',['open','process'])]}</attribute>-->
             </xpath>
+            <!-- invisible optional -->
+            <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='project_id']" position="attributes">
+                <attribute name="optional"></attribute>
+                <attribute name="invisible">True</attribute>
+            </xpath>
+            <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='company_id']" position="attributes">
+                <attribute name="optional"></attribute>
+                <attribute name="invisible">True</attribute>
+            </xpath>
+            <!--<xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='planned_hours']" position="attributes">
+                <attribute name="optional"></attribute>
+                <attribute name="invisible">True</attribute>
+            </xpath>
+            <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='effective_hours']" position="attributes">
+                <attribute name="optional"></attribute>
+                <attribute name="invisible">True</attribute>
+            </xpath>
+            <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='subtask_effective_hours']" position="attributes">
+                <attribute name="optional"></attribute>
+                <attribute name="invisible">True</attribute>
+            </xpath>
+            <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='total_hours_spent']" position="attributes">
+                <attribute name="optional"></attribute>
+                <attribute name="invisible">True</attribute>
+            </xpath>
+            <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='remaining_hours']" position="attributes">
+                <attribute name="optional"></attribute>
+                <attribute name="invisible">True</attribute>
+            </xpath>
+            <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='progress']" position="attributes">
+                <attribute name="optional"></attribute>
+                <attribute name="invisible">True</attribute>
+            </xpath>-->
+            <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='tag_ids']" position="attributes">
+                <attribute name="optional"></attribute>
+                <attribute name="invisible">True</attribute>
+            </xpath>
+            <!--<xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='rating_ids']" position="attributes">
+                <attribute name="optional"></attribute>
+                <attribute name="invisible">True</attribute>
+            </xpath>-->
             <!-- page name -->
             <xpath expr="//form[1]/sheet[1]/notebook[1]/page[2]" position="after">
                 <page name="strategy_page" string="Strategy" attrs="{'invisible': [('is_solution', '=' ,False)]}">
@@ -1103,18 +1161,22 @@
             <xpath expr="//page[@name='description_page']" position="attributes">
                 <attribute name="invisible">True</attribute>
             </xpath>
+
+            
+
+            
             
 
             <!-- button stat -->
             <xpath expr="//form[1]/sheet[1]/div[1]/button[@name='%(project.project_task_action_sub_task)d']" position="replace">
-                <button name="button_open_project" type="object" class="oe_stat_button" icon="fa-tasks"
+                <!--<button name="button_open_project" type="object" class="oe_stat_button" icon="fa-tasks"
                     attrs="{'invisible' : [('id', '=', False)]}" context="{'default_user_ids': user_ids}">
                     <span class="o_stat_text">CCPP</span>  
                 </button>
                 <button name="button_open_solution" type="object" class="oe_stat_button" icon="fa-tasks"
                     attrs="{'invisible' : ['|',('id', '=', False), ('is_solution', '=', True)]}" context="{'default_user_ids': user_ids}">
                     <span class="o_stat_text">Solution</span>
-                </button>
+                </button>-->
                 <button class="oe_stat_button" name="solution_update_all_action" type="object" groups="project.group_project_manager"
                 attrs="{'invisible' : ['|',('id', '=', False),('is_solution', '=', False)]}">
                     <div class="ps-4">
@@ -1358,8 +1420,34 @@
                 <filter string="Done" name="done" domain="[('state','=','done')]"/>
                 <filter string="Cancelled" name="cancel" domain="[('state','=','cancel')]"/>
                 <filter string="Delayed" name="delay" domain="[('is_delay','=',True)]"/>
-                <separator/>
-                <filter string="My CCPP" name="my_ccpp" domain="[('user_id', '=', uid)]"/>
+                <separator string="Department"/>
+                <filter string="ACC (ฝ่ายบัญชี)" name="acc" domain="[('department_id.code', '=', 'ACC')]"/>
+                <filter string="AMO (โครงการรับบริจาคเกล็ดเลือดนอกสถานที่)" name="amo" domain="[('department_id.code', '=', 'AMO')]"/>
+                <filter string="BTM (Blood Tranfusion)" name="btm" domain="[('department_id.code', '=', 'BTM')]"/>
+                <filter string="BUD (ฝ่ายพัฒนาธุรกิจ)" name="bud" domain="[('department_id.code', '=', 'BUD')]"/>
+                <filter string="BUD2 (ฝ่ายพัฒนาธุรกิจ 2)" name="bud2" domain="[('department_id.code', '=', 'BUD2')]"/>
+                <filter string="BUD3 (ฝ่ายพัฒนาธุรกิจ 3)" name="bud3" domain="[('department_id.code', '=', 'BUD3')]"/>
+                <filter string="CCPP (CCPP IMPACT)" name="ccpp" domain="[('department_id.code', '=', 'CCPP')]"/>
+                <filter string="CMK (Consumer Marketing)" name="cmk" domain="[('department_id.code', '=', 'CMK')]"/>
+                <filter string="CMT (Cell and Molecular Technology)" name="cmt" domain="[('department_id.code', '=', 'CMT')]"/>
+                <filter string="CSD (เลขานุการบริษัท Company Secretary Department)" name="csd" domain="[('department_id.code', '=', 'CSD')]"/>
+                <filter string="ENG (ฝ่ายวิศวะบริการ)" name="eng" domain="[('department_id.code', '=', 'ENG')]"/>
+                <filter string="FIN (ฝ่ายการเงิน)" name="fin" domain="[('department_id.code', '=', 'FIN')]"/>
+                <filter string="HRM (ฝ่ายบริหารทรัพยากรมนุษย์)" name="hrm" domain="[('department_id.code', '=', 'HRM')]"/>
+                <filter string="IAD (ฝ่ายตรวจสอบภายใน)" name="iad" domain="[('department_id.code', '=', 'IAD')]"/>
+                <filter string="IRD (ฝ่ายนักลงทุนสัมพันธ์)" name="ird" domain="[('department_id.code', '=', 'IRD')]"/>
+                <filter string="ISO (ฝ่ายบริหารระบบคุณภาพ)" name="iso" domain="[('department_id.code', '=', 'ISO')]"/>
+                <filter string="LEG (ฝ่ายกฏหมาย)" name="leg" domain="[('department_id.code', '=', 'LEG')]"/>
+                <filter string="MGT (ฝ่ายบริหาร  (Management - C Level))" name="mgt" domain="[('department_id.code', '=', 'MGT')]"/>
+                <filter string="OMA (ฝ่ายกิจการสำนักงาน Office Management Department)" name="oma" domain="[('department_id.code', '=', 'OMA')]"/>
+                <filter string="PRD (ฝ่ายประสานงานราชการและจัดซื้อ)" name="prd" domain="[('department_id.code', '=', 'PRD')]"/>
+                <filter string="PRO (ฝ่ายผลิตภัณฑ์)" name="pro" domain="[('department_id.code', '=', 'PRO')]"/>
+                <filter string="RID (ฝ่ายประสานงานราชการและนำเข้าส่งออก)" name="rid" domain="[('department_id.code', '=', 'RID')]"/>
+                <filter string="SCO (ฝ่ายประสานงานขาย)" name="sco" domain="[('department_id.code', '=', 'SCO')]"/>
+                <filter string="SRC (Sexual and Reproductive Care)" name="src" domain="[('department_id.code', '=', 'SRC')]"/>
+                <filter string="SRT (Solar Roof Top)" name="srt" domain="[('department_id.code', '=', 'SRT')]"/>
+                <filter string="WCL (Winmed Clinic and Laboratory)" name="wcl" domain="[('department_id.code', '=', 'WCL')]"/>
+                <filter string="WHD (ฝ่ายคลังสินค้า)" name="whd" domain="[('department_id.code', '=', 'WHD')]"/>
                 <group expand="0" string="Group By">
                     <filter string="Priority" name="groupby_priority" context="{'group_by': 'priority_id'}"/>
                     <filter string="CCPP User" name="groupby_user" context="{'group_by': 'user_id'}"/> 
@@ -1395,8 +1483,7 @@
         <field name="name">My CCPP</field>
         <field name="res_model">project.project</field>
         <field name="view_mode">tree,kanban,form</field>
-        <field name="context">{'search_default_groupby_priority': 1, 'show_create': '1', 'my_ccpp': True}</field>
-        <field name="domain">[('user_id', '=', uid)]</field>
+        <field name="context">{'search_default_groupby_priority': 0, 'show_create': '1', 'my_ccpp': True, 'create_from_tree': True}</field>
         <field name="view_id" ref="ccpp.ccpp_report_tree_show_create_view"/>
         <field name="search_view_id" ref="ccpp_search_form"/>
         <field name="target">main</field>
@@ -1433,6 +1520,14 @@
         <field name="code">action = model.action_ccpp_department_group_by_priority_manager()</field>
     </record>
 
+    <record id="action_my_ccpp_group_by_priority_user" model="ir.actions.server">
+        <field name="name">My CCPP</field>
+        <field name="model_id" ref="model_project_project"/>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="code">action = model.action_my_ccpp_group_by_priority_user()</field>
+    </record>
+
     <record id="action_all_ccpp_group_by_customer_manager" model="ir.actions.server">
         <field name="name">All CCPP Group by Customer</field>
         <field name="model_id" ref="model_project_project"/>
@@ -1445,7 +1540,7 @@
         <field name="name">All CCPP</field>
         <field name="res_model">project.project</field>
         <field name="view_mode">tree,kanban,form</field>
-        <field name="context">{'search_default_groupby_priority': 1, 'show_create': '0', 'all_ccpp': True}</field>
+        <field name="context">{'search_default_groupby_priority': 0, 'show_create': '0', 'all_ccpp': True, }</field>
         <field name="view_id" ref="ccpp.ccpp_report_tree_hide_create_view"/>
         <field name="search_view_id" ref="ccpp_search_form"/>
         <field name="target">main</field>
@@ -1483,6 +1578,8 @@
                 <field name="state_color" invisible="1"/>
                 <field name="state" string="State" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'state_color'}"/>
                 <field name="user_ids" widget="many2many_avatar_user" string="User"/>
+                <button name="button_done" type="object" string="Done" class="btn-success ri-arrow-right-up-line me-2" attrs="{'invisible': [('state','!=','process')]}"/>
+                <button name="button_cancel" type="object" string="Cancel" class="btn-secondary-ccpp"   attrs="{'invisible': [('state','!=','process')]}"/>
                 <!--<button name="action_open_strategy" type="object" title="View Detail" string="View Detail" class="btn btn-link float-end"/>-->
             </tree>
         </field>
@@ -1519,17 +1616,20 @@
         <field name="model">project.project</field>
         <field eval="201" name="priority"/>
         <field name="arch" type="xml">
-            <tree delete="0" create="1" expand="1" js_class="ccpp_dashboard_list">
+            <!--<tree delete="0" create="1" expand="1" js_class="ccpp_dashboard_list ccpp_tree" class="ccpp_list">-->
+            <tree delete="0" create="1" expand="1" js_class="ccpp_dashboard_list" class="ccpp_list">
                 <button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>
-                <field name="name" string="CCPP Name" class="fw-bold"/>
+                <field name="code" string="CCPP No."/>
+                <field name="name" string="CCPP Title" class="fw-bold"/>
                 <field name="partner_id" string="Customer"/>
                 <!--<field name="color" invisible="1"/>
                 <field name="priority_select" string="Priority" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'color'}"/>-->
                 <field name="priority_select" decoration-danger="priority_select in ['1','2']" string="Priority"/>
-                <field name="show_period" string="Period"/>
+                <field name="deadline_date"/>
+                <!--<field name="show_period" string="Period"/>-->
                 <field name="state_color" invisible="1"/>
                 <field name="state" string="State" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'state_color'}"/>
-                <button name="action_open_solution" type="object" title="View Solution" string="View Solution" class="btn btn-link float-end"/>
+                <button name="action_open_solution" type="object" title="View Strategy" string="Strategy" class="btn btn-link float-end ri-eye-line"/>
             </tree>
         </field>
     </record>
@@ -1539,17 +1639,19 @@
         <field name="model">project.project</field>
         <field eval="201" name="priority"/>
         <field name="arch" type="xml">
-            <tree delete="0" create="0" expand="1" js_class="ccpp_dashboard_list_manager">
+            <tree delete="0" create="0" expand="1" js_class="ccpp_dashboard_list_manager" class="ccpp_list">
                 <button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>
-                <field name="name" string="CCPP Name" class="fw-bold"/>
+                <field name="code" string="CCPP No."/>
+                <field name="name" string="CCPP Title" class="fw-bold"/>
                 <field name="partner_id" string="Customer"/>
                 <!--<field name="color" invisible="1"/>
                 <field name="priority_select" string="Priority" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'color'}"/>-->
                 <field name="priority_select" decoration-danger="priority_select in ['1','2']" string="Priority"/>
-                <field name="show_period" string="Period"/>
+                <field name="deadline_date"/>
+                <!--<field name="show_period" string="Period"/>-->
                 <field name="state_color" invisible="1"/>
                 <field name="state" string="State" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'state_color'}"/>
-                <button name="action_open_solution" type="object" title="View Solution" string="View Solution" class="btn btn-link float-end"/>
+                <button name="action_open_solution" type="object" title="Strategy" string="Strategy" class="btn btn-link float-end ri-eye-line"/>
             </tree>
         </field>
     </record>
@@ -1565,7 +1667,7 @@
         <field name="target">main</field>
     </record>
 
-    <menuitem name="My CCPP" id="menu_my_ccpp" parent="project.menu_main_pm" action="action_my_ccpp_group_by_priority" sequence="1"/>
+    <menuitem name="My CCPP" id="menu_my_ccpp" parent="project.menu_main_pm" action="action_my_ccpp_group_by_priority_user" sequence="1"/>
 
         <!--<menuitem name="My CCPP Group by Priority" id="menu_my_ccpp_group_by_priority" parent="menu_my_ccpp" action="action_my_ccpp_group_by_priority" sequence="1"/>
 
@@ -1655,6 +1757,11 @@
 
         <record model="ir.ui.menu" id="project.menu_project_tags_act">
             <field name="action" eval="False"/>
+        </record>
+
+        <!-- hidden report -->
+        <record model="ir.actions.report" id="hr_timesheet.timesheet_report_project">
+            <field name="binding_model_id" eval="False"/>
         </record>
 
 </odoo>

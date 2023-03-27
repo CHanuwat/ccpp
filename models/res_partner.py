@@ -5,6 +5,7 @@ from datetime import datetime, timedelta, date, timezone
 import pytz
 import json
 from pprint import pprint
+from odoo.osv import expression
 
 class Partner(models.Model):
     _inherit = "res.partner"
@@ -49,8 +50,10 @@ class Partner(models.Model):
     is_potential = fields.Boolean(string="Potential", default=_get_default_potential)
     is_employee = fields.Boolean(string="Employeee", default=False)
     potential_ranking = fields.Integer(string="Potential rank by user", compute="_compute_potential_rank")
+    department_code = fields.Char(string="Department Code", compute="_compute_department_code")
     is_company = fields.Boolean(default=_get_default_is_company)
     parent_id = fields.Many2one(default=_get_default_parent_id)
+    job_position_name = fields.Char(string="Job Position Name", related="job_position_id.name", store=True)
     
     #@api.model_create_multi
     #def create(self, vals_list):
@@ -69,7 +72,13 @@ class Partner(models.Model):
                                                                           ('year_selection','=',year),
                                                                           ('type','=','customer')], limit=1)
             obj.potential_ranking = customer_info.potential_ranking
-            
+                    
+    def _compute_department_code(self):
+        for obj in self:
+            department_code = ''
+            employee_id = self.env['hr.employee'].search([('work_contact_id','=',obj.id)],limit=1)
+            department_code = employee_id.department_id.code
+            obj.department_code = department_code
 
     def name_get(self):
         #res = []
@@ -81,6 +90,8 @@ class Partner(models.Model):
             res = []
             for obj in self:
                 new_name_list = []
+                if obj.department_code:
+                    new_name_list.append(obj.department_code)
                 if obj.title:
                     new_name_list.append(obj.title.name)
                 if obj.name:
@@ -108,6 +119,15 @@ class Partner(models.Model):
                 new_name = ' '.join(new_name_list)
                 res.append((obj.id, new_name))
         return res
+    
+    @api.model
+    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
+        #domain = [('job_position_name', operator, name)]
+        domain = []
+        if name:
+            domain = ['|',('name', operator, name),('job_position_name', operator, name)]
+            #domain.append(('job_position_name', operator, name))
+        return self._search(domain + args, limit=limit, access_rights_uid=name_get_uid)
     
     @api.depends('is_company', 'name', 'parent_id.display_name', 'type', 'company_name', 'job_position_id')
     def _compute_display_name(self):
