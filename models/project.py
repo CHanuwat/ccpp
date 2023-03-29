@@ -57,9 +57,9 @@ class Project(models.Model):
         #    raise UserError("Not recognize the Employee. Please Configure User to Employee to get the job")
         return employee_id.job_id
 
-    def _get_default_sale_team(self):
-        print("x*50"+"pass pass pass")
-        return self.env['crm.team'].search([('user_id','=',self.env.user.id)], limit=1)
+    # def _get_default_sale_team(self):
+    #     print("x*50"+"pass pass pass")
+    #     return self.env['crm.team'].search([('user_id','=',self.env.user.id)], limit=1)
     
     @api.model
     def _default_company_id(self):
@@ -82,7 +82,7 @@ class Project(models.Model):
         #('delay', 'delayed'),
     ], compute="_get_priority", string="Priority Selection", store=True)
     
-    sale_team_id = fields.Many2one("crm.team", string="Sale Team", default="_get_default_sale_team")
+    sale_team_id = fields.Many2one("crm.team", string="Sale Team")
     domain_task_solution_ids = fields.Many2many('project.task', string="Domain task solution")
     tasks_solution = fields.One2many('project.task', 'project_solution_id', string="Solution", context={'is_solution': True})
     name = fields.Char(string="Name of CCPP", translate=False, track_visibility="onchange")

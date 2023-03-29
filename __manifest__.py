@@ -12,8 +12,11 @@
                 'web',
                 'project',
                 'hr',
-                'stock',
+                'product',
                 'board',
+                'crm',
+                'hr_hourly_cost',
+                'hr_timesheet',
                 ],
     'data': [
         "data/ir_sequence.xml",
