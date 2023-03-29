@@ -60,14 +60,21 @@ class Project(models.Model):
     def _get_default_sale_team(self):
         print("x*50"+"pass pass pass")
         return self.env['crm.team'].search([('user_id','=',self.env.user.id)], limit=1)
+    
+    @api.model
+    def _default_company_id(self):
+        #if self._context.get('default_project_id'):
+        #    return self.env['project.project'].browse(self._context['default_project_id']).company_id
+        return self.env.user.company_id
 
     rec_name = fields.Char(string="Record Name", default='CCPP')
-    department_id = fields.Many2one("hr.department",string="Department", related="job_id.department_id")
-    employee_id = fields.Many2one("hr.employee", string="User", related="job_id.employee_id")
+    department_id = fields.Many2one("hr.department",string="Department", related="job_id.department_id", store=True)
+    employee_id = fields.Many2one("hr.employee", string="User", related="job_id.employee_id", store="True")
     job_id = fields.Many2one("hr.job", string="Job Position", default=_get_default_job, required=True, track_visibility="onchange")#default=_get_default_job,     
+    domain_job_ids = fields.Many2many("hr.job", string="Domain Job", compute="_compute_domain_job_ids")
     priority_id = fields.Many2one("ccpp.priority", string="CCPP Priority", compute="_get_priority", store=True)
     priority_select = fields.Selection([
-        ('to_define', 'To Define'),
+        ('to_define', 'Undefine'),
         ('1', '1st'),
         ('2', '2nd'),
         ('3', '3rd'),
@@ -133,6 +140,13 @@ class Project(models.Model):
     is_approve_strategy = fields.Boolean(string="Is Approve Strategy", default=False)
     is_ready_create_solution = fields.Boolean(string="Is Ready Create Solution", compute="_compute_ready_create_solution")
     reason_reject = fields.Text(string="Comment Rejection",track_visibility="onchange")
+    task_last_update_id = fields.Many2one("account.analytic.line", string="Task Last Update Situation")
+    task_current_action = fields.Char(related="task_last_update_id.current_action", string="Task Current Situation")
+    task_next_action = fields.Char(related="task_last_update_id.next_action", string="Task Next Action")
+    company_id = fields.Many2one('res.company', string='Company', required=True, default=_default_company_id)
+    ccpp_approve_lines = fields.One2many("ccpp.approve.line", "ccpp_id", string="CCPP Approve Lines")
+    is_show_approve = fields.Boolean(string="Is Show Approve", compute="_compute_show_approve")
+    current_approve_ids = fields.Many2many("hr.job", string="Current Apporver", compute="_compute_current_approve", store="True")
  
     def unlink(self):
         res = super().unlink()
@@ -200,6 +214,15 @@ class Project(models.Model):
                 obj.show_time = "ใช้เวลามากกว่า 4 เดือน"
             else:
                 obj.show_time = ""
+    
+    @api.depends("employee_id")
+    def _compute_domain_job_ids(self):
+        for obj in self:
+            job_ids = self.env['hr.job']
+            if obj.employee_id:
+                for job_id in obj.employee_id.job_lines:
+                    job_ids |= job_id
+            obj.domain_job_ids = job_ids.ids
     
     @api.depends("is_income_comp", "is_effectiveness_comp", "is_repulation_comp", "is_competitive_comp", "is_short_time", "is_long_time")
     def _get_priority(self):
@@ -339,11 +362,78 @@ class Project(models.Model):
                 vals['code'] = code
             
         res = super(Project, self).create(vals_list)
+        res.create_approve_lines()
         #if not res.is_income_cus and not res.is_effectiveness_cus and not res.is_repulation_cus and not res.is_competitive_cus:
         #    raise UserError("กรุณาเลือกผลกระทบต่อลูกค้าอย่างน้อย 1 ข้อ")
         #if not res.is_critical and not res.is_not_critical:
         #    raise UserError("กรุณาเลือกผลกระทบต่อลูกค้าอย่างน้อย 1 ข้อ")
         return res
+    
+    def create_approve_lines(self):
+        for obj in self:
+            print("ก" *100)
+            print(obj._name)
+            model_id = self.env['ir.model'].sudo().search([('model','=',obj._name)])
+            print(model_id)
+            print(obj.department_id)
+            print(obj.job_id)
+            approve_id = self.env['approval'].search([('model_id','=', model_id.id),
+                                                      ('department_id','=', obj.department_id.id),
+                                                      ('job_request_id','=', obj.job_id.id)])
+            
+            vals_list = []
+            print(approve_id)
+            for approve_line in approve_id.lines:
+                vals = {
+                    'ccpp_id': obj.id,
+                    #'sequence': approve_line.sequence,
+                    #'job_approve_ids': [(6,0,approve_line.job_approve_ids.ids)],
+                    'approve_line_id': approve_line.id,
+                }
+                vals_list.append(vals)    
+                
+            print(vals_list)    
+            self.env['ccpp.approve.line'].create(vals_list)
+    
+    @api.depends('ccpp_approve_lines', 'ccpp_approve_lines.is_approve', 'ccpp_approve_lines.job_approve_ids', 'ccpp_approve_lines.sequence', 'state' )
+    def _compute_current_approve(self):
+        for obj in self:
+            current_approve_ids = self.env['hr.job']
+            for approve_line in obj.ccpp_approve_lines:
+                if not approve_line.is_approve:
+                    current_approve_ids = approve_line.job_approve_ids
+                    break
+            obj.current_approve_ids = current_approve_ids.ids
+    
+    @api.depends('ccpp_approve_lines', 'ccpp_approve_lines.is_approve', 'ccpp_approve_lines.job_approve_ids', 'ccpp_approve_lines.sequence', 'state' )
+    def _compute_show_approve(self):
+        for obj in self:
+            is_show_approve = False
+            employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)], limit=1)
+            for current_approve_id in obj.current_approve_ids:
+                if current_approve_id in employee_id.job_lines:
+                    is_show_approve = True 
+            #job_approve_ids = self.env['hr.job']
+            #for approve_line in obj.ccpp_approve_lines:
+            #    if not approve_line.is_approve:
+            #        job_approve_ids = approve_line.job_approve_ids
+            #        break
+            #employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)], limit=1)
+            #for job_approve_id in job_approve_ids:
+            #    if job_approve_id in employee_id.job_lines:
+            #        is_show_approve = True
+            obj.is_show_approve = is_show_approve
+            
+    @api.model
+    def _create_analytic_account_from_values(self, values):
+        company = self.env['res.company'].browse(values.get('company_id')) if values.get('company_id') else self.env.user.company_id
+        analytic_account = self.env['account.analytic.account'].create({
+            'name': values.get('name', _('Unknown Analytic Account')),
+            'company_id': company.id,
+            'partner_id': values.get('partner_id'),
+            'plan_id': company.analytic_plan_id.id,
+        })
+        return analytic_account
     
     # replace for open project instead
     def action_view_tasks(self):
@@ -422,6 +512,12 @@ class Project(models.Model):
         #action['display_name'] = _("%(name)s's Updates", name=self.name)
         return action
     
+    def ccpp_update_all_action_task(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.act_rocker_timesheet_tree')
+        action['domain'] = [('project_id', '=', self.id)]
+        #action['display_name'] = _("%(name)s's Updates", name=self.name)
+        return action
+    
     def button_send_approve(self):
         for obj in self:
             obj.check_information()
@@ -455,14 +551,35 @@ class Project(models.Model):
                                                
     def button_approve(self):
         for obj in self:
-            obj.state = 'process'
-            obj.reason_reject = False
+            employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+            for approve_line in obj.ccpp_approve_lines:
+                if not approve_line.is_approve:
+                    approve_line.is_approve = True
+                    approve_line.approve_date = datetime.now()
+                    approve_line.job_approve_by_id = employee_id.job_id.id
+                    break
+                    
+            waiting_another_level = obj.ccpp_approve_lines.filtered(lambda o:not o.is_approve)
+            if not waiting_another_level:
+                obj.button_approve_final()
+                
             for solution_id in obj.tasks_solution:
                 if solution_id.state == 'waiting_approve':
-                    solution_id.state = 'process'
-                for strategy_id in solution_id.child_ids:
-                    if strategy_id.state == 'waiting_approve':
-                        strategy_id.state = 'process'
+                    solution_id.button_approve_solution()
+                    for strategy_id in solution_id.child_ids:
+                        if strategy_id.state == 'waiting_approve':
+                            strategy_id.button_approve_strategy()
+
+    def button_approve_final(self):
+        for obj in self:
+            obj.state = 'process'
+            obj.reason_reject = False
+            #for solution_id in obj.tasks_solution:
+                #if solution_id.state == 'waiting_approve':
+                #    solution_id.state = 'process'
+                #for strategy_id in solution_id.child_ids:
+                #    if strategy_id.state == 'waiting_approve':
+                #        strategy_id.state = 'process'
             obj.get_period_deadline()
             
     def button_reject(self):
@@ -607,10 +724,32 @@ class Project(models.Model):
     def action_ccpp_department_approve_manager(self):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_ccpp_approve_dashboard_action')
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-        job_ids = self.get_child_job(employee_id.job_lines)
-        ccpp_ids = self.env['project.project'].search([('state', '=', 'waiting_approve'),
-                                                        ('job_id', 'in', job_ids.ids),
+        #job_ids = self.get_child_job(employee_id.job_lines)
+        
+        #ccpp_ids = self.env['project.project'].search([('state', '=', 'waiting_approve'),
+        #                                                ('job_id', 'in', job_ids.ids),
+        #                                                ])
+        #action['domain'] = [('id','in',ccpp_ids.ids)]
+        
+        ccpp_ids = self.env['project.project']
+        #for job_line in employee_id.job_lines:
+            
+        ccpp_ids |= self.env['project.project'].search([('state', '=', 'waiting_approve'),
+                                                        ('current_approve_ids','in',employee_id.job_lines.ids)
                                                         ])
+        print(employee_id)
+        print(employee_id.job_lines)
+        print(ccpp_ids)
+        #job_approve_id = self.env['hr.job']
+        #ccpp_for_approve_ids = self.env['project.project']
+        #for ccpp_id in ccpp_ids:
+        #    for approve_line in ccpp_id.ccpp_approve_lines:
+        #        if not approve_line.is_approve:
+        #            job_approve_id = approve_line.job_approve_id
+        #            break
+        #    if job_approve_id in employee_id.job_lines:
+        #        ccpp_for_approve_ids |= ccpp_id
+                
         action['domain'] = [('id','in',ccpp_ids.ids)]
         return action
     
@@ -645,6 +784,7 @@ class Project(models.Model):
             'priority_3': 0,
             'priority_4': 0,
             'delay': 0,
+            'undefine': 0,
         }
 
         ccpp = self.env['project.project']
@@ -655,6 +795,7 @@ class Project(models.Model):
             result['priority_3'] = ccpp.search_count([('priority_id.point','=',3),('job_id', '=', employee_id.job_id.id)])
             result['priority_4'] = ccpp.search_count([('priority_id.point','=',4),('job_id', '=', employee_id.job_id.id)])
             result['delay'] = ccpp.search_count([('is_delay','=',True),('job_id', '=', employee_id.job_id.id)])
+            result['undefine'] = ccpp.search_count([('priority_select','=','to_define'),('job_id', '=', employee_id.job_id.id)])
         return result
         
     @api.model
@@ -665,6 +806,7 @@ class Project(models.Model):
             'priority_3': 0,
             'priority_4': 0,
             'delay': 0,
+            'undefine': 0,
         }
         ccpp = self.env['project.project']
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
@@ -674,6 +816,8 @@ class Project(models.Model):
         result['priority_3'] = ccpp.search_count([('priority_id.point','=',3),('job_id', 'in', job_ids.ids)])
         result['priority_4'] = ccpp.search_count([('priority_id.point','=',4),('job_id', 'in', job_ids.ids)])
         result['delay'] = ccpp.search_count([('is_delay','=',True),('job_id', 'in', job_ids.ids)])
+        result['undefine'] = ccpp.search_count([('priority_select','=','to_define'),('job_id', 'in', job_ids.ids)])
+        
         return result        
 
     def get_child_job(self,job_lines,job_ids=False):
@@ -710,12 +854,14 @@ class Task(models.Model):
     project_solution_id = fields.Many2one("project.project", string="Relate Project Solution")
     code = fields.Char(string="Code")
     period_id = fields.Many2one("ccpp.period", string="Priority Period", related="project_id.period_id")
-    partner_id = fields.Many2one(related="project_id.partner_id")
-    job_position_id = fields.Many2one("res.partner.position", string="Contact Job Position",related="project_id.job_position_id")
-    job_id = fields.Many2one("hr.job", string="Job Position", related="project_id.job_id")
-    priority_id = fields.Many2one("ccpp.priority", string="Priority", related="project_id.priority_id")
+    partner_id = fields.Many2one(related="project_id.partner_id", store=True)
+    job_position_id = fields.Many2one("res.partner.position", string="Contact Job Position",related="project_id.job_position_id", store=True)
+    job_id = fields.Many2one("hr.job", string="Job Position", related="project_id.job_id", store=True)
+    department_id = fields.Many2one(related="project_id.department_id", store=True)
+    priority_id = fields.Many2one("ccpp.priority", string="Priority", related="project_id.priority_id", store=True)
     evaluate_method = fields.Char("วิธีวัดผล/เป้าหมาย", track_visibility="onchange")
     situation_ids = fields.One2many("project.update", 'strategy_id', string="Current Situation")
+    task_situation_ids = fields.One2many("account.analytic.line", 'task_strategy_id', string="Task Current Situation")
     last_situation_id = fields.Many2one("project.update", string="Last Update Situation Strategy") # last update at strategy
     last_situation_solution_id = fields.Many2one("project.update", string="Last Update Situation Solution") # last update at solution
     state = fields.Selection([
@@ -746,6 +892,12 @@ class Task(models.Model):
     state_color = fields.Integer(compute='_compute_state_color')
     next_action_solution = fields.Char(string="Next Action Solution")
     next_action = fields.Char(string="Next Action")
+    task_next_action_solution = fields.Char(related="task_last_situation_solution_id.next_action", string="Task Next Action Solution")
+    task_next_action = fields.Char(related="task_last_situation_id.next_action", string="Task Next Action")
+    task_last_situation_id = fields.Many2one("account.analytic.line", string="Task Last Update Situation Strategy") # last update at strategy
+    task_last_situation_solution_id = fields.Many2one("account.analytic.line", string="Task Last Update Situation Solution") # last update at solution
+    task_last_current_action = fields.Char(related="task_last_situation_id.current_action", string="Task Current Action")
+    task_last_current_action_solution = fields.Char(related="task_last_situation_solution_id.current_action", string="Task Current Action Solution")
     start_date = fields.Date(string="Start Date",track_visibility="onchange")
     deadline_date = fields.Date(string="Deadline", compute="_compute_deadline", store=True, track_visibility="onchange")
     priority_line_id = fields.Date(string="Priority Line") # stamp when approve :fix me
@@ -757,6 +909,13 @@ class Task(models.Model):
     user_ids = fields.Many2many(default=_default_user_ids)
     priority_select = fields.Selection(related="project_id.priority_select")
     reason_reject = fields.Text(string="Comment Rejection",track_visibility="onchange")
+    solution_approve_lines = fields.One2many("ccpp.approve.line", "solution_id", string="Solution Approve Lines")
+    strategy_approve_lines = fields.One2many("ccpp.approve.line", "strategy_id", string="Strategy Approve Lines")
+    current_solution_approve_ids = fields.Many2many("hr.job", "solution_hr_job_rel", "solution_id", "job_id", string="Current Solution Apporver", compute="_compute_current_solution_approve", store="True")
+    current_strategy_approve_ids = fields.Many2many("hr.job", "strategy_hr_job_rel", "strategy_id", "job_id", string="Current Strategy Apporver", compute="_compute_current_strategy_approve", store="True")
+    is_show_solution_approve = fields.Boolean(string="Is Show Solution Approve", compute="_compute_show_solution_approve")
+    is_show_strategy_approve = fields.Boolean(string="Is Show Strategy Approve", compute="_compute_show_strategy_approve")
+    
     
     def unlink(self):
         if self.is_solution:
@@ -907,6 +1066,47 @@ class Task(models.Model):
     def _compute_state_color(self):
         for obj in self:         
             obj.state_color = STATE_COLOR[obj.state]
+    
+    @api.depends('solution_approve_lines', 'solution_approve_lines.is_approve', 'solution_approve_lines.job_approve_ids', 'solution_approve_lines.sequence', 'state' )
+    def _compute_current_solution_approve(self):
+        for obj in self:
+            current_solution_approve_ids = self.env['hr.job']
+            for approve_line in obj.solution_approve_lines:
+                if not approve_line.is_approve:
+                    current_solution_approve_ids = approve_line.job_approve_ids
+                    break
+            obj.current_solution_approve_ids = current_solution_approve_ids.ids
+    
+    @api.depends('solution_approve_lines', 'solution_approve_lines.is_approve', 'solution_approve_lines.job_approve_ids', 'solution_approve_lines.sequence', 'state' )
+    def _compute_show_solution_approve(self):
+        for obj in self:
+            is_show_solution_approve = False
+            employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)], limit=1)
+            for current_approve_id in obj.current_solution_approve_ids:
+                if current_approve_id in employee_id.job_lines:
+                    is_show_solution_approve = True
+            obj.is_show_solution_approve = is_show_solution_approve
+    
+    @api.depends('strategy_approve_lines', 'strategy_approve_lines.is_approve', 'strategy_approve_lines.job_approve_ids', 'strategy_approve_lines.sequence', 'state' )
+    def _compute_current_strategy_approve(self):
+        for obj in self:
+            current_strategy_approve_ids = self.env['hr.job']
+            for approve_line in obj.strategy_approve_lines:
+                if not approve_line.is_approve:
+                    current_strategy_approve_ids = approve_line.job_approve_ids
+                    break
+            obj.current_strategy_approve_ids = current_strategy_approve_ids.ids
+    
+    @api.depends('strategy_approve_lines', 'strategy_approve_lines.is_approve', 'strategy_approve_lines.job_approve_ids', 'strategy_approve_lines.sequence', 'state' )
+    def _compute_show_strategy_approve(self):
+        for obj in self:
+            is_show_strategy_approve = False
+            employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)], limit=1)
+            for current_approve_id in obj.current_strategy_approve_ids:
+                if current_approve_id in employee_id.job_lines:
+                    is_show_strategy_approve = True
+            obj.is_show_strategy_approve = is_show_strategy_approve
+    
         
     @api.model_create_multi
     def create(self, vals_list):
@@ -974,7 +1174,7 @@ class Task(models.Model):
             #    sequence_code = 'ccpp.'+'ta.'+rec.project_id.department_id.code
             #    code = self.env['ir.sequence'].next_by_code(sequence_code,sequence_date=sequence_date)
             #    rec.code = code
-            
+        res.create_approve_lines()
             
 
         return res
@@ -987,6 +1187,34 @@ class Task(models.Model):
     #            print("compute project xxx",obj.project_id.id)
     #            project_id = obj.project_id
     #        obj.project_solution_id = project_id.id
+
+    def create_approve_lines(self):
+        for obj in self:
+            model_id = self.env['ir.model'].sudo().search([('model','=',self.project_id._name)])
+            approve_id = self.env['approval'].search([('model_id','=', model_id.id),
+                                                      ('department_id','=', obj.department_id.id),
+                                                      ('job_request_id','=', obj.job_id.id)
+                                                    ])
+            
+            vals_list = []
+            for approve_line in approve_id.lines:
+                if obj.is_solution:
+                    vals = {
+                        'solution_id': obj.id,
+                        #'sequence': approve_line.sequence,
+                        #'job_approve_ids': [(6,0,approve_line.job_approve_ids.ids)],
+                        'approve_line_id': approve_line.id,
+                    }
+                elif obj.is_strategy:
+                    vals = {
+                        'strategy_id': obj.id,
+                        #'sequence': approve_line.sequence,
+                        #'job_approve_ids': [(6,0,approve_line.job_approve_ids.ids)],
+                        'approve_line_id': approve_line.id,
+                    }
+                vals_list.append(vals)
+
+            self.env['ccpp.approve.line'].create(vals_list)
 
     @api.depends('parent_id')
     def _compute_level(self):
@@ -1058,6 +1286,13 @@ class Task(models.Model):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.solution_update_all_action')
         #action['display_name'] = _("%(name)s's Updates", name=self.name)
         return action
+    
+    def solution_update_all_action_task(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.act_rocker_timesheet_tree')
+        action['domain'] = [('task_id', '=', self.id)]
+        #action['display_name'] = _("%(name)s's Updates", name=self.name)
+        return action
+    
     
     def button_update_strategy(self):
         
@@ -1220,19 +1455,51 @@ class Task(models.Model):
         
     def button_approve_strategy(self):
         for obj in self:
+            employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+            for approve_line in obj.strategy_approve_lines:
+                if not approve_line.is_approve:
+                    approve_line.is_approve = True
+                    approve_line.approve_date = datetime.now()
+                    approve_line.job_approve_by_id = employee_id.job_id.id
+                    break
+                    
+            waiting_another_level = obj.strategy_approve_lines.filtered(lambda o:not o.is_approve)
+            if not waiting_another_level:
+                obj.button_approve_strategy_final()
+        
+    def button_approve_strategy_final(self):
+        for obj in self:
             #obj.is_approve_strategy = False
             obj.reason_reject = False
             obj.state = 'process'
             
     def button_approve_solution(self):
         for obj in self:
+            employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+            for approve_line in obj.solution_approve_lines:
+                if not approve_line.is_approve:
+                    approve_line.is_approve = True
+                    approve_line.approve_date = datetime.now()
+                    approve_line.job_approve_by_id = employee_id.job_id.id
+                    break
+                    
+            waiting_another_level = obj.solution_approve_lines.filtered(lambda o:not o.is_approve)
+            if not waiting_another_level:
+                obj.button_approve_solution_final()
+                
+            for strategy_id in obj.child_ids:
+                if strategy_id.state == 'waiting_approve':
+                    strategy_id.button_approve_strategy()
+    
+    def button_approve_solution_final(self):
+        for obj in self:
             obj.project_id.get_period_deadline()
             obj.project_id.is_delay = False
             obj.state = 'process'
             obj.reason_reject = False
-            for strategy_id in obj.child_ids:
-                if strategy_id.state == 'waiting_approve':
-                    strategy_id.state = 'process'
+            #for strategy_id in obj.child_ids:
+            #    if strategy_id.state == 'waiting_approve':
+            #        strategy_id.state = 'process'
     
     def button_reject_strategy(self):
         for obj in self:
@@ -1253,7 +1520,7 @@ class Task(models.Model):
     def button_reject_solution_wizard(self):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_wizard_reject_action')
         action['context'] = {'default_solution': self.id}
-        return action       
+        return action
     
     def button_to_open_strategy(self):
         for obj in self:
@@ -1334,9 +1601,10 @@ class Task(models.Model):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_solution_approve_dashboard_action')
         #department_id = self.env.user.employee_id.department_id
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-        job_ids = self.get_child_job(employee_id.job_lines)
+        #job_ids = self.get_child_job(employee_id.job_lines)
         solution_ids = self.env['project.task'].search([('state', '=', 'waiting_approve'),
-                                                        ('project_id.job_id', 'in', job_ids.ids),
+                                                        #('project_id.job_id', 'in', job_ids.ids),
+                                                        ('current_solution_approve_ids','in',employee_id.job_lines.ids),
                                                         ('is_solution','=',True),
                                                         ('state','=','waiting_approve'),
                                                         ('is_ccpp_on_process','=',True),
@@ -1347,9 +1615,10 @@ class Task(models.Model):
     def action_strategy_department_approve_manager(self):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_strategy_approve_dashboard_action')
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-        job_ids = self.get_child_job(employee_id.job_lines)
+        #job_ids = self.get_child_job(employee_id.job_lines)
         strategy_ids = self.env['project.task'].search([('state', '=', 'waiting_approve'),
-                                                        ('project_id.job_id', 'in', job_ids.ids),
+                                                        #('project_id.job_id', 'in', job_ids.ids),
+                                                        ('current_strategy_approve_ids','in',employee_id.job_lines.ids),
                                                         ('is_strategy','=',True),
                                                         ('state','=','waiting_approve'),
                                                         ('is_ccpp_on_process','=',True),
@@ -1477,3 +1746,17 @@ class ProjectUpdate(models.Model):
     def button_done(self):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.act_rocker_timesheet_tree')
         return action
+    
+class ProjectApprovelines(models.Model):
+    _name = "ccpp.approve.line" 
+    _order = "sequence, id"
+    
+    ccpp_id = fields.Many2one("project.project", string="CCPP", ondelete="cascade")
+    solution_id = fields.Many2one("project.task", string="Solution", ondelete="cascade")
+    strategy_id = fields.Many2one("project.task", string="Strategy", ondelete="cascade")
+    approve_line_id = fields.Many2one("approval.line", string="Approval Lines")
+    sequence = fields.Integer(related="approve_line_id.sequence", string="Sequence")
+    job_approve_ids = fields.Many2many(related="approve_line_id.job_approve_ids", string="Approver")
+    is_approve = fields.Boolean(string="Approved", default=False)   
+    approve_date = fields.Datetime(string="Approved Date")
+    job_approve_by_id = fields.Many2one("hr.job", string="Approved By")

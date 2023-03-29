@@ -56,6 +56,13 @@ class CCPPPurchaseHistory(models.Model):
         #    current_period = datetime.today().month
         #    res['month'] = str(current_period)
         return res
+    
+    def _get_default_job(self):
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        #if not employee_id:
+        #    print(self.env.user.name)
+        #    raise UserError("Not recognize the Employee. Please Configure User to Employee to get the job")
+        return employee_id.job_id
         
     name = fields.Char(string="Name", compute="_compute_name", store=True)
     #year = fields.Char(string="Year")
@@ -165,12 +172,23 @@ class CCPPPurchaseHistory(models.Model):
     total_use_qty = fields.Float(string="Total Used Qty", compute="_compute_total")
     note = fields.Text("Competitors' Sales Strategy")
     sale_person_id = fields.Many2one("hr.employee", string="Sales Person", required=True)
+    job_id = fields.Many2one("hr.job", string="Job Position", default=_get_default_job, required=True, track_visibility="onchange")
+    domain_job_ids = fields.Many2many("hr.job", string="Domain Job", compute="_compute_domain_job_ids")
     department_id = fields.Many2one("hr.department", string="Deparment", related="sale_person_id.department_id")
     user_id = fields.Many2one(related="sale_person_id.user_id", string="Sales User", store=True)
-    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
+    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.user.company_id)
     company_partner_id = fields.Many2one("res.partner", string="Company Partner", related="company_id.partner_id")
     winmed_lines = fields.One2many("ccpp.purchase.history.line", "history_id", string="Winmed Purchase History Lines", domain=[('potential_type','=','company')])
     competitor_lines = fields.One2many("ccpp.purchase.history.line", "history_id", string="Competitor Purchase History Lines", domain=[('potential_type','=','competitor')] )
+    
+    @api.depends("sale_person_id")
+    def _compute_domain_job_ids(self):
+        for obj in self:
+            job_ids = self.env['hr.job']
+            if obj.sale_person_id:
+                for job_id in obj.sale_person_id.job_lines:
+                    job_ids |= job_id
+            obj.domain_job_ids = job_ids.ids
     
     @api.depends("winmed_lines", "winmed_lines.unit_price", "winmed_lines.order_qty", "winmed_lines.use_qty")
     def _compute_total(self):
@@ -270,6 +288,7 @@ class CCPPPurchaseHistory(models.Model):
     customer_id = fields.Many2one(related="history_id.customer_id", store=True)
     year_selection = fields.Selection(related="history_id.year_selection", store=True)
     sale_person_id = fields.Many2one(related="history_id.sale_person_id", store=True)
+    job_id = fields.Many2one(related="history_id.job_id", store=True)
     key_user_id = fields.Many2one("res.partner", string="Key User")
     domain_key_user_ids = fields.Many2many("res.partner", string="Domain Key User", compute="_compute_domain_key_user_ids")
     potential_type = fields.Selection(selection=[

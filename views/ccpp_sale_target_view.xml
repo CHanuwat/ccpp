@@ -4,10 +4,11 @@
     <record id="ccpp_sale_target_action" model="ir.actions.act_window">
         <field name="name">Sales Target</field>
         <field name="type">ir.actions.act_window</field>
-        <field name="context">{'search_default_groupby_year': 1}</field>
+        <field name="context">{'search_default_groupby_year': 0}</field>
         <field name="domain">[('user_id', '=', uid)]</field>
         <field name="res_model">ccpp.sale.target</field>
         <field name="view_mode">tree,form</field>
+        <field name="target">main</field>
     </record>
 
     <record id="ccpp_sale_target_search" model="ir.ui.view">
@@ -36,7 +37,7 @@
         <field name="name">ccpp.sale.target.view.tree</field>
         <field name="model">ccpp.sale.target</field>
         <field name="arch" type="xml">
-            <tree sample="1" multi_edit="1" editable="top" class="sale_target_tree">
+            <tree sample="1" multi_edit="0" editable="top" class="sale_target_tree" expand="1" create="1">
                 <!--<field name="years" interval="year" options="{'datepicker': {'format': 'yyyy'}, 'hide_month': True,'date_format': '%Y/%m/%d'}" />-->
                 <field name="year_selection"/>
                 <field name="period"/>
@@ -45,7 +46,8 @@
                 <field name="target" sum="sum_target"/>
                 <field name="actual" sum="sum_actual"/>
                 <field name="actual_percent" widget="progressbar"/>
-                <field name="job_id"/>
+                <field name="domain_job_ids" invisible="True"/>
+                <field name="job_id" domain="[('id','in',domain_job_ids)]"/>
                 <field name="status_color" invisible="1"/>
                 <field name="status" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'status_color'}"/>
             </tree>
@@ -68,7 +70,8 @@
                         <group>
                             <field name="target"/>
                             <field name="actual"/>
-                            <field name="job_id"/>
+                            <field name="domain_job_ids" invisible="True"/>
+                            <field name="job_id" domain="[('id','in',domain_job_ids)]"/>
                         </group>
                     </group>
                 </sheet>

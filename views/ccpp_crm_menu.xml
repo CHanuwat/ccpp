@@ -28,6 +28,13 @@
     <record model="ir.ui.menu" id="crm.crm_menu_sales">
         <field name="action" eval="False"/>
     </record>
+    <record model="ir.ui.menu" id="crm.menu_crm_opportunities">
+        <field name="action" eval="False"/>
+    </record>
+
+    <record model="ir.ui.menu" id="crm.crm_menu_root">
+        <field name="sequence" eval="1"/>
+    </record>
 
     <menuitem
         id="ccpp_crm_customer"

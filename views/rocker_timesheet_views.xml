@@ -70,8 +70,8 @@
                     <form>
                         <header>
                             <!--<button name="update_situation" string="Update Situation" type="object" class="btn-primary" states="open"/>-->
-                            <button name="button_done" string="Done" type="object" class="btn-success" states="open"/>
-                            <button name="button_to_open" string="To Open" type="object" class="btn-primary" states="done"/>
+                            <button name="button_done_wizard" string="Check In" type="object" class="btn-success" states="open"/>
+                            <!--<button name="button_to_open" string="To Open" type="object" class="btn-primary" states="done"/>-->
                             <field name="state" widget="statusbar"/>
                         </header>
                         <sheet>
@@ -80,22 +80,34 @@
                                 <span style="padding-left:30px; padding-top:5px" class="oe_left">
                                     <h1>Task</h1>
                                 </span>
-                                <button class="oe_stat_button" name="open_current_situation" type="object" icon="fa-tasks">
+                                <!--<button class="oe_stat_button" name="open_current_situation" type="object" icon="fa-tasks">
                                     <div class="o_field_widget o_stat_info">
                                         <span class="o_stat_text">Current Situation</span>
                                     </div>
-                                </button>
+                                </button>-->
                             </div>
-                            <div class="oe_title" style="padding-top:5px; padding-bottom:10px">
-                     
-                                    <h2>
-                                        <field name="name" readonly="True"/>  
-                                    </h2>
                             
+                            <div class="oe_title" style="padding-top:5px; padding-bottom:10px">
+                                <h2>
+                                    <label for="name" string=""/>
+                                    <field name="name" readonly="True"/>
+                                </h2>
+                            </div>
+                            <div class="oe_title">
+                                <h1>
+                                    <label for="current_action" string="Current Situation"/>
+                                    <field name="current_action" class="o_text_overflow" placeholder="Enter Current Situation"/>
+                                </h1>
+                            </div>
+                            <div class="oe_title">
+                                <h1>
+                                    <label for="next_action" string="Next Action"/>
+                                    <field name="next_action" class="o_text_overflow" placeholder="Enter Next Action"/>
+                                </h1>
                             </div>
 
-                            <h2 style="color:gray; font-size:1.2em;"> Task Information </h2>
-                            <div style="border-top: 2px solid #e6e6e6;padding: 0px;;margin-top: 10px; margin-bottom: 10px;"/>  
+                            <h2 style="color:gray; font-size:1.2em; padding-top:20px;"> Task Information </h2>
+                            <div style="border-top: 2px solid #e6e6e6;padding: 0px;;margin-top: 10px; margin-bottom: 10px; padding-top:15px;"/>  
 
                             <group>
                                 <group>
@@ -104,16 +116,20 @@
                                     <field name="start" required="1" string="From" readonly="True"/>
                                     <field name="stop" required="1" string="To" readonly="True"/>
                                     <field name="employee_id" readonly="True" invisible="True"/>
+                                    <field name="location" readonly="True"/>
                                 </group>
                                 <group>
-                                    
                                     <field name="project_id" string="CCPP" readonly="True"/>
                                     <field name="task_id" string="Solution" readonly="True"/>
                                     <field name="task_strategy_id" string="Strategy" readonly="True"/>
+                                    <field name="checkin_date" string="Check In Date" readonly="True"/>
                                 </group>
                                 
                             </group>  
                             <notebook>
+                                <page name="note" string="Note">
+                                    <field name="note"/>
+                                </page>
                                 <page name="log_page" string="Log">
                                     <field name="log_lines" readonly="True">
                                         <tree edit="false" create="false" delete="false">
@@ -126,8 +142,30 @@
                                 </page>
                             </notebook>
                         </sheet>
+                        <div class="oe_chatter">
+                            <field name="message_follower_ids" groups="base.group_user"/>
+                            <field name="activity_ids"/>
+                            <field name="message_ids"/>
+                        </div>
                     </form>
                 </xpath>
+            </field>
+        </record>
+
+        <record id="action_ccpp_account_analytic_line_form" model="ir.actions.act_window">
+            <field name="name">Check In</field>
+            <field name="res_model">account.analytic.line</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="ccpp_account_analytic_line_form"/>
+            <field name="search_view_id" ref="rocker_timesheet_search"/>
+            <field name="target">main</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No timesheets found. Let's start a new one!
+                </p>
+                <p>
+                    Track your working hours by projects every day.
+                </p>
             </field>
         </record>
 
@@ -138,7 +176,7 @@
             <field name="arch" type="xml">
                 <form delete="false" edit="false" create="false">
                     <sheet>
-                        <h2 style="color:gray; font-size:1.2em;"> Task Log Information </h2>
+                        <h2 style="color:gray; font-size:1.2em; padding-top:10px;"> Task Log Information </h2>
                         <div style="border-top: 2px solid #e6e6e6;padding: 0px;;margin-top: 10px; margin-bottom: 10px;"/>  
 
                         <group>
@@ -492,7 +530,7 @@
             <field name="view_mode">tree,form</field>
             <field name="view_id" ref="rocker_timesheet_tree"/>
             <field name="search_view_id" ref="rocker_timesheet_search"/>
-            <field name="context">{'search_default_groupby_month': 1, 'search_default_open': 1}</field>
+            <field name="context">{'search_default_groupby_month': 0, 'search_default_open': 0}</field>
             <field name="target">main</field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
@@ -503,6 +541,8 @@
                 </p>
             </field>
         </record>
+
+        
 
         <record id="act_rocker_timesheet_tree_by_user" model="ir.actions.act_window">
             <field name="name">Tasks</field>

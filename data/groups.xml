@@ -25,5 +25,20 @@
             <field name="category_id" ref="module_category_ccpp"/>
             <!--<field name="implied_ids" eval="[(4, ref('group_ccpp_user'))]"/>-->
         </record>
+        <record id="group_ccpp_backoffice_manager_all_department" model="res.groups">
+            <field name="name">Back Office Manager All Department</field>
+            <field name="category_id" ref="module_category_ccpp"/>
+            <!--<field name="implied_ids" eval="[(4, ref('group_ccpp_user'))]"/>-->
+        </record>
+        <record id="group_ccpp_frontoffice_manager_all_department" model="res.groups">
+            <field name="name">Front Office Manager All Department</field>
+            <field name="category_id" ref="module_category_ccpp"/>
+            <!--<field name="implied_ids" eval="[(4, ref('group_ccpp_user'))]"/>-->
+        </record>
+        <record id="group_ccpp_ceo" model="res.groups">
+            <field name="name">CEO</field>
+            <field name="category_id" ref="module_category_ccpp"/>
+            <!--<field name="implied_ids" eval="[(4, ref('group_ccpp_user'))]"/>-->
+        </record>
     </data>
 </odoo>

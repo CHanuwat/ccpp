@@ -22,7 +22,6 @@ class CCPPPrioirty(models.Model):
     period_id = fields.Many2one("ccpp.period", string="Period")
     lines = fields.One2many("ccpp.priority.line", "priority_id", string="Lines")
     
-    @api.model
     def name_get(self):
         result = []
         for rec in self:

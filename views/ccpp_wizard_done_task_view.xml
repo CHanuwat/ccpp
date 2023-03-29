@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="ccpp_wizard_done_task_action" model="ir.actions.act_window">
+        <field name="name">Check In</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">ccpp.wizard.done.task</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="ccpp_wizard_done_task_view_form" model="ir.ui.view">
+        <field name="name">ccpp.wizard.done.task.view.form</field>
+        <field name="model">ccpp.wizard.done.task</field>
+        <field name="arch" type="xml">
+            <form string="Reject">
+                <sheet>
+                    <div class="o_row">
+                        <span>
+                            <h3>
+                                Are you want to done strategy that relate with this task ?
+                            </h3>
+                        </span>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="task_id" attrs="{'invisible': True}" readonly="True" force_save="True"/>
+                            <field name="ccpp_id" attrs="{'invisible': True}" readonly="True" force_save="True"/>
+                            <field name="solution_id" attrs="{'invisible': True}" readonly="True" force_save="True"/>
+                            <field name="strategy_id" attrs="{'invisible': [('strategy_id','=',False)]}" readonly="True" force_save="True"/>
+                        </group>
+                    </group>
+                    <footer>
+                        <button name="button_done_and_skip" string="Check In Only" type="object" class="btn-primary"/>
+                        <button name="button_done" string="Check In &amp; Done Strategy" type="object" class="btn-success"/>
+                        <button special="cancel" data-hotkey="z" string="Cancel" />
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+</odoo>

@@ -38,11 +38,14 @@
         "views/ccpp_approve_dashboard.xml",
         "views/hr_job_view.xml",
         "views/ccpp_wizard_reject_view.xml",
+        "views/ccpp_wizard_done_task_view.xml",
         "views/hr_employee_view.xml",
         "views/ccpp_project_update_template.xml",
+        "views/approval_view.xml",
         "views/ccpp_crm_menu.xml",
         ],
     'qweb': [ 
+        
         ],
     
     'installable': True,

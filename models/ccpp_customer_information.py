@@ -68,7 +68,7 @@ class CCPPCustomerInformation(models.Model):
         if self._context.get('default_my_company'):
             customer_id = self.env.user.company_id.partner_id
         return customer_id
-        
+
     name = fields.Char(string="Name", compute="_compute_name", store=True)
     date_from = fields.Date("From", required=True, default=_get_default_date_from, track_visibility="onchange")
     date_to = fields.Date("To", required=True, default=_get_default_date_to)
@@ -77,8 +77,8 @@ class CCPPCustomerInformation(models.Model):
     partner_id = fields.Many2one("res.partner", string="Contact", track_visibility="onchange")
     domain_partner_ids = fields.Many2many("res.partner", string="Domain partner", compute="_compute_domain_partner_ids")
     active = fields.Boolean(string="Active", default=True, track_visibility="onchange")
-    sale_person_id = fields.Many2one("hr.employee", string="Sales Person", related="job_id.employee_id", required=True, track_visibility="onchange")
-    department_id = fields.Many2one("hr.department",string="Department", related="job_id.department_id")
+    sale_person_id = fields.Many2one("hr.employee", string="Sales Person", related="job_id.employee_id", required=True, store=True, track_visibility="onchange")
+    department_id = fields.Many2one("hr.department",string="Department", related="job_id.department_id", store=True)
     job_id = fields.Many2one("hr.job", string="Job Position", default=_get_default_job, required=True, track_visibility="onchange")#default=_get_default_job, 
     domain_job_ids = fields.Many2many("hr.job", string="Domain Job", compute="_compute_domain_job_ids")
     user_id = fields.Many2one("res.users", string="User", related="sale_person_id.user_id", store=True, track_visibility="onchange")
@@ -97,7 +97,7 @@ class CCPPCustomerInformation(models.Model):
     connection = fields.Text(string="Connection with other hospital")
     note = fields.Text(string="Note")
     #actual_sale = fields.Float(string="Actual Sale")
-    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
+    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.user.company_id)
     #year_text = fields.Char(string="Year", compute="_compute_year_text", store=True)
     company_name = fields.Char(string="Company Name")
     state = fields.Selection(selection=[
@@ -384,27 +384,38 @@ class CCPPCustomerInformation(models.Model):
     
     def action_customer_information_manager(self):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_customer_information_action')
-        department_id = self.env.user.employee_id.department_id
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        job_ids = self.get_child_job(employee_id.job_lines)
         information_ids = self.env['ccpp.customer.information'].search([('type','=','customer'),
-                                                                ('department_id', '=', department_id.id),
+                                                                ('job_id', 'in', job_ids.ids),
                                                                 ])
         action['domain'] = [('id','in',information_ids.ids)]
         return action
     
     def action_external_information_manager(self):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_external_information_action')
-        department_id = self.env.user.employee_id.department_id
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        job_ids = self.get_child_job(employee_id.job_lines)
         information_ids = self.env['ccpp.customer.information'].search([('type','=','external'),
-                                                                ('department_id', '=', department_id.id),
+                                                                ('job_id', 'in', job_ids.ids),
                                                                 ])
         action['domain'] = [('id','in',information_ids.ids)]
         return action
     
     def action_internal_information_manager(self):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_internal_information_action')
-        department_id = self.env.user.employee_id.department_id
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        job_ids = self.get_child_job(employee_id.job_lines)
         information_ids = self.env['ccpp.customer.information'].search([('type','=','internal'),
-                                                                ('department_id', '=', department_id.id),
+                                                                ('job_id', 'in', job_ids.ids),
                                                                 ])
         action['domain'] = [('id','in',information_ids.ids)]
         return action
+    
+    def get_child_job(self,job_lines,job_ids=False):
+        if not job_ids:
+            job_ids = self.env['hr.job']
+        for job_id in job_lines:
+            job_ids |= job_id
+            job_ids |= self.get_child_job(job_id.child_lines, job_ids)   
+        return job_ids

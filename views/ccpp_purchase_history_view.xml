@@ -61,6 +61,7 @@
                 <field name="use_qty" sum="sum_use_qty" invisible="True"/>
                 <field name="note" invisible="True"/>
                 <field name="sale_person_id"/>
+                <field name="job_id"/>
             </tree>
         </field>
     </record>
@@ -96,6 +97,8 @@
                         <group>
                             <field name="customer_id" domain="[('is_customer','=',True)]"/>
                             <field name="sale_person_id"/>
+                            <field name="domain_job_ids" invisible="True"/>
+                            <field name="job_id" domain="[('id','in',domain_job_ids)]"/>
                         </group>
                         <group>
                         </group>
@@ -184,7 +187,7 @@
         <field name="name">ccpp.purchase.history.view.tree.by.product</field>
         <field name="model">ccpp.purchase.history.line</field>
         <field name="arch" type="xml">
-            <tree js_class="button_in_tree">
+            <tree>
                 <!--<header>
                     <button name="action_open_history_form" type="object" string="Create XXX"/>
                 </header>-->
@@ -194,6 +197,7 @@
                 <field name="order_qty" sum="sum_order_qty" readonly="True"/>
                 <field name="use_qty" sum="sum_use_qty" readonly="True"/>
                 <field name="sale_person_id" readonly="True"/>
+                <field name="job_id" readonly="True"/>
                 <button name="action_open_history_form" type="object" string="More Information"/>
             </tree>
         </field>

@@ -46,10 +46,16 @@ prev_company = -1
 # btw....remember to check odoo global defaults....working day, is it 8 or 7.5 hours...has to be in sync with rocker company / user defaults
 
 class RockerTimesheet(models.Model):
-    _inherit = 'account.analytic.line'
+    _inherit = ['account.analytic.line','mail.thread','portal.mixin','mail.activity.mixin']
     _name = 'account.analytic.line'
     _order = "start desc"
     #_rec_name = "display_name"
+
+    @api.model
+    def _default_company_id(self):
+        #if self._context.get('default_project_id'):
+        #    return self.env['project.project'].browse(self._context['default_project_id']).company_id
+        return self.env.company
 
     @api.model
     def _default_user(self):
@@ -349,6 +355,14 @@ class RockerTimesheet(models.Model):
         if self._context.get('default_customer_id'):
             customer_id = self._context.get('default_customer_id')
         return customer_id
+    
+    #def _get_default_checkin_date(self):
+    #    print(self._context)
+    #    checkin_date = False
+    #    if self._context.get('default_checkin_date'):
+    #        checkin_date = datetime.now()
+    #    return checkin_date
+            
 
     # existing fields
     company_id = fields.Many2one('res.company', "Company", default=lambda self: self.env.company, store=True,
@@ -434,6 +448,11 @@ class RockerTimesheet(models.Model):
     domain_solution_ids = fields.Many2many("project.task", string="Domain Solution", compute="_compute_domain_solution_ids")
     domain_strategy_ids = fields.Many2many("project.task", string="Domain Strategy", compute="_compute_domain_strategy_ids")
     log_lines = fields.One2many("account.analytic.line.log", "analytic_line_id", string="Log")
+    current_action = fields.Char("Current Situation")
+    next_action = fields.Char("Next Action")
+    location = fields.Char("Location")
+    note = fields.Text("Note")
+    checkin_date = fields.Datetime(string="Check In Date")
 
     def duplicate_task(self):
         for obj in self:
@@ -591,6 +610,52 @@ class RockerTimesheet(models.Model):
     #############################
     # read search create unlink
     #############################
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        res = super(RockerTimesheet,self).create(vals_list)
+        for update in res:
+            update.task_strategy_id.sudo().task_last_situation_id = update
+            update.task_strategy_id.parent_id.sudo().task_last_situation_solution_id = update
+            update.task_strategy_id.sudo().task_next_action = update.next_action
+            update.task_strategy_id.parent_id.sudo().task_next_action_solution = update.next_action
+            update.task_strategy_id.project_id.sudo().task_next_action = update.next_action
+            #if not update.code:
+            #    sequence_date = datetime.now().strftime("%Y-%m-%d")
+            #    try:
+            #        #sequence_code = 'ccpp.'+'ta.'+update.strategy_id.project_id.department_id.code
+            #        sequence_code = 'ccpp.'+'ta.'
+            #    except:
+            #        raise UserError("Please Check Sequence")
+            #    code = self.env['ir.sequence'].next_by_code(sequence_code,sequence_date=sequence_date)
+            #    update.code = code or 'New'
+            #update.strategy_id.state = 'process'
+            #if update.task_id:
+            #    update.task_id.button_done()
+            #update.update_solution_process()
+        return res
+    
+    def unlink(self):
+        strategy_id = self.task_strategy_id
+        solution_id = self.task_id
+        ccpp = self.project_id
+        res = super().unlink()
+        
+        last_situation_id = self.search([('task_strategy_id', "=", strategy_id.id)], order="date desc", limit=1)
+        strategy_id.task_last_situation_id = last_situation_id
+        strategy_id.task_next_action = last_situation_id.next_action
+        strategy_id.task_last_current_action = last_situation_id.current_action
+        
+        last_situation_solution_id = self.search([('task_id', "=", solution_id.id)], order="date desc", limit=1)
+        solution_id.task_last_situation_solution_id = last_situation_solution_id
+        solution_id.task_next_action_solution = last_situation_solution_id.next_action_solution
+        solution_id.task_last_current_action_solution = last_situation_solution_id.next_action_solution
+        
+        last_situation_ccpp_id = self.search([('project_id', "=", solution_id.id)], order="date desc", limit=1)
+        ccpp.last_update_id = last_situation_ccpp_id
+        ccpp.task_next_action = last_situation_ccpp_id.next_action
+        ccpp.task_current_action = last_situation_ccpp_id.current_action
+        return res
 
     @api.model
     def create(self, vals):
@@ -1107,8 +1172,26 @@ class RockerTimesheet(models.Model):
 
         return dt - offset.total_seconds() / 3600
     
+    def button_done_wizard(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_wizard_done_task_action')
+        action['context'] = {'default_task': self.id,
+                            'default_ccpp': self.project_id.id,
+                            'default_solution': self.task_id.id,
+                            'default_strategy': self.task_strategy_id.id}
+        return action
+    
     def button_done(self):
         for obj in self:
+            if not obj.checkin_date:
+                obj.checkin_date = datetime.now()
+            obj.task_strategy_id.sudo().task_last_situation_id = obj
+            #obj.task_strategy_id.sudo().task_last_current_action = obj.current_action
+            obj.task_strategy_id.parent_id.sudo().task_last_situation_solution_id = obj
+            #obj.task_strategy_id.parent_id.sudo().task_last_current_action_solution = obj.current_action
+            #obj.task_strategy_id.sudo().task_next_action = obj.next_action
+            #obj.task_strategy_id.parent_id.sudo().task_next_action_solution = obj.next_action
+            #obj.task_strategy_id.project_id.sudo().task_next_action = obj.next_action
+            obj.task_strategy_id.project_id.sudo().task_last_update_id = obj
             obj.state = 'done'
 
     def button_to_open(self):
@@ -1116,8 +1199,12 @@ class RockerTimesheet(models.Model):
             obj.state = 'open'
             
     def update_situation(self):
-        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.task_timesheet_update_all_action_form')
-        action['context'] = {'task_id': self.id, 'update_task': True, 'active_id': self.project_id.id}
+        #action = self.env['ir.actions.act_window']._for_xml_id('ccpp.task_timesheet_update_all_action_form')
+        #action['context'] = {'task_id': self.id, 'update_task': True, 'active_id': self.project_id.id}
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.action_ccpp_account_analytic_line_form')
+        action['views'] = [(self.env.ref('ccpp.ccpp_account_analytic_line_form').id, 'form')]
+        action['res_id'] = self.id
+        action['context'] = {'default_checkin_date': datetime.now()}
         return action
     
     def open_current_situation(self):

@@ -34,6 +34,11 @@
                                     <div class="fs-2" t-out="ccppData['delay']"/>Delayed
                                 </a>
                             </div>
+                            <div class="g-col-2 p-0" t-on-click="setSearchContext" title="Undefine" filter_name="undefine">
+                                <a href="#" class="btn btn-warning w-100 h-100 border-0 rounded-0 text-capitalize fw-normal" style="color:#FFFFFF;">
+                                    <div class="fs-2" t-out="ccppData['undefine']"/>Undefine
+                                </a>
+                            </div>
                         </div>
                     </div>
                     <!--<div class="grid gap-4">

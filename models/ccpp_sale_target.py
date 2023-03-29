@@ -63,6 +63,13 @@ class CCPPSaleTarget(models.Model):
                 res['period'] = '4'
         return res
         
+    def _get_default_job(self):
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        #if not employee_id:
+        #    print(self.env.user.name)
+        #    raise UserError("Not recognize the Employee. Please Configure User to Employee to get the job")
+        return employee_id.job_id
+        
     name = fields.Char(string="Name")
     sale_period_id = fields.Many2one("ccpp.sale.target.period", string="Period")
     period = fields.Selection(selection=[
@@ -129,8 +136,9 @@ class CCPPSaleTarget(models.Model):
     target = fields.Float(string="Sales Target")
     actual = fields.Float(string="Sales Actual")
     actual_percent = fields.Float(string="% Success", compute="_compute_actual_percent", store=True)
-    sale_person_id = fields.Many2one("hr.employee", default="_get_default_sale_person", string="Sales Person", required=True)
-    job_id = fields.Many2one("hr.job", string="Job Position",  related="sale_person_id.job_id", store=True, required=True, track_visibility="onchange")#default=_get_default_job,
+    sale_person_id = fields.Many2one("hr.employee", related="job_id.employee_id", string="Sales Person", required=True)
+    job_id = fields.Many2one("hr.job", string="Job Position",  default=_get_default_job, required=True, track_visibility="onchange")#default=_get_default_job,
+    domain_job_ids = fields.Many2many("hr.job", string="Domain Job", compute="_compute_domain_job_ids")
     department_id = fields.Many2one("hr.department", string="Deparment", related="job_id.department_id")
     status = fields.Selection(selection=[
         ('over', 'Over'),
@@ -139,7 +147,7 @@ class CCPPSaleTarget(models.Model):
         ('to_define', 'Undefine'),
     ], compute='_compute_status', store=True, readonly=False, string="Target Result")
     status_color = fields.Integer(string="Status Color", compute='_compute_status_color')
-    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
+    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.user.company_id)
     user_id = fields.Many2one("res.users", string="User", related="sale_person_id.user_id", store=True)
     
     #@api.model_create_multi
@@ -249,3 +257,11 @@ class CCPPSaleTarget(models.Model):
         action['domain'] = [('id','in',sale_target_ids.ids)]
         return action
     
+    @api.depends("sale_person_id")
+    def _compute_domain_job_ids(self):
+        for obj in self:
+            job_ids = self.env['hr.job']
+            if obj.sale_person_id:
+                for job_id in obj.sale_person_id.job_lines:
+                    job_ids |= job_id
+            obj.domain_job_ids = job_ids.ids

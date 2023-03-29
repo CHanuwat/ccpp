@@ -210,8 +210,8 @@
             <xpath expr="//kanban[1]/field[@name='label_tasks']" position="after">
                 <field name="code"/>
                 <field name="name"/>
-                <field name="last_update_id"/>
-                <field name="next_action"/>
+                <field name="task_current_action"/>
+                <field name="task_next_action"/>
             </xpath>
             <xpath expr="//kanban[1]/progressbar[1]" position="replace">
                 <!--<progressbar field="priority_select" colors='{"1": "9", "2": "2", "3": "3", "4": "4"}'/>-->
@@ -242,11 +242,11 @@
                         <span/><t t-esc="record.name.value"/>
                     </span>
                     <br t-if="record.name.value"/>
-                    <t t-if="record.next_action.value">
-                        <span style="padding-left:10px;" t-if="record.next_action.value">
-                            <span class="fa fa-tasks me-2" style="color:green;" t-if="record.next_action.value"/>
-                            <t t-esc="record.next_action.value"/> 
-                            <span t-if="record.next_action.value" class="fa fa-clock-o me-2"/>
+                    <t t-if="record.task_next_action.value">
+                        <span style="padding-left:10px;" t-if="record.task_next_action.value">
+                            <span class="fa fa-tasks me-2" style="color:green;" t-if="record.task_next_action.value"/>
+                            <t t-esc="record.task_next_action.value"/> 
+                            <span t-if="record.task_next_action.value" class="fa fa-clock-o me-2"/>
                         </span>
                     </t>
                 </div>
@@ -315,9 +315,10 @@
             </xpath>
             <xpath expr="//form[1]/header[1]/button[1]" position="before">
                 <field name="is_ccpp_done" invisible="True"/>
+                <field name="is_show_approve" invisible="True"/>
                 <button name="button_send_approve" string="Send Approve" type="object" class="btn-primary" attrs="{'invisible':['|',('id','=',False),('state','!=','open')]}"/>
-                <button name="button_approve" string="Approve" type="object" class="btn-primary" states="waiting_approve" /><!--groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>-->
-                <button name="button_reject_wizard" string="Reject" type="object" class="btn-danger" states="waiting_approve"/><!--groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>-->
+                <button name="button_approve" string="Approve" type="object" class="btn-primary"  attrs="{'invisible': ['|',('is_show_approve','=',False),('state','!=','waiting_approve')]}" /><!-- states="waiting_approve" groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>-->
+                <button name="button_reject_wizard" string="Reject" type="object" class="btn-danger" attrs="{'invisible': ['|',('is_show_approve','=',False),('state','!=','waiting_approve')]}"/><!--states="waiting_approve" groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>-->
                 <button name="button_done" string="Done" type="object" class="btn-success" attrs="{'invisible': ['|',('state','!=','process'),('is_ccpp_done','=',False)]}"/>
                 <button name="button_cancel" string="Cancel" type="object" states="open,process"/>
                 <button name="button_to_open" string="To Open" type="object" class="btn-primary" states="reject"/>
@@ -329,7 +330,7 @@
             </xpath>
             <!-- button stat ccpp -->
             <xpath expr="//form[1]/sheet[1]/div[1]/button[@name='project_update_all_action']" position="replace">
-                <button class="oe_stat_button" name="ccpp_update_all_action" type="object" groups="project.group_project_manager">
+                <button class="oe_stat_button" name="ccpp_update_all_action_task" type="object" groups="project.group_project_manager">
                     <div class="ps-4">
                         <span class="o_stat_text">
                             Current Situation
@@ -424,11 +425,23 @@
                     <group>
                         <group>
                             <field name="department_id" attrs="{'readonly': True}"/> 
-                            <field name="job_id" attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"/>
+                            <field name="domain_job_ids" invisible="True"/>
+                            <field name="job_id"  domain="[('id', 'in', domain_job_ids)]" attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"/>
                             <field name="employee_id" attrs="{'readonly': True}" string="CCPP User"/>
                             <field name="company_id" attrs="{'readonly': True}"/>
                         </group>
                     </group>
+                </page>
+                <page name="approve_lines" string="Approve Lines" attrs="{'invisible': [('ccpp_approve_lines','=',False)]}">
+                    <field name="ccpp_approve_lines" readonly="True">
+                        <tree decoration-success="is_approve == True">
+                            <field name="sequence"/>
+                            <field name="job_approve_ids" widget="many2many_tags"/>
+                            <field name="job_approve_by_id"/>
+                            <field name="approve_date"/>
+                            <field name="is_approve"/>
+                        </tree>
+                    </field>
                 </page>
             </xpath>
 
@@ -475,7 +488,7 @@
                                 class="fw-bold" widget="badge" invisible="True" optional=""/>
                             <!--<field name="kanban_state" widget="state_selection" optional="show" options="{'hide_label': True}" nolabel="1"/>
                             <field name="stage_id" optional="show" context="{'default_project_id': project_id}"/>-->
-                            <field name="last_situation_solution_id" invisible="True" string="Current Situation" readonly="True"/>
+                            <field name="task_last_current_action_solution" invisible="True" string="Current Situation" readonly="True"/>
                             <field name="state_color" invisible="1"/>
                             <field name="state" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'state_color'}"/>
                             <!--<button name="action_open_task2" type="object" title="View Solution" string="View Solution" class="btn btn-link float-end ri-eye-line"/>-->
@@ -889,7 +902,7 @@
         <field name="priority">201</field>
         <field name="arch" type="xml">
             <xpath expr="//a[@name='project_update_all_action']" position="replace">
-                <a name="ccpp_update_all_action" type="object" t-attf-context="{'active_id': #{record.id.raw_value} }">CCPP Updates</a>
+                <a name="ccpp_update_all_action_task" type="object" t-attf-context="{'active_id': #{record.id.raw_value} }">CCPP Updates</a>
             </xpath>
         </field>
     </record>
@@ -936,15 +949,17 @@
             <xpath expr="//button[@name='action_assign_to_me']" position='replace'>
                 <field name="is_ccpp_on_process" invisible="True"/>
                 <field name="is_solution_on_approve" invisible="True"/>
+                <field name="is_show_solution_approve" invisible="True"/>
+                <field name="is_show_strategy_approve" invisible="True"/>
                 <!--<button name="button_update_strategy" type="object" class="btn-primary" string="Current Situation" attrs="{'invisible': ['|',('is_strategy', '=', False),('state','!=','process')]}"/>-->
                 <button name="button_done" string="Done" type="object" class="btn-success" attrs="{'invisible': ['|',('is_strategy', '=', False),('state','!=','process')]}"/>
                 
                 <button name="button_send_approve_strategy" type="object" class="btn-primary" string="Send Approve Strategy" attrs="{'invisible': ['|','|','|',('is_strategy', '=', False),('state','!=','open'),('is_ccpp_on_process','=',False),('is_solution_on_approve','=',True)]}"/>
                 <button name="button_send_approve_solution" type="object" class="btn-primary" string="Send Approve Solution" attrs="{'invisible': ['|','|',('is_solution', '=', False),('state','!=','open'),('is_ccpp_on_process','=',False)]}"/>
-                <button name="button_approve_strategy" string="Approve Strategy" type="object" class="btn-primary" attrs="{'invisible': ['|','|','|',('is_strategy', '=', False),('state','!=','waiting_approve'),('is_ccpp_on_process','=',False),('is_solution_on_approve','=',True)]}"/><!--groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>-->
-                <button name="button_approve_solution" string="Approve Solution" type="object" class="btn-primary" attrs="{'invisible': ['|','|',('is_solution', '=', False),('state','!=','waiting_approve'),('is_ccpp_on_process','=',False)]}"/><!-- groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>-->
-                <button name="button_reject_strategy_wizard" string="Reject Strategy" type="object" class="btn-danger" attrs="{'invisible': ['|','|','|',('is_strategy', '=', False),('state','!=','waiting_approve'),('is_ccpp_on_process','=',False),('is_solution_on_approve','=',True)]}"/><!-- groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>-->
-                <button name="button_reject_solution_wizard" string="Reject Solution" type="object" class="btn-danger" attrs="{'invisible': ['|','|',('is_solution', '=', False),('state','!=','waiting_approve'),('is_ccpp_on_process','=',False)]}"/><!-- groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_managerr"/>-->
+                <button name="button_approve_strategy" string="Approve Strategy" type="object" class="btn-primary" attrs="{'invisible': ['|','|','|','|',('is_strategy', '=', False),('state','!=','waiting_approve'),('is_ccpp_on_process','=',False),('is_solution_on_approve','=',True),('is_show_strategy_approve','=',False)]}"/><!--groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>-->
+                <button name="button_approve_solution" string="Approve Solution" type="object" class="btn-primary" attrs="{'invisible': ['|','|','|',('is_solution', '=', False),('state','!=','waiting_approve'),('is_ccpp_on_process','=',False),('is_show_solution_approve','=',False)]}"/><!-- groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>-->
+                <button name="button_reject_strategy_wizard" string="Reject Strategy" type="object" class="btn-danger" attrs="{'invisible': ['|','|','|','|',('is_strategy', '=', False),('state','!=','waiting_approve'),('is_ccpp_on_process','=',False),('is_solution_on_approve','=',True),('is_show_strategy_approve','=',False)]}"/><!-- groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>-->
+                <button name="button_reject_solution_wizard" string="Reject Solution" type="object" class="btn-danger" attrs="{'invisible': ['|','|','|',('is_solution', '=', False),('state','!=','waiting_approve'),('is_ccpp_on_process','=',False),('is_show_solution_approve','=',False)]}"/><!-- groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_managerr"/>-->
                 <button name="button_to_open_strategy" string="To Open Strategy" type="object" class="btn-primary" attrs="{'invisible': ['|','|','|',('is_strategy', '=', False),('state','!=','reject'),('is_ccpp_on_process','=',False),('is_solution_on_approve','=',True)]}"/>
                 <button name="button_to_open_solution" string="To Open Solution" type="object" class="btn-primary" attrs="{'invisible': ['|','|',('is_solution', '=', False),('state','!=','reject'),('is_ccpp_on_process','=',False)]}"/>
 
@@ -1046,8 +1061,8 @@
             </xpath>
             <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='activity_ids']" position="replace">
                 <!--<field name="activity_ids" string="Next Activity" widget="list_activity" attrs="{'column_invisible': [('parent.is_solution','=',False)]}"/>-->
-                <field name="last_situation_id" string="Current Situation" attrs="{'column_invisible': [('parent.is_solution','=',False)]}" readonly="True"/>
-                <field name="next_action" attrs="{'column_invisible': [('parent.is_solution','=',False)]}" readonly="True"/>
+                <field name="task_last_current_action" string="Current Situation" attrs="{'column_invisible': [('parent.is_solution','=',False)]}" readonly="True"/>
+                <field name="task_next_action" attrs="{'column_invisible': [('parent.is_solution','=',False)]}" readonly="True"/>
             </xpath>
             <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='id']" position="replace">
             </xpath>
@@ -1135,7 +1150,17 @@
                     <field name="child_ids"/>
                 </page>
                 <page name="situation_page" string="Situation" attrs="{'invisible': [('is_strategy', '=' ,False)]}">
-                    <field name="situation_ids">
+                    <field name="task_situation_ids">
+                        <tree create="false" delete="false" edit="false" multi_edit="1">
+                            <!--<field name="code"/>-->
+                            <field name="current_action" string="Current Situation"/>
+                            <field name="next_action"/>
+                            <field name="user_id" string="Author"/>
+                            <field name="date"/>
+                            <field name="location"/>
+                        </tree>
+                    </field>
+                    <!--<field name="situation_ids">
                         <tree create="false" delete="false" edit="false" multi_edit="1">
                             <field name="code"/>
                             <field name="name" string="Name"/>
@@ -1143,6 +1168,28 @@
                             <field name="date"/>
                             <field name="next_action"/>
                             <field name="location"/>
+                        </tree>
+                    </field>-->
+                </page>
+                <page name="solution_approve_lines" string="Solution Approve Lines" attrs="{'invisible': [('is_solution','=',False)]}">
+                    <field name="solution_approve_lines" readonly="True">
+                        <tree decoration-success="is_approve == True">
+                            <field name="sequence"/>
+                            <field name="job_approve_ids" widget="many2many_tags"/>
+                            <field name="job_approve_by_id"/>
+                            <field name="approve_date"/>
+                            <field name="is_approve"/>
+                        </tree>
+                    </field>
+                </page>
+                <page name="strategy_approve_lines" string="Strategy Approve Lines" attrs="{'invisible': [('is_strategy','=',False)]}">
+                    <field name="strategy_approve_lines" readonly="True">
+                        <tree decoration-success="is_approve == True">
+                            <field name="sequence"/>
+                            <field name="job_approve_ids" widget="many2many_tags"/>
+                            <field name="job_approve_by_id"/>
+                            <field name="approve_date"/>
+                            <field name="is_approve"/>
                         </tree>
                     </field>
                 </page>
@@ -1177,15 +1224,15 @@
                     attrs="{'invisible' : ['|',('id', '=', False), ('is_solution', '=', True)]}" context="{'default_user_ids': user_ids}">
                     <span class="o_stat_text">Solution</span>
                 </button>-->
-                <button class="oe_stat_button" name="solution_update_all_action" type="object" groups="project.group_project_manager"
+                <button class="oe_stat_button" name="solution_update_all_action_task" type="object" groups="project.group_project_manager"
                 attrs="{'invisible' : ['|',('id', '=', False),('is_solution', '=', False)]}">
                     <div class="ps-4">
                         <span class="o_stat_text">
                             Current Situation
                         </span>
-                        <br/>
+                        <!--<br/>
                         <field name="last_update_color_solution" invisible="1"/>
-                        <field name="last_update_status_solution" readonly="1" widget="status_with_color" options="{'color_field': 'last_update_color_solution'}" attrs="{'invisible': [('last_update_status_solution','=','to_define')]}"/>
+                        <field name="last_update_status_solution" readonly="1" widget="status_with_color" options="{'color_field': 'last_update_color_solution'}" attrs="{'invisible': [('last_update_status_solution','=','to_define')]}"/>-->
                     </div>
                 </button>
                 <!--<button name="button_open_child" type="object" class="oe_stat_button" icon="fa-tasks"
@@ -1226,6 +1273,8 @@
 
         </field>
     </record>
+
+    
 
     <!-- action open form project -->
     <record id="open_view_project_all_ccpp" model="ir.actions.act_window">
@@ -1330,7 +1379,7 @@
     <menuitem name="Task"
             id="menu_main_task"
             web_icon="ccpp,static/description/calendar_icon.png"
-            sequence="501"/>
+            sequence="3"/>
 
     <record model="ir.ui.menu" id="project.menu_project_management">
         <field name="action" eval="False"/>
@@ -1403,15 +1452,17 @@
         <field name="model">project.project</field>
         <field name="arch" type="xml">
             <search string="Search CCPP">
-                <field name="name" string="CCPP"/>
-                <field name="code" string="CCPP Number"/>
-                <field name="tag_ids"/>
+                <field name="name" string="CCPP Title"/>
+                <field name="code" string="CCPP No."/>
+                <field name="department_id" string="Department"/>
+                <field name="job_position_id" string="Job Position"/>
                 <field name="user_id" string="CCPP User"/>
                 <field name="partner_id" string="Customer" filter_domain="[('partner_id', 'child_of', self)]"/>
                 <filter string="1st Priority" name="priority_1" domain="[('priority_id.point', '=', 1)]"/>
                 <filter string="2nd Priority" name="priority_2" domain="[('priority_id.point', '=', 2)]"/>
                 <filter string="3rd Priority" name="priority_3" domain="[('priority_id.point', '=', 3)]"/>
                 <filter string="4th Priority" name="priority_4" domain="[('priority_id.point', '=', 4)]"/>
+                <filter string="Undefine" name="undefine" domain="[('priority_select', '=', 'to_define')]"/>
                 <separator/>
                 <filter string="Open" name="open" domain="[('state', '=', 'open')]"/>
                 <filter string="Waiting Approve" name="waiting_approve" domain="[('state', '=', 'waiting_approve')]"/>
@@ -1602,8 +1653,8 @@
         <field name="arch" type="xml">
             <tree delete="0" create="0">
                 <field name="name" string="Strategy"/>
-                <field name="last_situation_id" string="Current Situation"/>
-                <field name="next_action" string="Next Action"/>
+                <field name="task_last_current_action" string="Current Situation"/>
+                <field name="task_next_action" string="Next Action"/>
                 <field name="state_color" invisible="1"/>
                 <field name="state" string="State" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'state_color'}"/>
                 <field name="user_ids" widget="many2many_avatar_user" string="User"/>
