@@ -320,7 +320,7 @@
                 <button name="button_approve" string="Approve" type="object" class="btn-primary"  attrs="{'invisible': ['|',('is_show_approve','=',False),('state','!=','waiting_approve')]}" /><!-- states="waiting_approve" groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>-->
                 <button name="button_reject_wizard" string="Reject" type="object" class="btn-danger" attrs="{'invisible': ['|',('is_show_approve','=',False),('state','!=','waiting_approve')]}"/><!--states="waiting_approve" groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>-->
                 <button name="button_done" string="Done" type="object" class="btn-success" attrs="{'invisible': ['|',('state','!=','process'),('is_ccpp_done','=',False)]}"/>
-                <button name="button_cancel" string="Cancel" type="object" states="open,process"/>
+                <button name="button_cancel_wizard" string="Cancel" type="object" states="open,process"/>
                 <button name="button_to_open" string="To Open" type="object" class="btn-primary" states="reject"/>
             </xpath>
 
@@ -404,6 +404,7 @@
                 attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"
                 required="True"/> <!--options="{'no_create':True}"/>-->
                 <field name="reason_reject" readonly="True" attrs="{'invisible': [('reason_reject','=',False)]}" style="color:red;"/>
+                <field name="reason_cancel" readonly="True" attrs="{'invisible': [('reason_cancel','=',False)]}" style="color:red;"/>
                 <!--<field name="domain_job_position_ids" invisible="True"/>
                 <field name="job_position_id" domain="[('id','in',domain_job_position_ids)]" options="{'no_create': True, 'no_open': True}"/>-->
             </xpath>
@@ -424,11 +425,12 @@
                 <page name="Information" string="Information">
                     <group>
                         <group>
-                            <field name="department_id" attrs="{'readonly': True}"/> 
+                            <field name="department_id" attrs="{'readonly': True}" options="{'no_open': True}"/> 
+                            <field name="division_id" attrs="{'readonly': True}" options="{'no_open': True}"/>
                             <field name="domain_job_ids" invisible="True"/>
                             <field name="job_id"  domain="[('id', 'in', domain_job_ids)]" attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"/>
-                            <field name="employee_id" attrs="{'readonly': True}" string="CCPP User"/>
-                            <field name="company_id" attrs="{'readonly': True}"/>
+                            <field name="employee_id" attrs="{'readonly': True}" string="CCPP User" options="{'no_open': True}"/>
+                            <field name="company_id" attrs="{'readonly': True}" options="{'no_open': True}"/>
                         </group>
                     </group>
                 </page>
@@ -447,11 +449,13 @@
 
             <xpath expr="//form[1]/sheet[1]/notebook[1]/page[1]" position="before">
                 <page name="solutions" string="Solutions" >
+                    <field name="is_delay" invisible="True"/>
                     <field name="is_ready_create_solution" invisible="True"/>
-                    <button name="create_solution" type="object" string="Create Solution" class="btn-success" style="padding-bottom:20px" 
+                    <button name="create_solution" type="object" string="New Solution" class="btn btn-outline-primary" icon="fa-plus" style="padding-bottom:20px" 
                     attrs="{'invisible':[('is_ready_create_solution','=',False)]}"/>
                     <field name="tasks_solution" style="padding-top:20px" context="{'is_create_solution': True, 'project_id': active_id, 'default_project_id': active_id}" 
-                    attrs="{'readonly': [('state','not in',['open'])]}" >
+                     >
+                    <!--attrs="{'readonly': [('state','not in',['open']),('is_delay','=',False)]}"-->
                         <tree decoration-muted="is_closed == True" create="0" delete="0" edit="1" multi_edit="false">
                             <!--<field name="legend_normal" invisible="1"/>
                             <field name="legend_done" invisible="1"/>
@@ -492,6 +496,36 @@
                             <field name="state_color" invisible="1"/>
                             <field name="state" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'state_color'}"/>
                             <!--<button name="action_open_task2" type="object" title="View Solution" string="View Solution" class="btn btn-link float-end ri-eye-line"/>-->
+                        </tree>
+                    </field>
+                </page>
+                <page name="strategy_history" string="Strategy History">
+                    <div style="border: 0px solid #1ea8e7b3;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #1ea8e7b3">
+                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Current Period Strategy</p>
+                    </div>
+                    <field name="strategy_lines" readonly="True">
+                        <tree>
+                            <field name="code" string="Solution No."/>
+                            <field name="parent_id" string="Solution Title"/>
+                            <field name="name" string="Strategy Title"/>
+                            <field name="deadline_date" string="Deadline"/>
+                            <field name="show_period"/>
+                            <field name="state_color" invisible="1"/>
+                            <field name="state" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'state_color'}"/>
+                        </tree>
+                    </field>
+                    <div style="border: 0px solid #dee1e6;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #dee1e6">
+                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Previous Period Strategy</p>
+                    </div>
+                    <field name="strategy_history_lines" readonly="True">
+                        <tree>
+                            <field name="code" string="Solution No."/>
+                            <field name="parent_id" string="Solution Title"/>
+                            <field name="name" string="Strategy Title"/>
+                            <field name="deadline_date" string="Deadline"/>
+                            <field name="show_period"/>
+                            <field name="state_color" invisible="1"/>
+                            <field name="state" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'state_color'}"/>
                         </tree>
                     </field>
                 </page>
@@ -964,19 +998,21 @@
                 <button name="button_to_open_solution" string="To Open Solution" type="object" class="btn-primary" attrs="{'invisible': ['|','|',('is_solution', '=', False),('state','!=','reject'),('is_ccpp_on_process','=',False)]}"/>
 
                 <!--<button name="button_to_process" string="To Process" type="object" states="cancel" attrs="{'invisible': ['|',('is_strategy', '=', False),('state','!=','cancel')]}"/>-->
-                <button name="button_cancel" string="Cancel" type="object" attrs="{'invisible': ['|',('state','not in',['open','process']),('id', '=', False)]}"/>
+                <button name="button_cancel_wizard" string="Cancel" type="object" attrs="{'invisible': ['|',('state','not in',['open','process']),('id', '=', False)]}"/>
+                <button name="button_start_next_period" string="Start Next Period" type="object" class="btn-warning" attrs="{'invisible': ['|','|',('is_delay','=',False),('state','=','cancel'),('is_solution','=',False)]}"/>
             </xpath>
 
             <xpath expr="//form[1]/sheet[1]/group[1]" position="replace">
                 <group>
                     <group>
                         <field name="code" string="Solution No." attrs="{'invisible': [('is_solution','=',False)]}" readonly="True"/>
-                        <field name="start_date" attrs="{'invisible': [('is_solution','=',False)], 'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])], 'required': [('is_solution','=',True)]}"/>
+                        <field name="start_date" force_save="1" attrs="{'invisible': [('is_solution','=',False)], 'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])], 'required': [('is_solution','=',True)]}"/>
                         <field name="code" string="Strategy No." attrs="{'invisible': [('is_strategy','=',False)]}" readonly="True"/>
                         <field name="code" string="Task No." attrs="{'invisible': [('is_task','=',False),('is_subtask','=',False)]}" readonly="True"/>
                         <field name="evaluate_method" attrs="{'invisible': [('is_strategy','=',False)], 'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"/>
                         <field name="next_action" attrs="{'invisible': [('is_strategy','=',False)]}" readonly="True"/>
                         <field name="reason_reject" readonly="True" attrs="{'invisible': [('reason_reject','=',False)]}" style="color:red;"/>
+                        <field name="reason_cancel" readonly="True" attrs="{'invisible': [('reason_cancel','=',False)]}" style="color:red;"/>
 
                         <!--<field name="project_id" domain="[('active', '=', True), ('company_id', '=', company_id)]" widget="project_private_task" string="CCPP" />
                         <field name="parent_id" string="Solution" attrs="{'invisible': [('is_solution','=',True)]}"/>
@@ -1054,9 +1090,14 @@
                 <field name="is_strategy" invisible="True"/>
                 <field name="is_task" invisible="True"/>
                 <field name="is_subtask" invisible="True"/>
+                <field name="is_ccpp_on_process" invisible="True"/>
+                <field name="is_solution_on_approve" invisible="True"/>
+                <field name="is_show_solution_approve" invisible="True"/>
+                <field name="is_show_strategy_approve" invisible="True"/>
                 <!--<button name="action_open_task2" type="object" title="View Strategy" string="View Strategy" class="btn btn-link float-end" attrs="{'invisible': [('parent.is_solution','=',False)]}"/>-->
+                <button name="button_send_approve_strategy" type="object" class="btn-primary" string="Send Approve Strategy" attrs="{'invisible': ['|','|',('state','!=','open'),('is_ccpp_on_process','=',False),('is_solution_on_approve','=',True)]}"/>
                 <button name="button_done" type="object" string="Done" class="btn-success ri-arrow-right-up-line me-2" attrs="{'invisible': [('state','!=','process')]}"/>
-                <button name="button_cancel" type="object" string="Cancel" class="btn-secondary-ccpp"   attrs="{'invisible': [('state','!=','process')]}"/>
+                <button name="button_cancel_wizard" type="object" string="Cancel" class="btn-secondary-ccpp"   attrs="{'invisible': [('state','!=','process')]}"/>
                 <button name="action_open_task2" type="object" title="View Task" string="View Task" class="btn btn-link float-end" attrs="{'invisible': [('parent.is_strategy','=',False)]}"/>
             </xpath>
             <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='activity_ids']" position="replace">
@@ -1100,7 +1141,7 @@
                 <field name="code" string="Task No." attrs="{'column_invisible': [('parent.is_strategy','=',False),('parent.is_task','=',False),('parent.is_subtask','=',False)]}" readonly="True"/>
             </xpath>
             <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]" position="attributes">
-                <attribute name="delete">false</attribute>
+                <!--<attribute name="delete">false</attribute>-->
                 <!--<attribute name="attrs">{'create': [('state','in',['open','process'])]}</attribute>-->
             </xpath>
             <!-- invisible optional -->
@@ -1589,7 +1630,7 @@
                 <field name="state" string="State" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'state_color'}"/>
                 <field name="user_ids" widget="many2many_avatar_user" string="User"/>
                 <button name="button_done" type="object" string="Done" class="btn-success ri-arrow-right-up-line me-2" attrs="{'invisible': [('state','!=','process')]}"/>
-                <button name="button_cancel" type="object" string="Cancel" class="btn-secondary-ccpp"   attrs="{'invisible': [('state','!=','process')]}"/>
+                <button name="button_cancel_wizard" type="object" string="Cancel" class="btn-secondary-ccpp"   attrs="{'invisible': [('state','!=','process')]}"/>
                 <!--<button name="action_open_strategy" type="object" title="View Detail" string="View Detail" class="btn btn-link float-end"/>-->
             </tree>
         </field>
@@ -1647,7 +1688,7 @@
     <record id="action_my_ccpp_group_by_priority" model="ir.actions.act_window">
         <field name="name">My CCPP</field>
         <field name="res_model">project.project</field>
-        <field name="view_mode">tree,kanban,form</field>
+        <field name="view_mode">tree,kanban,form,graph</field>
         <field name="context">{'search_default_groupby_priority': 0, 'show_create': '1', 'my_ccpp': True, 'create_from_tree': True}</field>
         <field name="view_id" ref="ccpp.ccpp_report_tree_show_create_view"/>
         <field name="search_view_id" ref="ccpp_search_form"/>
@@ -1700,7 +1741,7 @@
     <record id="action_all_ccpp_group_by_priority" model="ir.actions.act_window">
         <field name="name">All CCPP</field>
         <field name="res_model">project.project</field>
-        <field name="view_mode">tree,kanban,form</field>
+        <field name="view_mode">tree,kanban,form,graph</field>
         <field name="context">{'search_default_groupby_priority': 0, 'show_create': '0', 'all_ccpp': True, }</field>
         <field name="view_id" ref="ccpp.ccpp_report_tree_hide_create_view"/>
         <field name="search_view_id" ref="ccpp_search_form"/>

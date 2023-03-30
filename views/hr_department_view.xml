@@ -9,6 +9,13 @@
             <xpath expr="//form[1]/sheet[1]/group[1]/field[@name='name']" position="after">
                 <field name="code"/>
             </xpath>
+            <xpath expr="//form[1]/sheet[1]/group[1]" position="after">
+                <notebook>
+                    <page name="child_ids" string="Child Department">
+                        <field name="child_ids"/>
+                    </page>
+                </notebook>
+            </xpath>
         </field>
     </record>
 

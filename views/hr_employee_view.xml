@@ -12,6 +12,12 @@
                     <field name="job_lines" widget="many2many" options="{'no_create': True, 'no_quick_create': True, 'no_create_edit': True}"/>
                 </page>
             </xpath>
+
+            <xpath expr="//field[@name='department_id']" position="after">
+                <field name="domain_division_ids" invisible="True"/>
+                <field name="division_id" domain="[('id','in',domain_division_ids)]" options="{'no_create': True}"/>
+            </xpath>
+
         </field>
     </record>
 

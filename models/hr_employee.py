@@ -10,7 +10,17 @@ class HrEmployeePrivate(models.Model):
     _inherit = "hr.employee"
     
     job_lines = fields.One2many("hr.job", 'employee_id', string="Job Lines")
+    division_id = fields.Many2one("hr.department", string="Division")
+    domain_division_ids = fields.Many2many("hr.department", string="Domain Division", compute="_compute_domain_division")
     
+    @api.depends('department_id')
+    def _compute_domain_division(self):
+        for obj in self:
+            domain_division_ids = self.env['hr.department']
+            if obj.department_id:
+                domain_division_ids = obj.department_id.child_ids
+            obj.domain_division_ids = domain_division_ids
+        
     @api.constrains('name')
     def _constrains_name(self):
         for obj in self:

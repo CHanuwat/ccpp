@@ -363,6 +363,12 @@ class RockerTimesheet(models.Model):
     #        checkin_date = datetime.now()
     #    return checkin_date
             
+    def _get_default_job(self):
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        #if not employee_id:
+            #print(self.env.user.name)
+            #raise UserError("Not recognize the Employee. Please Configure User to Employee to get the job")
+        return employee_id.job_id
 
     # existing fields
     company_id = fields.Many2one('res.company', "Company", default=lambda self: self.env.company, store=True,
@@ -453,6 +459,21 @@ class RockerTimesheet(models.Model):
     location = fields.Char("Location")
     note = fields.Text("Note")
     checkin_date = fields.Datetime(string="Check In Date")
+    
+    
+    department_id = fields.Many2one("hr.department",string="Department", related="employee_id.department_id", store=True, track_visibility="onchange")
+    division_id = fields.Many2one("hr.department",string="Department", related="employee_id.division_id", store=True, track_visibility="onchange")
+    job_id = fields.Many2one("hr.job", string="Job Position", default=_get_default_job, required=True, track_visibility="onchange")#default=_get_default_job, 
+    domain_job_ids = fields.Many2many("hr.job", string="Domain Job", compute="_compute_domain_job_ids")
+
+    @api.depends("employee_id")
+    def _compute_domain_job_ids(self):
+        for obj in self:
+            job_ids = self.env['hr.job']
+            if obj.sale_person_id:
+                for job_id in obj.sale_person_id.job_lines:
+                    job_ids |= job_id
+            obj.domain_job_ids = job_ids.ids
 
     def duplicate_task(self):
         for obj in self:

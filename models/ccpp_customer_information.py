@@ -78,7 +78,8 @@ class CCPPCustomerInformation(models.Model):
     domain_partner_ids = fields.Many2many("res.partner", string="Domain partner", compute="_compute_domain_partner_ids")
     active = fields.Boolean(string="Active", default=True, track_visibility="onchange")
     sale_person_id = fields.Many2one("hr.employee", string="Sales Person", related="job_id.employee_id", required=True, store=True, track_visibility="onchange")
-    department_id = fields.Many2one("hr.department",string="Department", related="job_id.department_id", store=True)
+    department_id = fields.Many2one("hr.department",string="Department", related="sale_person_id.department_id", store=True, track_visibility="onchange")
+    division_id = fields.Many2one("hr.department",string="Department", related="sale_person_id.division_id", store=True, track_visibility="onchange")
     job_id = fields.Many2one("hr.job", string="Job Position", default=_get_default_job, required=True, track_visibility="onchange")#default=_get_default_job, 
     domain_job_ids = fields.Many2many("hr.job", string="Domain Job", compute="_compute_domain_job_ids")
     user_id = fields.Many2one("res.users", string="User", related="sale_person_id.user_id", store=True, track_visibility="onchange")
@@ -182,7 +183,8 @@ class CCPPCustomerInformation(models.Model):
             partner_ids = self.env['res.partner']
             if obj.customer_id:
                 for child_id in obj.customer_id.child_ids:
-                    partner_ids |= child_id
+                    if child_id != obj.sale_person_id.work_contact_id:
+                        partner_ids |= child_id
             obj.domain_partner_ids = partner_ids.ids
             
     @api.depends("sale_person_id")

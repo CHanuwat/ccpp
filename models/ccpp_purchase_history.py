@@ -175,6 +175,7 @@ class CCPPPurchaseHistory(models.Model):
     job_id = fields.Many2one("hr.job", string="Job Position", default=_get_default_job, required=True, track_visibility="onchange")
     domain_job_ids = fields.Many2many("hr.job", string="Domain Job", compute="_compute_domain_job_ids")
     department_id = fields.Many2one("hr.department", string="Deparment", related="sale_person_id.department_id")
+    division_id = fields.Many2one("hr.department", string="Division", related="sale_person_id.division_id")
     user_id = fields.Many2one(related="sale_person_id.user_id", string="Sales User", store=True)
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.user.company_id)
     company_partner_id = fields.Many2one("res.partner", string="Company Partner", related="company_id.partner_id")

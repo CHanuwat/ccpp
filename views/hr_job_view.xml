@@ -44,6 +44,9 @@
             <xpath expr="//field[@name='no_of_recruitment']" position="replace">
                 <field name="employee_id"/>
             </xpath>
+            <xpath expr="//field[@name='department_id']" position="after">
+                <field name="contract_type_id"/>
+            </xpath>
         </field>
     </record>
 

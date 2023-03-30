@@ -23,5 +23,6 @@ from . import hr_employee
 from . import hr_job
 from . import res_users
 from . import ccpp_wizard_reject
+from . import ccpp_wizard_cancel
 from . import ccpp_wizard_done_task
 from . import approval

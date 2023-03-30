@@ -190,7 +190,7 @@
                             </div>
                             <field name="province_id"/>
                             <field name="sale_area_id"/>
-                            <field name="sale_person_id" readonly="True"/>
+                            <field name="sale_person_id" readonly="True" options="{'no_open': True}"/>
                             <field name="domain_job_ids" invisible="True"/>
                             <field name="job_id" domain="[('id', 'in', domain_job_ids)]"/>
                         </group>
@@ -372,7 +372,7 @@
                             />
                             <field name="domain_partner_ids" invisible="True"/>
                             <field name="partner_id" string="Contact Person" context="{'show_title_position':True}" options="{'no_create':True}" domain="[('id','in',domain_partner_ids)]" required="True"/>
-                            <field name="sale_person_id" string="User" readonly="True"/>
+                            <field name="sale_person_id" string="User" readonly="True" options="{'no_open': True}"/>
                             <field name="domain_job_ids" invisible="True"/>
                             <field name="job_id" domain="[('id', 'in', domain_job_ids)]"/>
                         </group>
@@ -509,7 +509,7 @@
                             />
                             <field name="domain_partner_ids" invisible="True"/>
                             <field name="partner_id" string="Contact Person" context="{'show_title_position':True, 'create_external_contact':True, 'external_parent': customer_id}" domain="[('id','in',domain_partner_ids)]" required="True" options="{'no_quick_create': True}"/>
-                            <field name="sale_person_id" string="User" readonly="True"/>
+                            <field name="sale_person_id" string="User" readonly="True" options="{'no_open': True}"/>
                             <field name="domain_job_ids" invisible="True"/>
                             <field name="job_id" domain="[('id', 'in', domain_job_ids)]"/>
                         </group>
