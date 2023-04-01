@@ -16,6 +16,7 @@ class Job(models.Model):
     parent_id = fields.Many2one("hr.job", string="Parent Job Position")
     child_lines = fields.One2many("hr.job", 'parent_id', string="Child Job Position")
     employee_id = fields.Many2one("hr.employee", string="Employee")
+    division_id = fields.Many2one("hr.job", string="Division")
     
     _sql_constraints = [
         #('name_company_uniq', 'unique(name, company_id, department_id)', 'The name of the job position must be unique per department in company!'),

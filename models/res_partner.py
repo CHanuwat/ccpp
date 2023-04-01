@@ -11,7 +11,7 @@ class Partner(models.Model):
     _inherit = "res.partner"
     
     def _get_default_potential(self):
-        if self._context.get('create_potential'):
+        if self._context.get('create_potential') or self._context.get('create_external_customer') or self._context.get('create_external_contact') or self._context.get('create_customer_contact'):
             is_potential = True
         else:
             is_potential = False
@@ -24,12 +24,12 @@ class Partner(models.Model):
             is_company = False
         return is_company
     
-    def _get_default_is_customer(self):
-        if self._context.get('create_external_customer') or self._context.get('create_external_contact'):
-            is_customer = True
-        else:
-            is_customer = False
-        return is_customer
+    #def _get_default_is_customer(self):
+    #    if  self._context.get('create_external_contact') or self._context.get('create_customer_contact'):
+    #        is_customer = True
+    #    else:
+    #        is_customer = False
+    #    return is_customer
     
     def _get_default_parent_id(self):
         parent_id = self.env['res.partner']
@@ -39,12 +39,18 @@ class Partner(models.Model):
                 partner_id = self.env['res.partner'].browse(parent_id)
                 if partner_id.company_type == 'person':
                     parent_id = self.env['res.partner']
+        if self._context.get('create_customer_contact'):
+            if self._context.get('customer_parent'):
+                parent_id = self._context.get('customer_parent')
+                partner_id = self.env['res.partner'].browse(parent_id)
+                if partner_id.company_type == 'person':
+                    parent_id = self.env['res.partner']
         return parent_id
     
     job_position_id = fields.Many2one('res.partner.position', string='Job Position', index=True, copy=False ,help="replace instead function field char")
     province_id = fields.Many2one('ccpp.province', string="Province")
     customer_category_id = fields.Many2one('ccpp.customer.category', string="Customer Category")
-    is_customer = fields.Boolean(string="Customer", default=_get_default_is_customer)
+    is_customer = fields.Boolean(string="Customer")#default=_get_default_is_customer
     is_vendor = fields.Boolean(string="Vendor", default=False)
     is_competitor = fields.Boolean(string="Competitor", default=False)
     is_potential = fields.Boolean(string="Potential", default=_get_default_potential)
@@ -120,14 +126,14 @@ class Partner(models.Model):
                 res.append((obj.id, new_name))
         return res
     
-    @api.model
-    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
+    #@api.model
+    #def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
         #domain = [('job_position_name', operator, name)]
-        domain = []
-        if name:
-            domain = ['|',('name', operator, name),('job_position_name', operator, name)]
+    #    domain = []
+    #    if name:
+    #        domain = ['|',('name', operator, name),('job_position_name', operator, name)]
             #domain.append(('job_position_name', operator, name))
-        return self._search(domain + args, limit=limit, access_rights_uid=name_get_uid)
+    #    return self._search(domain + args, limit=limit, access_rights_uid=name_get_uid)
     
     @api.depends('is_company', 'name', 'parent_id.display_name', 'type', 'company_name', 'job_position_id')
     def _compute_display_name(self):

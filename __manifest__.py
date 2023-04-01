@@ -46,7 +46,9 @@
         "views/hr_employee_view.xml",
         "views/ccpp_project_update_template.xml",
         "views/approval_view.xml",
-        "views/ccpp_crm_menu.xml",
+        "views/ccpp_menu_crm.xml",
+        "views/ccpp_menu_customer.xml",
+        "views/ccpp_menu_task.xml",
         ],
     'qweb': [ 
         

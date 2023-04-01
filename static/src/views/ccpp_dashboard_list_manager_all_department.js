@@ -2,19 +2,16 @@
 import { useService } from "@web/core/utils/hooks";
 
 const { Component, onWillStart } = owl;
-const session = require('web.session');
 
-export class CCPPDashBoardList extends Component {
+export class CCPPDashBoardListManagerAllDepartment extends Component {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
 
         onWillStart(async () => {
-            debugger
             this.ccppData = await this.orm.call(
                 "project.project",
-                "retrieve_dashboard",
-                { context: this.context },
+                "retrieve_dashboard_manager_all_department",
             );
         });
     }
@@ -34,4 +31,4 @@ export class CCPPDashBoardList extends Component {
     }
 }
 
-CCPPDashBoardList.template = 'ccpp.CCPPDashboardList'
+CCPPDashBoardListManagerAllDepartment.template = 'ccpp.CCPPDashboardListManagerAllDepartment'

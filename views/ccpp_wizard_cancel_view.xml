@@ -25,7 +25,7 @@
                         </group>
                     </group>
                     <footer>
-                        <button name="button_confirm" string="Cancel" type="object" class="btn-danger"/>
+                        <button name="button_confirm" string="Confirm" type="object" class="btn-danger"/>
                         <button special="cancel" data-hotkey="z" string="Close" />
                     </footer>
                 </sheet>

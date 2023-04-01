@@ -1415,32 +1415,6 @@
 
     <menuitem id="menu_ccpp_group_all_action_ccpp" name="Test Group 2" parent="project.menu_project_config" action="ccpp_group_all_action_ccpp" sequence="15"/>    
 
-    <!-- My task -->
-
-    <menuitem name="Task"
-            id="menu_main_task"
-            web_icon="ccpp,static/description/calendar_icon.png"
-            sequence="3"/>
-
-    <record model="ir.ui.menu" id="project.menu_project_management">
-        <field name="action" eval="False"/>
-    </record>
-
-    <menuitem name="Plan Task" id="menu_ccpp_plan_task" parent="menu_main_task" action="act_rocker_timesheet_calendar" sequence="1" />
-
-        <!--<menuitem name="Tasks Calendar" id="menu_ccpp_task_calendar" parent="menu_ccpp_plan_task"
-        action="act_rocker_timesheet_calendar" sequence="1" />-->
-
-    <menuitem name="Check In" id="menu_ccpp_update_task" parent="menu_main_task" action="act_rocker_timesheet_tree" sequence="2" />
-
-        <!--<menuitem name="Tasks List" id="menu_ccpp_task_list" parent="menu_ccpp_update_task"
-        action="act_rocker_timesheet_tree" sequence="1" />-->
-
-    <menuitem name="Reporting" id="menu_ccpp_report_task" parent="menu_main_task" action="act_rocker_timesheet_tree_by_user" sequence="3" />
-
-        <!--<menuitem name="Tasks by User" id="menu_ccpp_task_list" parent="menu_ccpp_report_task"
-        action="act_rocker_timesheet_tree_by_user" sequence="1" />-->
-
     <!-- CCPP -->
 
     <record id="solution_search_form" model="ir.ui.view">  
@@ -1590,11 +1564,27 @@
     </record>
 
     <record id="action_all_ccpp_group_by_priority_manager" model="ir.actions.server">
-        <field name="name">All CCPP Group by Department</field>
+        <field name="name">All CCPP</field>
         <field name="model_id" ref="model_project_project"/>
         <field name="type">ir.actions.server</field>
         <field name="state">code</field>
         <field name="code">action = model.action_ccpp_department_group_by_priority_manager()</field>
+    </record>
+
+    <record id="action_all_ccpp_group_by_priority_manager_all_department_code" model="ir.actions.server">
+        <field name="name">All CCPP</field>
+        <field name="model_id" ref="model_project_project"/>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="code">action = model.action_ccpp_department_group_by_priority_manager_all_department()</field>
+    </record>
+
+    <record id="action_all_ccpp_group_by_priority_ceo_code" model="ir.actions.server">
+        <field name="name">All CCPP</field>
+        <field name="model_id" ref="model_project_project"/>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="code">action = model.action_ccpp_department_group_by_priority_ceo()</field>
     </record>
 
     <record id="action_my_ccpp_group_by_priority_user" model="ir.actions.server">
@@ -1738,12 +1728,76 @@
         </field>
     </record>
 
+    <record id="ccpp_report_tree_hide_create_view_manager_all_department" model="ir.ui.view">
+        <field name="name">ccpp.report.tree.view</field>
+        <field name="model">project.project</field>
+        <field eval="202" name="priority"/>
+        <field name="arch" type="xml">
+            <tree delete="0" create="0" expand="1" js_class="ccpp_dashboard_list_manager_all_department" class="ccpp_list">
+                <button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>
+                <field name="code" string="CCPP No."/>
+                <field name="name" string="CCPP Title" class="fw-bold"/>
+                <field name="partner_id" string="Customer"/>
+                <!--<field name="color" invisible="1"/>
+                <field name="priority_select" string="Priority" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'color'}"/>-->
+                <field name="priority_select" decoration-danger="priority_select in ['1','2']" string="Priority"/>
+                <field name="deadline_date"/>
+                <!--<field name="show_period" string="Period"/>-->
+                <field name="state_color" invisible="1"/>
+                <field name="state" string="State" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'state_color'}"/>
+                <button name="action_open_solution" type="object" title="Strategy" string="Strategy" class="btn btn-link float-end ri-eye-line"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ccpp_report_tree_hide_create_view_ceo" model="ir.ui.view">
+        <field name="name">ccpp.report.tree.view</field>
+        <field name="model">project.project</field>
+        <field eval="203" name="priority"/>
+        <field name="arch" type="xml">
+            <tree delete="0" create="0" expand="1" js_class="ccpp_dashboard_list_ceo" class="ccpp_list">
+                <button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>
+                <field name="code" string="CCPP No."/>
+                <field name="name" string="CCPP Title" class="fw-bold"/>
+                <field name="partner_id" string="Customer"/>
+                <!--<field name="color" invisible="1"/>
+                <field name="priority_select" string="Priority" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'color'}"/>-->
+                <field name="priority_select" decoration-danger="priority_select in ['1','2']" string="Priority"/>
+                <field name="deadline_date"/>
+                <!--<field name="show_period" string="Period"/>-->
+                <field name="state_color" invisible="1"/>
+                <field name="state" string="State" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'state_color'}"/>
+                <button name="action_open_solution" type="object" title="Strategy" string="Strategy" class="btn btn-link float-end ri-eye-line"/>
+            </tree>
+        </field>
+    </record>
+
     <record id="action_all_ccpp_group_by_priority" model="ir.actions.act_window">
         <field name="name">All CCPP</field>
         <field name="res_model">project.project</field>
         <field name="view_mode">tree,kanban,form,graph</field>
         <field name="context">{'search_default_groupby_priority': 0, 'show_create': '0', 'all_ccpp': True, }</field>
         <field name="view_id" ref="ccpp.ccpp_report_tree_hide_create_view"/>
+        <field name="search_view_id" ref="ccpp_search_form"/>
+        <field name="target">main</field>
+    </record>
+
+    <record id="action_all_ccpp_group_by_priority_manager_all_department" model="ir.actions.act_window">
+        <field name="name">All CCPP</field>
+        <field name="res_model">project.project</field>
+        <field name="view_mode">tree,kanban,form,graph</field>
+        <field name="context">{'search_default_groupby_priority': 0, 'show_create': '0', 'all_ccpp': True, }</field>
+        <field name="view_id" ref="ccpp.ccpp_report_tree_hide_create_view_manager_all_department"/>
+        <field name="search_view_id" ref="ccpp_search_form"/>
+        <field name="target">main</field>
+    </record>
+
+    <record id="action_all_ccpp_group_by_priority_ceo" model="ir.actions.act_window">
+        <field name="name">All CCPP</field>
+        <field name="res_model">project.project</field>
+        <field name="view_mode">tree,kanban,form,graph</field>
+        <field name="context">{'search_default_groupby_priority': 0, 'show_create': '0', 'all_ccpp': True, }</field>
+        <field name="view_id" ref="ccpp.ccpp_report_tree_hide_create_view_ceo"/>
         <field name="search_view_id" ref="ccpp_search_form"/>
         <field name="target">main</field>
     </record>
@@ -1774,6 +1828,11 @@
 
     <menuitem name="All CCPP" id="menu_all_ccpp_manager" groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager" action="action_all_ccpp_group_by_priority_manager" parent="project.menu_main_pm" sequence="2"/>
 
+    <menuitem name="All CCPP" id="menu_all_ccpp_manager_all_department" groups="ccpp.group_ccpp_backoffice_manager_all_department,ccpp.group_ccpp_frontoffice_manager_all_department" action="action_all_ccpp_group_by_priority_manager_all_department_code" parent="project.menu_main_pm" sequence="3"/>
+
+    <menuitem name="All CCPP" id="menu_all_ccpp_manager_ceo" groups="ccpp.group_ccpp_ceo" action="action_all_ccpp_group_by_priority_ceo_code" parent="project.menu_main_pm" sequence="4"/>
+
+
         <!--<menuitem name="All CCPP Group by Priority" id="menu_all_ccpp_group_by_priority_manager" parent="menu_all_ccpp_manager" action="action_all_ccpp_group_by_priority_manager" sequence="1"/>
 
         <menuitem name="All CCPP Group by Customer" id="menu_all_ccpp_group_by_customer_manager" parent="menu_all_ccpp_manager" action="action_all_ccpp_group_by_customer_manager" sequence="2"/>-->
@@ -1785,7 +1844,7 @@
         </record>
 
         <record model="ir.ui.menu" id="project.menu_main_pm">
-            <field name="sequence" eval="2"></field>
+            <field name="sequence" eval="3"></field>
         </record>
 
         <record model="ir.ui.menu" id="project.menu_project_report_task_analysis">

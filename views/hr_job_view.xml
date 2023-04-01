@@ -45,6 +45,7 @@
                 <field name="employee_id"/>
             </xpath>
             <xpath expr="//field[@name='department_id']" position="after">
+                <field name="division_id"/>
                 <field name="contract_type_id"/>
             </xpath>
         </field>

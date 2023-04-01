@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <!-- Task -->
+
+    <menuitem name="Task"
+            id="menu_main_task"
+            web_icon="ccpp,static/description/calendar_icon.png"
+            sequence="4"/>
+
+    <record model="ir.ui.menu" id="project.menu_project_management">
+        <field name="action" eval="False"/>
+    </record>
+
+    <menuitem name="Plan Task" id="menu_ccpp_plan_task" parent="menu_main_task" action="act_rocker_timesheet_calendar" sequence="1" />
+
+    <menuitem name="Check In" id="menu_ccpp_update_task" parent="menu_main_task" action="act_rocker_timesheet_tree" sequence="2" />
+
+    <menuitem name="Reporting" id="menu_ccpp_report_task" parent="menu_main_task" action="act_rocker_timesheet_tree_by_user" sequence="3" />
+
+
+</odoo>

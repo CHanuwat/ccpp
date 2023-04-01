@@ -33,7 +33,7 @@
     </record>
 
     <record model="ir.ui.menu" id="crm.crm_menu_root">
-        <field name="sequence" eval="1"/>
+        <field name="sequence" eval="2"/>
     </record>
 
     <menuitem
@@ -43,59 +43,7 @@
         sequence="1"
     />
 
-        <menuitem
-            id="ccpp_crm_customer_customer_user"
-            name="Customer Information"
-            parent="ccpp_crm_customer"
-            action="ccpp_customer_information_action"
-            sequence="1"
-            groups="ccpp.group_ccpp_frontoffice_user"
-            />
-
-        <menuitem
-            id="ccpp_crm_customer_customer_manager"
-            name="Customer Information"
-            parent="ccpp_crm_customer"
-            action="ccpp_customer_information_action_manager"
-            sequence="1"
-            groups="ccpp.group_ccpp_frontoffice_manager"
-            />
-
-        <menuitem
-            id="ccpp_crm_customer_internal_user"
-            name="Internal Customer"
-            parent="ccpp_crm_customer"
-            action="ccpp_internal_information_action"
-            sequence="2"
-            groups="ccpp.group_ccpp_frontoffice_user,ccpp.group_ccpp_backoffice_user"
-            />
-
-        <menuitem
-            id="ccpp_crm_customer_internal_manager"
-            name="Internal Customer"
-            parent="ccpp_crm_customer"
-            action="ccpp_internal_information_action_manager"
-            sequence="2"
-            groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"
-            />
-
-        <menuitem
-            id="ccpp_crm_customer_external_user"
-            name="External Customer"
-            parent="ccpp_crm_customer"
-            action="ccpp_external_information_action"
-            sequence="3"
-            groups="ccpp.group_ccpp_frontoffice_user,ccpp.group_ccpp_backoffice_user"
-            />
-
-        <menuitem
-            id="ccpp_crm_customer_external_manager"
-            name="External Customer"
-            parent="ccpp_crm_customer"
-            action="ccpp_external_information_action_manager"
-            sequence="3"
-            groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"
-            />
+    <!-- Sale Target -->
 
     <menuitem
         id="ccpp_crm_sale_target_user"
@@ -116,6 +64,26 @@
     />
 
     <menuitem
+        id="ccpp_crm_sale_target_manager_all_department"
+        name="Sales Target"
+        parent="crm.crm_menu_root"
+        action="ccpp_sale_target_action_manager_all_department"
+        sequence="2"
+        groups="ccpp.group_ccpp_frontoffice_manager_all_department"
+    />
+
+    <menuitem
+        id="ccpp_crm_sale_target_ceo"
+        name="Sales Target"
+        parent="crm.crm_menu_root"
+        action="ccpp_sale_target_action_ceo"
+        sequence="2"
+        groups="ccpp.group_ccpp_ceo"
+    />
+
+    <!-- Purchase History -->
+
+    <menuitem
         id="ccpp_crm_purchase_history_user"
         name="Purchase History"
         parent="crm.crm_menu_root"
@@ -131,6 +99,24 @@
         action="ccpp_purchase_history_action_manager"
         sequence="3"
         groups="ccpp.group_ccpp_frontoffice_manager"
-    />    
+    />
+
+    <menuitem
+        id="ccpp_crm_purchase_history_manager_all_department"
+        name="Purchase History"
+        parent="crm.crm_menu_root"
+        action="ccpp_purchase_history_action_manager_all_department"
+        sequence="3"
+        groups="ccpp.group_ccpp_frontoffice_manager_all_department"
+    />
+
+    <menuitem
+        id="ccpp_crm_purchase_history_ceo"
+        name="Purchase History"
+        parent="crm.crm_menu_root"
+        action="ccpp_purchase_history_action_ceo"
+        sequence="3"
+        groups="ccpp.group_ccpp_ceo"
+    />
     
 </odoo>

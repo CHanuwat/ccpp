@@ -12,6 +12,7 @@
                 <separator/>
                 <filter string="Active" name="active" domain="[('state', '=', 'active')]"/>
                 <filter string="Inactive" name="active" domain="[('state', '=', 'inactive')]"/>
+                <filter name="this_year" string="This Year" domain="[('date_from', '&lt;', (context_today() + relativedelta(years=1, month=1, day=1)).strftime('%Y-%m-%d')), ('date_from', '&gt;=', (context_today() + relativedelta(month=1, day=1)).strftime('%Y-%m-%d'))]"/>
                 <group expand="0" string="Group By">
                     <filter string="Year" name="groupby_year" context="{'group_by': 'year_selection'}"/>
                     <filter string="Sales Area" name="groupby_sales_area" context="{'group_by': 'sale_area_id'}"/>
@@ -178,7 +179,7 @@
                     <group>
                         <group>
                             <field name="company_name" invisible="True"/> <!--attrs="{'invisible': [('customer_id','!=', False)]}"/>-->
-                            <field name="customer_id" domain="['|',('is_customer','=',True),('is_potential','=',True)]" 
+                            <field name="customer_id" domain="['&amp;', ('is_company','=',True),'|',('is_customer','=',True),('is_potential','=',True)]" 
                             attrs="{'required': [('company_name','=',False)], 'invisible':[('company_name','!=', False),('company_name','!=','')]}"
                             context="{'create_potential': True}"/>
                             <label for="is_customer" string=""/>
@@ -188,6 +189,8 @@
                                   <field name="is_potential" readonly="True"/>
                                   <label for="is_potential" string="Potential"/>     
                             </div>
+                            <field name="domain_partner_ids" invisible="True"/>
+                            <field name="partner_ids" widget="many2many_tags" context="{'show_title_position':True, 'create_customer_contact':True, 'customer_parent': customer_id}" domain="[('id','in',domain_partner_ids)]" required="True" options="{'no_quick_create': True}"/>
                             <field name="province_id"/>
                             <field name="sale_area_id"/>
                             <field name="sale_person_id" readonly="True" options="{'no_open': True}"/>
@@ -314,6 +317,7 @@
                 <separator/>
                 <filter string="Active" name="active" domain="[('state', '=', 'active')]"/>
                 <filter string="Inactive" name="active" domain="[('state', '=', 'inactive')]"/>
+                <filter name="this_year" string="This Year" domain="[('date_from', '&lt;', (context_today() + relativedelta(years=1, month=1, day=1)).strftime('%Y-%m-%d')), ('date_from', '&gt;=', (context_today() + relativedelta(month=1, day=1)).strftime('%Y-%m-%d'))]"/>
                 <group expand="0" string="Group By">
                     <filter string="Year" name="groupby_year" context="{'group_by': 'year_selection'}"/>
                     <filter string="Customer Category" name="groupby_category" context="{'group_by': 'customer_category_id'}"/>
@@ -451,6 +455,8 @@
                 <separator/>
                 <filter string="Active" name="active" domain="[('state', '=', 'active')]"/>
                 <filter string="Inactive" name="active" domain="[('state', '=', 'inactive')]"/>
+                <!--<filter string="Current Year" name="current_year" domain="[('date_from','&lt;',(context_today()+relativedelta(years=1)).strftime('%%Y-%%m-01')), ('date_from','&gt;=',time.strftime('%%Y-%%m-01'))]"/>-->
+                <filter name="this_year" string="This Year" domain="[('date_from', '&lt;', (context_today() + relativedelta(years=1, month=1, day=1)).strftime('%Y-%m-%d')), ('date_from', '&gt;=', (context_today() + relativedelta(month=1, day=1)).strftime('%Y-%m-%d'))]"/>
                 <group expand="0" string="Group By">
                     <filter string="Year" name="groupby_year" context="{'group_by': 'year_selection'}"/>
                     <filter string="Customer Category" name="groupby_category" context="{'group_by': 'customer_category_id'}"/>
@@ -501,14 +507,35 @@
                     <group>
                         <group>
                             <field name="company_name" invisible="True"/> <!--attrs="{'invisible': [('customer_id','!=', False)]}"/>-->
+                            <field name="is_company_group" invisible="True"/>
                             <field name="customer_id" 
                             attrs="{'required': [('company_name','=',False)], 'invisible':[('company_name','!=', False),('company_name','!=','')]}"
                             options="{'no_quick_create': True}"
                             context="{'create_external_customer':True}"
-                            domain="[('is_company','=',True)]"
+                            domain="['&amp;', ('is_company','=',True),'|',('is_customer','=',True),('is_potential','=',True)]"
                             />
+                            <label for="is_customer" string=""/>
+                            <div class="o_row" name="div_km_home_work">
+                                  <field name="is_customer" readonly="True"/>
+                                  <label for="is_customer" string="Customer"/>   
+                                  <field name="is_potential" readonly="True"/>
+                                  <label for="is_potential" string="Potential"/>     
+                            </div>
                             <field name="domain_partner_ids" invisible="True"/>
-                            <field name="partner_id" string="Contact Person" context="{'show_title_position':True, 'create_external_contact':True, 'external_parent': customer_id}" domain="[('id','in',domain_partner_ids)]" required="True" options="{'no_quick_create': True}"/>
+                            <field name="partner_id" string="Contact Person" 
+                            context="{'show_title_position':True, 'create_external_contact':True, 'external_parent': customer_id}" 
+                            domain="[('id','in',domain_partner_ids)]" 
+                            required="True" 
+                            options="{'no_quick_create': True}"
+                            attrs="{'invisible': [('is_company_group','=', True)]}"
+                            />
+                            <field name="partner_id" string="Contact Person" 
+                            context="{'show_title_position':True, 'create_external_contact':True, 'external_parent': customer_id}" 
+                            domain="[('id','in',domain_partner_ids)]" 
+                            required="True" 
+                            options="{'no_create': True}"
+                            attrs="{'invisible': [('is_company_group','=', False)]}"
+                            />
                             <field name="sale_person_id" string="User" readonly="True" options="{'no_open': True}"/>
                             <field name="domain_job_ids" invisible="True"/>
                             <field name="job_id" domain="[('id', 'in', domain_job_ids)]"/>
@@ -570,6 +597,22 @@
         <field name="code">action = model.action_customer_information_manager()</field>
     </record>
 
+    <record id="ccpp_customer_information_action_manager_all_department" model="ir.actions.server">
+        <field name="name">Internal Information</field>
+        <field name="model_id" ref="model_ccpp_customer_information"/>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="code">action = model.action_customer_information_manager_all_department()</field>
+    </record>
+
+    <record id="ccpp_customer_information_action_ceo" model="ir.actions.server">
+        <field name="name">Internal Information</field>
+        <field name="model_id" ref="model_ccpp_customer_information"/>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="code">action = model.action_customer_information_ceo()</field>
+    </record>
+
     <record id="ccpp_internal_information_action_manager" model="ir.actions.server">
         <field name="name">Internal Information</field>
         <field name="model_id" ref="model_ccpp_customer_information"/>
@@ -578,12 +621,44 @@
         <field name="code">action = model.action_internal_information_manager()</field>
     </record>
 
+    <record id="ccpp_internal_information_action_manager_all_department" model="ir.actions.server">
+        <field name="name">Internal Information</field>
+        <field name="model_id" ref="model_ccpp_customer_information"/>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="code">action = model.action_internal_information_manager_all_department()</field>
+    </record>
+
+    <record id="ccpp_internal_information_action_ceo" model="ir.actions.server">
+        <field name="name">Internal Information</field>
+        <field name="model_id" ref="model_ccpp_customer_information"/>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="code">action = model.action_internal_information_ceo()</field>
+    </record>
+
     <record id="ccpp_external_information_action_manager" model="ir.actions.server">
         <field name="name">External Information</field>
         <field name="model_id" ref="model_ccpp_customer_information"/>
         <field name="type">ir.actions.server</field>
         <field name="state">code</field>
         <field name="code">action = model.action_external_information_manager()</field>
+    </record>
+
+    <record id="ccpp_external_information_action_manager_all_department" model="ir.actions.server">
+        <field name="name">External Information</field>
+        <field name="model_id" ref="model_ccpp_customer_information"/>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="code">action = model.action_external_information_manager_all_department()</field>
+    </record>
+
+    <record id="ccpp_external_information_action_ceo" model="ir.actions.server">
+        <field name="name">External Information</field>
+        <field name="model_id" ref="model_ccpp_customer_information"/>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="code">action = model.action_external_information_ceo()</field>
     </record>
 
 </odoo>

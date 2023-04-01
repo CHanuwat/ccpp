@@ -75,6 +75,7 @@ class CCPPCustomerInformation(models.Model):
     customer_id = fields.Many2one("res.partner", string="Customer", default=_get_default_customer, track_visibility="onchange")
     domain_customer_ids = fields.Many2many("res.partner", string="Domain Customer", compute="_compute_domain_customer_ids")
     partner_id = fields.Many2one("res.partner", string="Contact", track_visibility="onchange")
+    partner_ids = fields.Many2many("res.partner", string="Contact", track_visibility="onchange")
     domain_partner_ids = fields.Many2many("res.partner", string="Domain partner", compute="_compute_domain_partner_ids")
     active = fields.Boolean(string="Active", default=True, track_visibility="onchange")
     sale_person_id = fields.Many2one("hr.employee", string="Sales Person", related="job_id.employee_id", required=True, store=True, track_visibility="onchange")
@@ -176,6 +177,20 @@ class CCPPCustomerInformation(models.Model):
     year_text = fields.Char("Year")
     is_customer = fields.Boolean(string="Customer", compute="_compute_customer_type", store=True)
     is_potential = fields.Boolean(string="Potential", compute="_compute_customer_type", store=True)
+    is_company_group = fields.Boolean(string="Is Company Group", compute="_compute_is_company_group")
+    
+    @api.depends("customer_id")
+    def _compute_is_company_group(self):
+        for obj in self:
+            is_company_group = False
+            partner_ids = self.env['res.company'].sudo().search([]).mapped('partner_id')
+            print(partner_ids)
+            print(obj.customer_id)
+            if obj.customer_id in partner_ids:
+                is_company_group = True
+            print(is_company_group)
+            obj.is_company_group = is_company_group
+            
     
     @api.depends("customer_id")
     def _compute_domain_partner_ids(self):
@@ -367,8 +382,12 @@ class CCPPCustomerInformation(models.Model):
         return action
             
     def open_ccpp(self):
-        action = self.env['ir.actions.act_window']._for_xml_id('project.open_view_project_all')
-        ccpp_ids = self.env['project.project'].search([('job_id','=',self.job_id.id),('partner_id','=',self.customer_id.id)])
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.action_my_ccpp_group_by_priority')
+        ccpp_ids = self.env['project.project']
+        if self.type == 'customer':
+            ccpp_ids = self.env['project.project'].search([('job_id','=',self.job_id.id),('partner_id','=',self.customer_id.id),('partner_contact_id','in',self.partner_ids.ids)])
+        elif self.type in ['internal','external']:
+            ccpp_ids = self.env['project.project'].search([('job_id','=',self.job_id.id),('partner_id','=',self.customer_id.id),('partner_contact_id','=',self.partner_id.id)])
         action['domain'] = [('id', 'in', ccpp_ids.ids)]
         return action
     
@@ -385,31 +404,109 @@ class CCPPCustomerInformation(models.Model):
         return res
     
     def action_customer_information_manager(self):
+        self = self.sudo()
+        company_ids = self._context.get('allowed_company_ids')
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_customer_information_action')
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
         job_ids = self.get_child_job(employee_id.job_lines)
         information_ids = self.env['ccpp.customer.information'].search([('type','=','customer'),
                                                                 ('job_id', 'in', job_ids.ids),
+                                                                ('company_id','in', company_ids),
+                                                                ])
+        action['domain'] = [('id','in',information_ids.ids)]
+        return action
+    
+    def action_customer_information_manager_all_department(self):
+        self = self.sudo()
+        company_ids = self._context.get('allowed_company_ids')
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_customer_information_action')
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        information_ids = self.env['ccpp.customer.information'].search([('type','=','customer'),
+                                                                ('department_id', '=', employee_id.department_id.id),
+                                                                ('company_id','in', company_ids),
+                                                                ])
+        action['domain'] = [('id','in',information_ids.ids)]
+        return action
+    
+    def action_customer_information_ceo(self):
+        self = self.sudo()
+        company_ids = self._context.get('allowed_company_ids')
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_customer_information_action')
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        information_ids = self.env['ccpp.customer.information'].search([('type','=','customer'),
+                                                                ('company_id','in', company_ids),
                                                                 ])
         action['domain'] = [('id','in',information_ids.ids)]
         return action
     
     def action_external_information_manager(self):
+        self = self.sudo()
+        company_ids = self._context.get('allowed_company_ids')
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_external_information_action')
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
         job_ids = self.get_child_job(employee_id.job_lines)
         information_ids = self.env['ccpp.customer.information'].search([('type','=','external'),
                                                                 ('job_id', 'in', job_ids.ids),
+                                                                ('company_id','in', company_ids),
+                                                                ])
+        action['domain'] = [('id','in',information_ids.ids)]
+        return action
+    
+    def action_external_information_manager_all_department(self):
+        self = self.sudo()
+        company_ids = self._context.get('allowed_company_ids')
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_external_information_action')
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        information_ids = self.env['ccpp.customer.information'].search([('type','=','external'),
+                                                                ('department_id', '=', employee_id.department_id.id),
+                                                                ('company_id','in', company_ids),
+                                                                ])
+        action['domain'] = [('id','in',information_ids.ids)]
+        return action
+    
+    def action_external_information_ceo(self):
+        self = self.sudo()
+        company_ids = self._context.get('allowed_company_ids')
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_external_information_action')
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        information_ids = self.env['ccpp.customer.information'].search([('type','=','external'),
+                                                                ('company_id','in', company_ids),
                                                                 ])
         action['domain'] = [('id','in',information_ids.ids)]
         return action
     
     def action_internal_information_manager(self):
+        self = self.sudo()
+        company_ids = self._context.get('allowed_company_ids')
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_internal_information_action')
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
         job_ids = self.get_child_job(employee_id.job_lines)
         information_ids = self.env['ccpp.customer.information'].search([('type','=','internal'),
                                                                 ('job_id', 'in', job_ids.ids),
+                                                                ('company_id','in', company_ids),
+                                                                ])
+        action['domain'] = [('id','in',information_ids.ids)]
+        return action
+    
+    def action_internal_information_manager_all_department(self):
+        self = self.sudo()
+        company_ids = self._context.get('allowed_company_ids')
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_internal_information_action')
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        information_ids = self.env['ccpp.customer.information'].search([('type','=','internal'),
+                                                                ('department_id', '=', employee_id.department_id.id),
+                                                                ('company_id','in', company_ids),
+                                                                ])
+        action['domain'] = [('id','in',information_ids.ids)]
+        return action
+    
+    def action_internal_information_ceo(self):
+        self = self.sudo()
+        company_ids = self._context.get('allowed_company_ids')
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_internal_information_action')
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        information_ids = self.env['ccpp.customer.information'].search([('type','=','internal'),
+                                                                ('company_id','in', company_ids),
                                                                 ])
         action['domain'] = [('id','in',information_ids.ids)]
         return action
