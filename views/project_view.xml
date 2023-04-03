@@ -321,7 +321,7 @@
                 <button name="button_reject_wizard" string="Reject" type="object" class="btn-danger" attrs="{'invisible': ['|',('is_show_approve','=',False),('state','!=','waiting_approve')]}"/><!--states="waiting_approve" groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>-->
                 <button name="button_done" string="Done" type="object" class="btn-success" attrs="{'invisible': ['|',('state','!=','process'),('is_ccpp_done','=',False)]}"/>
                 <button name="button_cancel_wizard" string="Cancel" type="object" states="open,process"/>
-                <button name="button_to_open" string="To Open" type="object" class="btn-primary" states="reject"/>
+                <button name="button_to_open" string="To Open" type="object" class="btn-primary" states="reject,waiting_approve"/>
             </xpath>
 
             <xpath expr="//form[1]/header[1]/button[@name='%(project.project_share_wizard_action)d']" position="replace">

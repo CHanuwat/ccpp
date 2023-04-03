@@ -654,10 +654,10 @@ class Project(models.Model):
         for obj in self:
             obj.state = 'open'
             for solution_id in obj.tasks_solution:
-                if solution_id.state == 'reject':
+                if solution_id.state in ['reject','waiting_approve']:
                     solution_id.state = 'open'
                 for strategy_id in solution_id.child_ids:
-                    if strategy_id.state == 'reject':
+                    if strategy_id.state in ['reject','waiting_approve']:
                         strategy_id.state = 'open'
             
     def check_ccpp_delayed(self):
