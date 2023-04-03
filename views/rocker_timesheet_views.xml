@@ -16,11 +16,11 @@
                     <field name="customer_potential"/>
                      <separator/>
                     <searchpanel view_types="tree,calendar">
-                        <!--<field name="task_search" expand="1" hierarchize="1" string="CCPP" icon="fa-folder-open"/>-->
-                        <!--<field name="customer_potential_id" string="Customer Potential" icon="fa-folder-open"/>
-                        <field name="project_test_id" string="Project Test" icon="fa-folder-open"/>
-                        <field name="project_id" string="Project" icon="fa-folder-open"/>
-                        <field name="customer_potential" string="Customer Potential" icon="fa-folder-open"/>-->
+                        <!--<field name="task_search" expand="1" hierarchize="1" string="CCPP" icon="fa-folder-open-o"/>-->
+                        <!--<field name="customer_potential_id" string="Customer Potential" icon="fa-folder-open-o"/>
+                        <field name="project_test_id" string="Project Test" icon="fa-folder-open-o"/>
+                        <field name="project_id" string="Project" icon="fa-folder-open-o"/>
+                        <field name="customer_potential" string="Customer Potential" icon="fa-folder-open-o"/>-->
                     </searchpanel>
                     <filter string="Open" name="open" domain="[('state', '=', 'open')]"/>
                     <filter string="Done" name="done" domain="[('state', '=', 'done')]"/>

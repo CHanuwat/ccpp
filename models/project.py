@@ -152,11 +152,26 @@ class Project(models.Model):
     
     strategy_lines = fields.One2many('project.task', 'project_id', string="Current Strategy", domain=[('is_strategy','=',True),('parent_id','!=',False),('is_history','=',False)])
     strategy_history_lines = fields.One2many('project.task', 'project_id', string="Previous Period Strategy", domain=[('is_strategy','=',True),('parent_id','!=',False),('is_history','=',True)])
+    check_step = fields.Selection([
+        ('1', 'Step 1'),
+        ('2', 'Step 2'),
+        ('3', 'Step 3'),
+        ('4', 'Step 4'),
+        ('5', 'Step 5'),
+    ], default='1', string="Step")
+
+    def check_view_step(self):
+        for obj in self:
+            if obj.check_step == '1':
+                action = self.env['ir.actions.act_window'].with_context({'active_id': self.id})._for_xml_id('ccpp.open_view_ccpp_step1')
+                action['res_id'] = self.id
+                return action
 
     def unlink(self):
+        if not self._context.get('discard_create'):
+            raise UserError("ระบบไม่สามารถลบ CCPP ได้ กรุณา cancel หากไม่ได้ใช้งาน")
         res = super().unlink()
-        raise UserError("ระบบไม่สามารถลบ CCPP ได้ กรุณา cancel หากไม่ได้ใช้งาน")
-
+        
     @api.depends('tasks_solution')   
     def _compute_ready_create_solution(self):
         for obj in self:
@@ -335,6 +350,7 @@ class Project(models.Model):
     @api.depends("job_id")
     def _compute_domain_partner_ids(self):
         for obj in self:
+            print("Pass"*100)
             customer_ids = self.env['ccpp.customer.information']
             if obj.job_id:
                 customer_ids = self.env['ccpp.customer.information'].search([('job_id','=',obj.job_id.id)]).mapped('customer_id')
@@ -396,7 +412,7 @@ class Project(models.Model):
             model_id = self.env['ir.model'].sudo().search([('model','=',obj._name)])
             approve_id = self.env['approval'].search([('model_id','=', model_id.id),
                                                       ('department_id','=', obj.department_id.id),
-                                                      ('job_request_id','=', obj.job_id.id)])
+                                                      ('job_request_ids','in', obj.job_id.id)])
             vals_list = []
             if not approve_id:
                 raise UserError("Approval Workflow is not set")
@@ -535,6 +551,11 @@ class Project(models.Model):
     
     def button_send_approve(self):
         for obj in self:
+            if not obj.code:
+                sequence_date = datetime.now().strftime("%Y-%m-%d")
+                sequence_code = 'ccpp.'+'cp'
+                code = self.env['ir.sequence'].next_by_code(sequence_code,sequence_date=sequence_date)
+                obj.code = code
             obj.check_information()
             obj.state = 'waiting_approve'
             for solution_id in obj.tasks_solution:
@@ -677,11 +698,17 @@ class Project(models.Model):
                         strategy_id.delay_date = date_today
                         
     def run_script_update(self):
-        employee_ids = self.env['hr.employee'].search([])
-        for employee_id in employee_ids:
-            for job_id in employee_id.job_lines:
-                employee_id.job_id = job_id.id
-                break
+        approve_ids = self.env['approval'].search([])
+        for approve_id in approve_ids:
+            if approve_id.job_request_id:
+                approve_id.write({'job_request_ids': [approve_id.job_request_id.id] })
+        
+        #employee_ids = self.env['hr.employee'].search([])
+        #for employee_id in employee_ids:
+        #    for job_id in employee_id.job_lines:
+        #        employee_id.job_id = job_id.id
+        #        break
+        
         # update start date & deadline
         #ccpp_ids = self.env['project.project'].search([])
         #for ccpp_id in ccpp_ids:
@@ -925,6 +952,14 @@ class Project(models.Model):
             job_ids |= job_id
             job_ids |= self.get_child_job(job_id.child_lines, job_ids)   
         return job_ids
+    
+    @api.model
+    def open_create_step(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('project.open_create_project')
+        action['target'] = 'new'
+        return action
+        
+        
         
 class Task(models.Model):
     _inherit = "project.task" 
@@ -1348,7 +1383,7 @@ class Task(models.Model):
             model_id = self.env['ir.model'].sudo().search([('model','=',self.project_id._name)])
             approve_id = self.env['approval'].search([('model_id','=', model_id.id),
                                                       ('department_id','=', obj.department_id.id),
-                                                      ('job_request_id','=', obj.job_id.id)
+                                                      ('job_request_ids','in', obj.job_id.id)
                                                     ])
             if not approve_id:
                 raise UserError("Approval Workflow is not set")
@@ -1821,8 +1856,8 @@ class ProjectUpdate(models.Model):
     status = fields.Selection(default='on_track')
 
     def unlink(self):
-        res = super().unlink()
         raise UserError("ระบบไม่สามารถลบเอกสารได้")
+        res = super().unlink()
 
     @api.model_create_multi
     def create(self, vals_list):

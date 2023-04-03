@@ -19,6 +19,23 @@ export class CCPPDashBoardList extends Component {
         });
     }
 
+    //async openCreate() {
+    //    this._rpc({
+    //        model: 'project.project',
+     //       method: 'open_create_step',
+     //   });//.then(function () {
+        //    self.trigger_up('reload');
+        //}
+    //}
+
+
+    //async openCreate() {
+    //   this._rpc({
+    //               model: 'project.project',
+    //               method: 'open_create_step',
+    //           });
+    //}
+
     /**
      * This method clears the current search query and activates
      * the filters found in `filter_name` attibute from button pressed

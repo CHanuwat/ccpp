@@ -8,6 +8,26 @@
         <field name="view_mode">tree,form</field>
     </record>
 
+    <record id="approval_search_form" model="ir.ui.view">  
+        <field name="name">approval.search.form</field>
+        <field name="model">approval</field>
+        <field name="arch" type="xml">
+            <search string="Search Solution">
+                <field name="name" string="Name" filter_domain="['|', ('name', 'ilike', self), ('id', 'ilike', self)]"/>
+                <field name="department_id" string="Department" filter_domain="[('department_id.name', 'ilike', self)]"/>
+                <field name="model_id" string="Document" filter_domain="[('model_id.name', 'ilike', self)]"/>
+                <field name="job_request_ids" string="Request By" filter_domain="[('job_request_ids.name', 'ilike', self)]"/>
+                <field name="all_approve_ids" string="Approvers" filter_domain="[('all_approve_ids.name', 'ilike', self)]"/>
+                <separator/>
+                <group expand="1" string="Group By">
+                    <filter string="Document" name="groupby_state" context="{'group_by': 'model_id'}"/>
+                    <filter string="Department" name="groupby_department" context="{'group_by': 'department_id'}"/>
+                    <filter string="Employee Type" name="groupby_employee_type" context="{'group_by': 'contract_type_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <record id="approval_view_tree" model="ir.ui.view">
         <field name="name">approval.view.tree</field>
         <field name="model">approval</field>
@@ -16,7 +36,9 @@
                 <!--<field name="name"/>-->
                 <field name="model_id"/>
                 <field name="department_id"/>
-                <field name="job_request_id"/>
+                <field name="job_request_ids" widget="many2many_tags" string="Request By"/>
+                <field name="contract_type_id" string="Employee Type"/>
+                <field name="all_approve_ids" widget="many2many_tags" string="Approvers"/>
             </tree>
         </field>
     </record>
@@ -31,15 +53,28 @@
                         <group>
                             <field name="model_id" options="{'no_create': True}"/>
                             <field name="department_id" options="{'no_create': True}"/>
-                            <field name="job_request_id" options="{'no_create': True}"/>
+                            <field name="domain_contract_type_ids" invisible="True"/>
+                            <field name="contract_type_id" domain="[('id', 'in', domain_contract_type_ids)]" options="{'no_create': True}"/>
                         </group>
                     </group>
                     <notebook>
-                        <page name="Approval Lines">
+                        <page name="request_users" string="Request Users">
+                            <field name="domain_job_request_ids" invisible="True"/>
+                            <field name="job_request_ids" domain="[('id', 'in', domain_job_request_ids)]" options="{'no_create': True}">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="employee_id" widget="many2one_avatar_user"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                    <notebook>
+                        <page name="approval_level" string="Approval Level"> 
                             <field name="lines">
                                 <tree editable="bottom" delete="true">
                                     <field name="sequence"/>
                                     <field name="job_approve_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                                    <field name="user_approve_ids" widget="many2many_avatar_user"/>
                                 </tree>
                             </field>
                         </page>

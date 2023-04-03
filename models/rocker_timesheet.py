@@ -761,15 +761,13 @@ class RockerTimesheet(models.Model):
                 vals['name'] = _name
 
         # project implies analytic account
+        # set none because some analytic line not have ccpp(project)
         if not vals.get('account_id'):
-            # _logger.debug('Account_id missing...')
-            # if imported from Excel, then there is no project_id
             task = self.env['project.task'].browse(vals.get('task_id'))
             project = self.env['project.project'].search([('id', '=', task.project_id.id)], limit=1)
-            # _logger.debug('Added account_id: ' + str(project.analytic_account_id))
-            vals['account_id'] = project.analytic_account_id.id
-            if not project.analytic_account_id.id:
-                vals['account_id'] = 1
+            #vals['account_id'] = project.analytic_account_id.id
+            #if not project.analytic_account_id.id:
+            #    vals['account_id'] = 1
         print("Y"*100)
         record = super(RockerTimesheet, self).create(vals)
         global daystocreate

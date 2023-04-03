@@ -194,6 +194,135 @@
         </field>
     </record>
 
+    <!-- project step -->
+    <record id="project_project_step1_view_form" model="ir.ui.view">
+        <field name="name">project.project.step1</field>
+        <field name="model">project.project</field>
+        <field name="priority">301</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Name"/>
+                        <h1>
+                            <field name="name" class="o_project_name oe_inline" placeholder="CCPP Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="company_id" invisible="True"/>
+                            <field name="domain_partner_ids" invisible="True"/>
+                            <field name="partner_id" domain="[('id', 'in', domain_partner_ids)]" options="{'no_create':True}"/>
+                            <field name="domain_partner_contact_ids" invisible="True"/>
+                            <field name="partner_contact_id" domain="[('id','in',domain_partner_contact_ids)]" context="{'show_title_position':True}" options="{'no_create':True}"/>
+                            <field name="department_id" invisible="True"/> 
+                            <field name="division_id" invisible="True"/>
+                            <field name="domain_job_ids" invisible="True"/>
+                            <field name="job_id"  invisible="True"/>
+                            <field name="employee_id" invisible="True"/>
+                        </group>
+                    </group>
+                    <div>
+                    <div>
+                        <h3><p style="margin: auto;font-weight: 900;text-align: center;">Impact to customer</p></h3>
+                    </div>  
+                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
+                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Critical CPP Criteria</p>
+                    </div>
+                    <div class="row mt16 o_settings_container" id="impact_cus_setting">
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_income_cus">
+                            <div class="o_setting_left_pane">
+                                <field name="is_income_cus"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_income_cus"/>
+                                <!--<div class="text-muted">
+                                    เงินได้/เงินสนับสนุน
+                                </div>-->
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_effectiveness_cus">
+                            <div class="o_setting_left_pane">
+                                <field name="is_effectiveness_cus"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_effectiveness_cus"/>
+                                <!--<div class="text-muted">
+                                    ประสิทธิภาพการทำงาน/ความก้าวหน้าส่วนบุคคล
+                                </div>-->
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_repulation_cus">
+                            <div class="o_setting_left_pane">
+                                <field name="is_repulation_cus"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_repulation_cus"/>
+                                <!--<div class="text-muted">
+                                    ภาพลักษณ์ของลูกค้า
+                                </div>-->
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_competitive_cus">
+                            <div class="o_setting_left_pane">
+                                <field name="is_competitive_cus"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_competitive_cus"/>
+                                <!--<div class="text-muted">
+                                    ความได้เปรียบของคู่แข่ง
+                                </div>-->
+                            </div>
+                        </div>
+                    </div>
+                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
+                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Critical Urgency</p>
+                    </div>
+                    <div class="row mt16 o_settings_container" id="impact_time_cus_setting">
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_critical">
+                            <div class="o_setting_left_pane">
+                                <field name="is_critical"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_critical"/>
+                                <!--<div class="text-muted">
+                                    ต้องแก้ไขด่วน
+                                </div>-->
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_not_critical">
+                            <div class="o_setting_left_pane">
+                                <field name="is_not_critical"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_not_critical"/>
+                                <!--<div class="text-muted">
+                                    รอได้
+                                </div>-->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="open_view_ccpp_step1" model="ir.actions.act_window">
+        <field name="name">CCPP</field>
+        <field name="res_model">project.project</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="ccpp.project_project_step1_view_form"/>
+    </record>
+
+    <!--<record id="open_view_ccpp_step2" model="ir.actions.act_window">
+        <field name="name">CCPP</field>
+        <field name="res_model">project.project</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="ccpp.project_project_step2_view_form"/>
+    </record>  -->
+    
+
     <!-- project kanban -->
     <record model="ir.ui.view" id="view_project_kanban_inherit_ccpp">
         <field name="name">project.project.kanban</field>
@@ -256,8 +385,7 @@
                     <!--<field style="padding-top:8px; padding-bottom:5px;" t-if="record.last_update_id.value &amp;&amp; widget.editable" name="last_update_status" widget="project_state_selection" options="{'color_field': 'last_update_color', 'hide_label': 1}" attrs="{'invisible':[('last_update_status','=',False)] }"/>
                     <span style="padding-top:5px; padding-bottom:5px;" class="o_text_overflow text-primary" t-if="record.last_update_id.value">
                         <span class="me-2"/><t t-esc="record.last_update_id.value"/>
-                    </span><br/>-->
-                    
+                    </span><br/>--> 
                 
             </xpath>
             <xpath expr="//kanban[1]/templates[1]/t[1]/div[1]/div[2]" position="replace">
@@ -710,8 +838,9 @@
                 <field name="is_verify_impact_cus" invisible="True"/>
                 <field name="is_critical" invisible="True"/>
                 <field name="is_stamp_record" invisible="True"/>
+
                 <button string="Next" name="button_next_create_ccpp" type="object" class="btn-primary" attrs="{'invisible':['|',('is_verify_impact_cus','=',True),('is_critical','=',False)]}"/>
-                <button string="Discard" name="button_discard_create_ccpp" type="object" attrs="{'invisible':[('is_verify_impact_cus','=',False),('is_stamp_record','=',False)]}"/><!-- attrs="{'invisible':[('is_verify_impact_cus','=',False)]}"/>-->
+                <button string="Discard" name="button_discard_create_ccpp" type="object" attrs="{'invisible':[('is_verify_impact_cus','=',False),('is_stamp_record','=',False)]}" context="{'discard_create': True}"/><!-- attrs="{'invisible':[('is_verify_impact_cus','=',False)]}"/>-->
             </xpath>
             <xpath expr="//button[@name='action_view_tasks']" position="before">
                 <button string="Back" name="button_back_create_ccpp" type="object" class="btn-primary" attrs="{'invisible':[('is_verify_impact_cus','=',False)]}"/>
@@ -751,9 +880,15 @@
                 <group>
                     <group>
                         <field name="company_id" invisible="True"/>
-                        <field name="partner_id" domain="[('child_ids','!=',False)]" options="{'no_create':True}"/>
+                        <field name="domain_partner_ids" invisible="True"/>
+                        <field name="partner_id" domain="[('id', 'in', domain_partner_ids)]" options="{'no_create':True}"/>
                         <field name="domain_partner_contact_ids" invisible="True"/>
                         <field name="partner_contact_id" domain="[('id','in',domain_partner_contact_ids)]" context="{'show_title_position':True}" options="{'no_create':True}"/>
+                        <field name="department_id" invisible="True"/> 
+                        <field name="division_id" invisible="True"/>
+                        <field name="domain_job_ids" invisible="True"/>
+                        <field name="job_id"  invisible="True"/>
+                        <field name="employee_id" invisible="True"/>
                         <!--<field name="domain_job_position_ids" invisible="True"/>
                         <field name="job_position_id" domain="[('id','in',domain_job_position_ids)]" options="{'no_create': True, 'no_open': True}"/>-->
                     </group>
@@ -1140,10 +1275,10 @@
                 <field name="code" string="Strategy No." attrs="{'column_invisible': [('parent.is_solution','=',False)]}" readonly="True"/>
                 <field name="code" string="Task No." attrs="{'column_invisible': [('parent.is_strategy','=',False),('parent.is_task','=',False),('parent.is_subtask','=',False)]}" readonly="True"/>
             </xpath>
-            <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]" position="attributes">
+            <!--<xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]" position="attributes">-->
                 <!--<attribute name="delete">false</attribute>-->
                 <!--<attribute name="attrs">{'create': [('state','in',['open','process'])]}</attribute>-->
-            </xpath>
+            <!--</xpath>-->
             <!-- invisible optional -->
             <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='project_id']" position="attributes">
                 <attribute name="optional"></attribute>
@@ -1658,8 +1793,9 @@
         <field eval="201" name="priority"/>
         <field name="arch" type="xml">
             <!--<tree delete="0" create="1" expand="1" js_class="ccpp_dashboard_list ccpp_tree" class="ccpp_list">-->
-            <tree delete="0" create="1" expand="1" js_class="ccpp_dashboard_list" class="ccpp_list">
+            <tree delete="0" create="0" expand="1" js_class="ccpp_dashboard_list" class="ccpp_list">
                 <button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>
+                <!--<button type="object" name="check_view_step" icon="fa-folder-open-o" class="oe_highlight"/>-->
                 <field name="code" string="CCPP No."/>
                 <field name="name" string="CCPP Title" class="fw-bold"/>
                 <field name="partner_id" string="Customer"/>

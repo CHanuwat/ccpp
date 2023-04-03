@@ -7,7 +7,7 @@
         <field name="priority" eval="1"/>
         <field name="arch" type="xml">
             <tree create="0" edit="0" delete="0"> 
-                <button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>
+                <button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" class="oe_highlight"/> 
                 <field name="name" string="Name" class="fw-bold"/>
                 <field name="partner_id" string="Customer"/>
                 <field name="priority_select" decoration-danger="priority_select in ['1','2']" string="Priority"/>
