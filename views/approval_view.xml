@@ -37,7 +37,7 @@
                     <notebook>
                         <page name="Approval Lines">
                             <field name="lines">
-                                <tree editable="bottom" delete="false">
+                                <tree editable="bottom" delete="true">
                                     <field name="sequence"/>
                                     <field name="job_approve_ids" widget="many2many_tags" options="{'no_create': True}"/>
                                 </tree>

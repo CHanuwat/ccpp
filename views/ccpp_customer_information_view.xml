@@ -193,7 +193,7 @@
                             <field name="partner_ids" widget="many2many_tags" context="{'show_title_position':True, 'create_customer_contact':True, 'customer_parent': customer_id}" domain="[('id','in',domain_partner_ids)]" required="True" options="{'no_quick_create': True}"/>
                             <field name="province_id"/>
                             <field name="sale_area_id"/>
-                            <field name="sale_person_id" readonly="True" options="{'no_open': True}"/>
+                            <field name="sale_person_id" readonly="True" options="{'no_open': True}" force_save="1"/>
                             <field name="domain_job_ids" invisible="True"/>
                             <field name="job_id" domain="[('id', 'in', domain_job_ids)]"/>
                         </group>
@@ -376,7 +376,7 @@
                             />
                             <field name="domain_partner_ids" invisible="True"/>
                             <field name="partner_id" string="Contact Person" context="{'show_title_position':True}" options="{'no_create':True}" domain="[('id','in',domain_partner_ids)]" required="True"/>
-                            <field name="sale_person_id" string="User" readonly="True" options="{'no_open': True}"/>
+                            <field name="sale_person_id" string="User" readonly="True" options="{'no_open': True}" force_save="1"/>
                             <field name="domain_job_ids" invisible="True"/>
                             <field name="job_id" domain="[('id', 'in', domain_job_ids)]"/>
                         </group>
@@ -536,7 +536,7 @@
                             options="{'no_create': True}"
                             attrs="{'invisible': [('is_company_group','=', False)]}"
                             />
-                            <field name="sale_person_id" string="User" readonly="True" options="{'no_open': True}"/>
+                            <field name="sale_person_id" string="User" readonly="True" options="{'no_open': True}" force_save="1"/>
                             <field name="domain_job_ids" invisible="True"/>
                             <field name="job_id" domain="[('id', 'in', domain_job_ids)]"/>
                         </group>

@@ -160,7 +160,7 @@ class Partner(models.Model):
             if obj.name:
                 partner_duplicate = self.env['res.partner'].search([('id','!=',obj.id),('name','=',obj.name)],limit=1)
                 if partner_duplicate:
-                    raise ValidationError(_("Contact name must be unique"))
+                    raise ValidationError(_("Contact name must be unique %s"%partner_duplicate.name))
                 
 class PartnerPosition(models.Model):
     _name = "res.partner.position"
