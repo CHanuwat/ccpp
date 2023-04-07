@@ -18,6 +18,10 @@
                 <field name="division_id" domain="[('id','in',domain_division_ids)]" options="{'no_create': True}"/>
             </xpath>
 
+            <xpath expr="//group[@name='active_group']/field[@name='user_id']" position="attributes">
+                <attribute name="options">{'no_open': True}</attribute>
+            </xpath>
+
         </field>
     </record>
 

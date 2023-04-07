@@ -190,7 +190,14 @@
                                   <label for="is_potential" string="Potential"/>     
                             </div>
                             <field name="domain_partner_ids" invisible="True"/>
-                            <field name="partner_ids" widget="many2many_tags" context="{'show_title_position':True, 'create_customer_contact':True, 'customer_parent': customer_id}" domain="[('id','in',domain_partner_ids)]" required="True" options="{'no_quick_create': True}"/>
+                            <field name="partner_ids" context="{'show_title_position':True, 'create_customer_contact':True, 'customer_parent': customer_id}" 
+                            domain="[('id','in',domain_partner_ids)]" 
+                            required="True" 
+                            options="{'no_quick_create': True}">
+                                <tree>
+                                    <field name="display_name" string="Name"/>
+                                </tree>
+                            </field>
                             <field name="province_id"/>
                             <field name="sale_area_id"/>
                             <field name="sale_person_id" readonly="True" options="{'no_open': True}" force_save="1"/>

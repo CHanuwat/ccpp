@@ -28,6 +28,10 @@ class CCPPPrioirty(models.Model):
             result.append((rec.id, '%s %s' %(rec.name, rec.description)))
         return result
     
+    def unlink(self):
+        raise UserError("ระบบไม่สามารถลบ Priority ได้")
+        res = super().unlink()
+    
 class CCPPPrioirtyLine(models.Model):
     _name = "ccpp.priority.line"
 

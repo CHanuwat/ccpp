@@ -96,13 +96,13 @@
                             <div class="oe_title">
                                 <h1>
                                     <label for="current_action" string="Current Situation"/>
-                                    <field name="current_action" class="o_text_overflow" placeholder="Enter Current Situation"/>
+                                    <field name="current_action" class="o_text_overflow" placeholder="Enter Current Situation" required="1"/>
                                 </h1>
                             </div>
                             <div class="oe_title">
                                 <h1>
                                     <label for="next_action" string="Next Action"/>
-                                    <field name="next_action" class="o_text_overflow" placeholder="Enter Next Action"/>
+                                    <field name="next_action" class="o_text_overflow" placeholder="Enter Next Action" required="1"/>
                                 </h1>
                             </div>
 
