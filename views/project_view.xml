@@ -2047,7 +2047,7 @@
         <field eval="201" name="priority"/>
         <field name="arch" type="xml">
             <!--<tree delete="0" create="1" expand="1" js_class="ccpp_dashboard_list ccpp_tree" class="ccpp_list">-->
-            <tree delete="0" create="1" expand="1" js_class="ccpp_dashboard_list" class="ccpp_list" editable="bottom">
+            <tree delete="0" create="1" expand="1" js_class="ccpp_dashboard_list" class="ccpp_list">
                 <!--<button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>-->
                 <button type="object" name="check_view_step" icon="fa-folder-open-o" class="oe_highlight"/>
                 <field name="code" string="CCPP No." readonly="1"/>
