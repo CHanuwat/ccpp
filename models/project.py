@@ -759,10 +759,16 @@ class Project(models.Model):
     def button_to_open(self):
         for obj in self:
             obj.state = 'open'
+            ccpp_approve_line_ids = obj.ccpp_approve_lines.filtered(lambda o:o.is_approve == False)
+            ccpp_approve_line_ids.unlink()
             for solution_id in obj.tasks_solution:
+                solution_approve_line_ids = solution_id.solution_approve_lines.filtered(lambda o:o.is_approve == False)
+                solution_approve_line_ids.unlink()
                 if solution_id.state in ['reject','waiting_approve']:
                     solution_id.state = 'open'
                 for strategy_id in solution_id.child_ids:
+                    strategy_approve_line_ids = strategy_id.strategy_approve_lines.filtered(lambda o:o.is_approve == False)
+                    strategy_approve_line_ids.unlink()
                     if strategy_id.state in ['reject','waiting_approve']:
                         strategy_id.state = 'open'
             
@@ -1138,6 +1144,7 @@ class Task(models.Model):
     is_owner = fields.Boolean(string="Is Show To Open", compute="_compute_is_owner")
     check_step = fields.Selection(related="project_id.check_step")
     
+    
     def button_start_next_period(self):
         for solution_id in self:
             
@@ -1243,7 +1250,7 @@ class Task(models.Model):
             deadline_date = False
             string_show_period = False
             #priority_line_id = obj.project_id.priority_id.lines.filtered(lambda o:o.active)
-            if obj.project_id.priority_id and obj.start_date and obj.project_id.priority_id.point <= 2:
+            if obj.project_id.priority_id and obj.start_date: #and obj.project_id.priority_id.point <= 2:
                 start_date_obj = obj.start_date
                 priority_line_id = obj.project_id.priority_id.lines.filtered(lambda o:o.active)
                 
@@ -1827,14 +1834,19 @@ class Task(models.Model):
     
     def button_to_open_strategy(self):
         for obj in self:
+            strategy_approve_line_ids = obj.strategy_approve_lines.filtered(lambda o:o.is_approve == False)
+            strategy_approve_line_ids.unlink()
             obj.state = 'open'
             
     def button_to_open_solution(self):
         for obj in self:
             obj.state = 'open'
+            solution_approve_line_ids = obj.solution_approve_lines.filtered(lambda o:o.is_approve == False)
+            solution_approve_line_ids.unlink()
             for strategy_id in obj.child_ids:
-                if strategy_id.state == 'reject':
-                    strategy_id.state = 'open'
+                strategy_approve_line_ids = strategy_id.strategy_approve_lines.filtered(lambda o:o.is_approve == False)
+                strategy_approve_line_ids.unlink()
+                strategy_id.state = 'open'
     
     def button_cancel_wizard(self):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_wizard_cancel_action')

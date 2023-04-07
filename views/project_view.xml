@@ -2057,7 +2057,7 @@
                 <field name="priority_select" string="Priority" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'color'}"/>-->
                 <field name="priority_select" decoration-danger="priority_select in ['1','2']" string="Priority" readonly="1"/>
                 <field name="deadline_date" readonly="1"/>
-                <!--<field name="show_period" string="Period"/>-->
+                <field name="show_period" string="Period"/>
                 <field name="state_color" invisible="1"/>
                 <field name="state" string="State" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'state_color'}"/>
                 <button name="action_open_solution" type="object" title="View Strategy" string="Strategy" class="btn btn-link float-end ri-eye-line"/>
@@ -2110,7 +2110,7 @@
                 <field name="priority_select" string="Priority" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'color'}"/>-->
                 <field name="priority_select" decoration-danger="priority_select in ['1','2']" string="Priority"/>
                 <field name="deadline_date"/>
-                <!--<field name="show_period" string="Period"/>-->
+                <field name="show_period" string="Period"/>
                 <field name="state_color" invisible="1"/>
                 <field name="state" string="State" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'state_color'}"/>
                 <button name="action_open_solution" type="object" title="Strategy" string="Strategy" class="btn btn-link float-end ri-eye-line"/>
