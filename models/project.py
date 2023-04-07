@@ -240,14 +240,14 @@ class Project(models.Model):
             raise UserError("ระบบไม่สามารถลบ CCPP ได้ กรุณา cancel หากไม่ได้ใช้งาน")
         res = super().unlink()
         
-    @api.depends('tasks_solution')   
+    @api.depends('tasks_solution',"is_income_cus", "is_effectiveness_cus", "is_repulation_cus", "is_competitive_cus", "is_critical", "is_not_critical","is_income_comp", "is_effectiveness_comp", "is_repulation_comp", "is_competitive_comp", "is_short_time", "is_long_time")   
     def _compute_ready_create_solution(self):
         for obj in self:
             is_ready_create_location = True
             if obj.tasks_solution:
                 if len(obj.tasks_solution) - len(obj.tasks_solution.filtered(lambda o:o.state == 'cancel')) != 0:
                     is_ready_create_location = False
-            if not obj.priority_id:
+            if (not obj.is_income_cus and not obj.is_effectiveness_cus and not obj.is_repulation_cus and not obj.is_competitive_cus and not obj.is_competitive_cus) or (not obj.is_critical and not obj.is_not_critical) or (not obj.is_income_comp and not obj.is_effectiveness_comp and not obj.is_effectiveness_comp and not obj.is_competitive_comp) or (not obj.is_short_time and not obj.is_long_time): 
                 is_ready_create_location = False
             obj.is_ready_create_solution = is_ready_create_location
             
