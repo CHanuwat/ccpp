@@ -221,6 +221,9 @@
                             <field name="job_id"  invisible="True"/>
                             <field name="employee_id" invisible="True"/>
                         </group>
+                        <group>
+                            <field name="show_critical"/>
+                        </group>
                     </group>
                     <div>
                     <div>
@@ -303,6 +306,234 @@
                         </div>
                     </div>
                 </div>
+                <field name="check_step" invisible="True"/>
+                <div style="padding: 10px;margin-top: 30px;">
+                    <button name="button_back_step" type="object" class="btn-primary m-1 btn-width-create-ccpp" string="Back" attrs="{'invisible': [('check_step', 'not in', ['2','3'])]}"/>
+                    <button name="button_next_step" type="object" class="btn-primary m-1 btn-width-create-ccpp" string="Next" attrs="{'invisible': [('is_critical', '=', False)]}"/>
+                    <button type="object" class="btn-outline-primary m-1 btn-width-create-ccpp" string="Back To List" special="cancel"/>   
+                </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="project_project_step2_view_form" model="ir.ui.view">
+        <field name="name">project.project.step2</field>
+        <field name="model">project.project</field>
+        <field name="priority">302</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Name"/>
+                        <h1>
+                            <field name="name" class="o_project_name oe_inline" placeholder="CCPP Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="company_id" invisible="True"/>
+                            <field name="domain_partner_ids" invisible="True"/>
+                            <field name="partner_id" domain="[('id', 'in', domain_partner_ids)]" options="{'no_create':True}"/>
+                            <field name="domain_partner_contact_ids" invisible="True"/>
+                            <field name="partner_contact_id" domain="[('id','in',domain_partner_contact_ids)]" context="{'show_title_position':True}" options="{'no_create':True}"/>
+                            <field name="department_id" invisible="True"/> 
+                            <field name="division_id" invisible="True"/>
+                            <field name="domain_job_ids" invisible="True"/>
+                            <field name="job_id"  invisible="True"/>
+                            <field name="employee_id" invisible="True"/>
+                        </group>
+                        <group>
+                            <field name="show_critical"/>
+                            <field name="priority_id" string="Priority" options="{'no_open': True}"/>
+                            <field name="show_time" readonly="True"/>
+                        </group>
+                    </group>
+                    <div>
+                    <div>
+                        <h3><p style="margin: auto;font-weight: 900;text-align: center;">Impact to Company/Winmed</p></h3>
+                    </div>  
+                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
+                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Priority Criteria</p>
+                    </div>
+                    <div class="row mt16 o_settings_container" id="impact_company_setting">
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_income_comp">
+                            <div class="o_setting_left_pane">
+                                <field name="is_income_comp"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_income_comp"/>
+                                <!--<div class="text-muted">
+                                    ยอดขาย/ต้นทุน
+                                </div>-->
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_effectiveness_comp">
+                            <div class="o_setting_left_pane">
+                                <field name="is_effectiveness_comp"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_effectiveness_comp"/>
+                                <!--<div class="text-muted">
+                                    โอกาสทางธุรกิจในอนาคต
+                                </div>-->
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_repulation_comp">
+                            <div class="o_setting_left_pane">
+                                <field name="is_repulation_comp"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_repulation_comp"/>
+                                <!--<div class="text-muted">
+                                    ภาพลักษณ์ของบริษัท
+                                </div>-->
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_competitive_comp">
+                            <div class="o_setting_left_pane">
+                                <field name="is_competitive_comp"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_competitive_comp"/>
+                                <!--<div class="text-muted">
+                                    ความได้เปรียบของคู่แข่ง
+                                </div>-->
+                            </div>
+                        </div>
+                    </div>
+                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
+                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Time</p>
+                    </div>
+                    <div class="row mt16 o_settings_container" id="impact_time_cus_setting">
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_short_time">
+                            <div class="o_setting_left_pane">
+                                <field name="is_short_time"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_short_time"/>
+                                <!--<div class="text-muted">
+                                    ใช้เวลาน้อยกว่า 4 เดือน
+                                </div>-->
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-5 o_setting_box" id="is_long_time">
+                            <div class="o_setting_left_pane">
+                                <field name="is_long_time"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="is_long_time"/>
+                                <!--<div class="text-muted">
+                                    ใช้เวลานานกว่า 4 เดือน
+                                </div>-->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="padding: 10px;margin-top: 30px;">
+                    <field name="check_step" invisible="True"/>
+                    <field name="priority_select" invisible="True"/>
+                    <button name="button_back_step" type="object" class="btn-primary m-1 btn-width-create-ccpp" string="Back" attrs="{'invisible': [('check_step', 'not in', ['2','3'])]}"/>
+                    <button name="button_next_step" type="object" class="btn-primary m-1 btn-width-create-ccpp" string="Next" attrs="{'invisible': [('priority_select', 'not in', ['1','2'])]}"/>
+                    <button name="button_save" type="object" class="btn-outline-primary m-1 btn-width-create-ccpp" string="Back To List"/>    
+                </div>
+                </sheet>
+                
+            </form>
+        </field>
+    </record>
+
+    <record id="project_project_step3_view_form" model="ir.ui.view">
+        <field name="name">project.project.step3</field>
+        <field name="model">project.task</field>
+        <field name="priority">303</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <field name="company_id" invisible="True"/>
+                    <field name="state" invisible="True"/>
+                    <span style="padding-left:30px; padding-top:5px" class="oe_left">
+                        <h1>Create Solution</h1>
+                    </span>
+                    <div class="oe_title">
+                        <label for="name" string="Title"/>
+                        <h1>
+                            <field name="name" class="o_project_name oe_inline" placeholder="Solution Title"/>
+                        </h1>
+                    </div>
+                    <group>
+                    <group>
+                        <field name="code" string="Solution No." attrs="{'invisible': [('is_solution','=',False)]}" readonly="True"/>
+                        <field name="start_date" force_save="1" attrs="{'invisible': [('is_solution','=',False)], 'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])], 'required': [('is_solution','=',True)]}"/>
+                        <field name="code" string="Strategy No." attrs="{'invisible': [('is_strategy','=',False)]}" readonly="True"/>
+                        <field name="code" string="Task No." attrs="{'invisible': [('is_task','=',False),('is_subtask','=',False)]}" readonly="True"/>
+                        <field name="evaluate_method" attrs="{'invisible': [('is_strategy','=',False)], 'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"/>
+                        <field name="next_action" attrs="{'invisible': [('is_strategy','=',False)]}" readonly="True"/>
+                        <field name="reason_reject" readonly="True" attrs="{'invisible': [('reason_reject','=',False)]}" style="color:red;"/>
+                        <field name="reason_cancel" readonly="True" attrs="{'invisible': [('reason_cancel','=',False)]}" style="color:red;"/>
+
+                        <!--<field name="project_id" domain="[('active', '=', True), ('company_id', '=', company_id)]" widget="project_private_task" string="CCPP" />
+                        <field name="parent_id" string="Solution" attrs="{'invisible': [('is_solution','=',True)]}"/>
+                        <field name="parent_id" string="Strategy" attrs="{'invisible': ['|',('is_solution','=',True),('is_strategy','=',True)]}"/>
+                        <field name="partner_id" widget="res_partner_many2one" class="o_task_customer_field"/>
+                        <field name="evaluate_method" attrs="{'invisible': [('is_strategy','=',False)]}"/>-->
+                        <field name="project_id" attrs="{'invisible': True}" />
+                        <field name="parent_id" attrs="{'invisible': True}"/>
+                        <field name="parent_id" attrs="{'invisible': True}"/>
+                        <field name="partner_id" attrs="{'invisible': True}"/>
+                        <field name="project_solution_id" attrs="{'invisible': True}"/>
+                    </group>
+                    <group>
+                        <!--<field name="priority_id"/>
+                        <field name="period_id" string="period"/>
+                        <field name="date_deadline" attrs="{'invisible': [('is_closed', '=', True)]}"/>
+                        <field name="user_ids" class="o_task_user_field" options="{'no_open': True, 'no_quick_create': True}" widget="many2many_avatar_user" domain="[('share', '=', False), ('active', '=', True)]"/>
+                        <field name="activity_ids" string="Next Activity" widget="list_activity" attrs="{'invisible': [('is_strategy','=',False)]}"/>-->
+                        <field name="show_period" attrs="{'invisible': [('is_solution','=',False)]}" readonly="True"/>
+                        <field name="deadline_date" attrs="{'invisible': [('is_solution','=',False)]}"/>
+                        <field name="priority_id"  attrs="{'invisible': True}"/>
+                        <field name="period_id"  attrs="{'invisible': True}"/>
+                        <field name="date_deadline"  attrs="{'invisible': True}"/>
+                        <field name="user_ids"  attrs="{'invisible': True}"/>
+                        <field name="activity_ids"  attrs="{'invisible': True}"/>
+                        <field name="active" invisible="1"/>
+                        <field name="partner_phone" widget="phone" attrs="{'invisible': True}"/>
+                        <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}" context="{'project_id': project_id}" invisible="True"/>
+                        <!--<field name="legend_blocked" invisible="1"/>
+                        <field name="legend_normal" invisible="1"/>
+                        <field name="legend_done" invisible="1"/>-->
+                        <field name="display_project_id" string="Project" attrs="{'invisible': True}" domain="[('active', '=', True), ('company_id', '=', company_id)]"/>
+                        <field name="milestone_id" placeholder="e.g. Prodquct Launch" context="{'default_project_id': project_id if not parent_id or not display_project_id else display_project_id}" attrs="{'invisible': True}"/>
+                        <field name="is_solution" attrs="{'invisible': True}"/>
+                        <field name="is_strategy" attrs="{'invisible': True}"/>
+                        <field name="is_task" attrs="{'invisible': True}"/>
+                        <field name="is_subtask" attrs="{'invisible': True}"/>
+                    </group>
+                </group>
+                    <notebook>
+                        <page name="strategy_page" string="Strategy" attrs="{'invisible': [['is_solution', '=', False]]}">
+                            <field name="child_ids">
+                                <tree create="0" edit="0" delete="0">
+                                    <button type="action" name="ccpp.action_open_solution_strategy_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>
+                                    <field name="is_solution" attrs="{'readonly': True, 'column_invisible': True}"/>
+                                    <field name="is_strategy" attrs="{'readonly': True, 'column_invisible': True}"/>
+                                    <field name="name" string="Strategy Title" class="fw-bold" attrs="{'required': True}"/>
+                                    <field name="parent_id" string="Solution"/>
+                                    <field name="project_id" string="CCPP"/>
+                                    <field name="partner_id" string="Customer"/>
+                                    <field name="priority_select" decoration-danger="priority_select in ['1','2']" string="Priority" attrs="{'readonly': True}"/>
+                                    <field name="show_period" string="Period" attrs="{'readonly': True}"/>
+                                    <field name="user_ids" widget="many2many_avatar_user" string="User"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                    <div style="padding: 10px;margin-top: 30px;">
+                        <field name="check_step" invisible="True"/>
+                        <button name="button_back_step" type="object" class="btn-primary m-1 btn-width-create-ccpp" string="Back" attrs="{'invisible': [('check_step', 'not in', ['2','3'])]}"/>
+                        <button name="button_next_step" type="object" class="btn-primary m-1 btn-width-create-ccpp" string="Next"/>
+                        <button type="object" class="btn-outline-primary m-1 btn-width-create-ccpp" string="Back To List" special="cancel"/>   
+                    </div> 
                 </sheet>
             </form>
         </field>
@@ -313,14 +544,31 @@
         <field name="res_model">project.project</field>
         <field name="view_mode">form</field>
         <field name="view_id" ref="ccpp.project_project_step1_view_form"/>
+        <field name="context">{'create_step': 1}</field>
     </record>
 
-    <!--<record id="open_view_ccpp_step2" model="ir.actions.act_window">
+    <record id="open_view_ccpp_step2" model="ir.actions.act_window">
         <field name="name">CCPP</field>
         <field name="res_model">project.project</field>
         <field name="view_mode">form</field>
         <field name="view_id" ref="ccpp.project_project_step2_view_form"/>
-    </record>  -->
+        <field name="target">main</field>
+    </record>
+
+    <record id="open_view_ccpp_step3" model="ir.actions.act_window">
+        <field name="name">CCPP</field>
+        <field name="res_model">project.project</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="ccpp.project_project_step3_view_form"/>
+        <field name="target">main</field>
+    </record>
+
+    <record id="open_view_ccpp_step4" model="ir.actions.act_window">
+        <field name="name">CCPP</field>
+        <field name="res_model">project.project</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="project.edit_project"/>
+    </record>
     
 
     <!-- project kanban -->
@@ -444,12 +692,13 @@
             <xpath expr="//form[1]/header[1]/button[1]" position="before">
                 <field name="is_ccpp_done" invisible="True"/>
                 <field name="is_show_approve" invisible="True"/>
+                <field name="is_owner" invisible="True"/>
                 <button name="button_send_approve" string="Send Approve" type="object" class="btn-primary" attrs="{'invisible':['|',('id','=',False),('state','!=','open')]}"/>
                 <button name="button_approve" string="Approve" type="object" class="btn-primary"  attrs="{'invisible': ['|',('is_show_approve','=',False),('state','!=','waiting_approve')]}" /><!-- states="waiting_approve" groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>-->
                 <button name="button_reject_wizard" string="Reject" type="object" class="btn-danger" attrs="{'invisible': ['|',('is_show_approve','=',False),('state','!=','waiting_approve')]}"/><!--states="waiting_approve" groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>-->
-                <button name="button_done" string="Done" type="object" class="btn-success" attrs="{'invisible': ['|',('state','!=','process'),('is_ccpp_done','=',False)]}"/>
-                <button name="button_cancel_wizard" string="Cancel" type="object" states="open,process"/>
-                <button name="button_to_open" string="To Open" type="object" class="btn-primary" states="reject,waiting_approve"/>
+                <button name="button_done" string="Done" type="object" class="btn-success" attrs="{'invisible': ['|','|',('state','!=','process'),('is_ccpp_done','=',False),('is_owner','=',False)]}"/>
+                <button name="button_cancel_wizard" string="Cancel" type="object" attrs="{'invisible': ['|',('state','not in',['open','process']),('is_owner','=',False)]}"/>
+                <button name="button_to_open" string="To Open" type="object" class="btn-primary" attrs="{'invisible': ['|',('state', 'not in', ['reject','waiting_approve']),('is_owner', '=', False)]}"/>
             </xpath>
 
             <xpath expr="//form[1]/header[1]/button[@name='%(project.project_share_wizard_action)d']" position="replace">
@@ -487,7 +736,7 @@
                 <group>
                     <field name="active" invisible="True"/>
                     <field name="show_critical"/>
-                    <field name="priority_id" string="Priority"/> <!--options="{'no_create':True}"/>-->
+                    <field name="priority_id" string="Priority" options="{'no_open':True}"/> <!--options="{'no_create':True}"/>-->
                     <field name="show_time" readonly="True"/>
                     <field name="show_period" readonly="True"/>
                     <field name="deadline_date" widget="date"/>
@@ -1120,8 +1369,9 @@
                 <field name="is_solution_on_approve" invisible="True"/>
                 <field name="is_show_solution_approve" invisible="True"/>
                 <field name="is_show_strategy_approve" invisible="True"/>
+                <field name="is_owner" invisible="True"/>
                 <!--<button name="button_update_strategy" type="object" class="btn-primary" string="Current Situation" attrs="{'invisible': ['|',('is_strategy', '=', False),('state','!=','process')]}"/>-->
-                <button name="button_done" string="Done" type="object" class="btn-success" attrs="{'invisible': ['|',('is_strategy', '=', False),('state','!=','process')]}"/>
+                <button name="button_done" string="Done" type="object" class="btn-success" attrs="{'invisible': ['|','|',('is_strategy', '=', False),('state','!=','process'),('is_owner','=',False)]}"/>
                 
                 <button name="button_send_approve_strategy" type="object" class="btn-primary" string="Send Approve Strategy" attrs="{'invisible': ['|','|','|',('is_strategy', '=', False),('state','!=','open'),('is_ccpp_on_process','=',False),('is_solution_on_approve','=',True)]}"/>
                 <button name="button_send_approve_solution" type="object" class="btn-primary" string="Send Approve Solution" attrs="{'invisible': ['|','|',('is_solution', '=', False),('state','!=','open'),('is_ccpp_on_process','=',False)]}"/>
@@ -1129,12 +1379,13 @@
                 <button name="button_approve_solution" string="Approve Solution" type="object" class="btn-primary" attrs="{'invisible': ['|','|','|',('is_solution', '=', False),('state','!=','waiting_approve'),('is_ccpp_on_process','=',False),('is_show_solution_approve','=',False)]}"/><!-- groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>-->
                 <button name="button_reject_strategy_wizard" string="Reject Strategy" type="object" class="btn-danger" attrs="{'invisible': ['|','|','|','|',('is_strategy', '=', False),('state','!=','waiting_approve'),('is_ccpp_on_process','=',False),('is_solution_on_approve','=',True),('is_show_strategy_approve','=',False)]}"/><!-- groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>-->
                 <button name="button_reject_solution_wizard" string="Reject Solution" type="object" class="btn-danger" attrs="{'invisible': ['|','|','|',('is_solution', '=', False),('state','!=','waiting_approve'),('is_ccpp_on_process','=',False),('is_show_solution_approve','=',False)]}"/><!-- groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_managerr"/>-->
-                <button name="button_to_open_strategy" string="To Open Strategy" type="object" class="btn-primary" attrs="{'invisible': ['|','|','|',('is_strategy', '=', False),('state','!=','reject'),('is_ccpp_on_process','=',False),('is_solution_on_approve','=',True)]}"/>
-                <button name="button_to_open_solution" string="To Open Solution" type="object" class="btn-primary" attrs="{'invisible': ['|','|',('is_solution', '=', False),('state','!=','reject'),('is_ccpp_on_process','=',False)]}"/>
+                <button name="button_to_open_strategy" string="To Open Strategy" type="object" class="btn-primary" attrs="{'invisible': ['|','|','|','|',('is_strategy', '=', False),('state','not in',['reject','waiting_approve']),('is_ccpp_on_process','=',False),('is_solution_on_approve','=',True),('is_owner','=',False)]}"/>
+                <button name="button_to_open_solution" string="To Open Solution" type="object" class="btn-primary" attrs="{'invisible': ['|','|','|',('is_solution', '=', False),('state','not in',['reject','waiting_approve']),('is_ccpp_on_process','=',False),('is_owner','=',False)]}"/>
 
                 <!--<button name="button_to_process" string="To Process" type="object" states="cancel" attrs="{'invisible': ['|',('is_strategy', '=', False),('state','!=','cancel')]}"/>-->
-                <button name="button_cancel_wizard" string="Cancel" type="object" attrs="{'invisible': ['|',('state','not in',['open','process']),('id', '=', False)]}"/>
-                <button name="button_start_next_period" string="Start Next Period" type="object" class="btn-warning" attrs="{'invisible': ['|','|',('is_delay','=',False),('state','=','cancel'),('is_solution','=',False)]}"/>
+                <button name="button_cancel_wizard" string="Cancel" type="object" attrs="{'invisible': ['|','|',('state','not in',['open','process']),('id', '=', False),('is_owner','=',False)]}"/>
+                <button name="button_start_next_period" string="Start Next Period" type="object" class="btn-warning" attrs="{'invisible': ['|','|',('is_delay','=',False),('state','=','cancel'),('is_solution','=',False)]}" help="Start Next Period with remaining strategy click here!"/>
+                <!--<span class="o_tooltip o_tooltip_visible right o_animated ccpp_tooltip" attrs="{'invisible': ['|','|',('is_delay','=',False),('state','=','cancel'),('is_solution','=',False)]}"></span>-->
             </xpath>
 
             <xpath expr="//form[1]/sheet[1]/group[1]" position="replace">
@@ -1225,14 +1476,16 @@
                 <field name="is_strategy" invisible="True"/>
                 <field name="is_task" invisible="True"/>
                 <field name="is_subtask" invisible="True"/>
+                <field name="is_delay" invisible="True"/>
+                <field name="is_owner" invisible="True"/>
                 <field name="is_ccpp_on_process" invisible="True"/>
                 <field name="is_solution_on_approve" invisible="True"/>
                 <field name="is_show_solution_approve" invisible="True"/>
                 <field name="is_show_strategy_approve" invisible="True"/>
                 <!--<button name="action_open_task2" type="object" title="View Strategy" string="View Strategy" class="btn btn-link float-end" attrs="{'invisible': [('parent.is_solution','=',False)]}"/>-->
                 <button name="button_send_approve_strategy" type="object" class="btn-primary" string="Send Approve Strategy" attrs="{'invisible': ['|','|',('state','!=','open'),('is_ccpp_on_process','=',False),('is_solution_on_approve','=',True)]}"/>
-                <button name="button_done" type="object" string="Done" class="btn-success ri-arrow-right-up-line me-2" attrs="{'invisible': [('state','!=','process')]}"/>
-                <button name="button_cancel_wizard" type="object" string="Cancel" class="btn-secondary-ccpp"   attrs="{'invisible': [('state','!=','process')]}"/>
+                <button name="button_done" type="object" string="Done" class="btn-success ri-arrow-right-up-line me-2" attrs="{'invisible': ['|','|',('state','!=','process'),('is_delay','=',True),('is_owner','=',False)]}"/>
+                <button name="button_cancel_wizard" type="object" string="Cancel" class="btn-secondary-ccpp"   attrs="{'invisible': ['|','|',('state','!=','process'),('is_delay','=',True),('is_owner','=',False)]}"/>
                 <button name="action_open_task2" type="object" title="View Task" string="View Task" class="btn btn-link float-end" attrs="{'invisible': [('parent.is_strategy','=',False)]}"/>
             </xpath>
             <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='activity_ids']" position="replace">
@@ -1754,8 +2007,9 @@
                 <field name="state_color" invisible="1"/>
                 <field name="state" string="State" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'state_color'}"/>
                 <field name="user_ids" widget="many2many_avatar_user" string="User"/>
-                <button name="button_done" type="object" string="Done" class="btn-success ri-arrow-right-up-line me-2" attrs="{'invisible': [('state','!=','process')]}"/>
-                <button name="button_cancel_wizard" type="object" string="Cancel" class="btn-secondary-ccpp"   attrs="{'invisible': [('state','!=','process')]}"/>
+                <field name="is_owner" invisible="True"/>
+                <button name="button_done" type="object" string="Done" class="btn-success ri-arrow-right-up-line me-2" attrs="{'invisible': ['|',('state','!=','process'),('is_owner','=',False)]}"/>
+                <button name="button_cancel_wizard" type="object" string="Cancel" class="btn-secondary-ccpp"   attrs="{'invisible': ['|',('state','!=','process'),('is_owner','=',False)]}"/>
                 <!--<button name="action_open_strategy" type="object" title="View Detail" string="View Detail" class="btn btn-link float-end"/>-->
             </tree>
         </field>
@@ -1793,16 +2047,16 @@
         <field eval="201" name="priority"/>
         <field name="arch" type="xml">
             <!--<tree delete="0" create="1" expand="1" js_class="ccpp_dashboard_list ccpp_tree" class="ccpp_list">-->
-            <tree delete="0" create="0" expand="1" js_class="ccpp_dashboard_list" class="ccpp_list">
-                <button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>
-                <!--<button type="object" name="check_view_step" icon="fa-folder-open-o" class="oe_highlight"/>-->
-                <field name="code" string="CCPP No."/>
-                <field name="name" string="CCPP Title" class="fw-bold"/>
-                <field name="partner_id" string="Customer"/>
+            <tree delete="0" create="1" expand="1" js_class="ccpp_dashboard_list" class="ccpp_list" editable="bottom">
+                <!--<button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>-->
+                <button type="object" name="check_view_step" icon="fa-folder-open-o" class="oe_highlight"/>
+                <field name="code" string="CCPP No." readonly="1"/>
+                <field name="name" string="CCPP Title" class="fw-bold" readonly="1"/>
+                <field name="partner_id" string="Customer" readonly="1" options="{'no_open': True}"/>
                 <!--<field name="color" invisible="1"/>
                 <field name="priority_select" string="Priority" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'color'}"/>-->
-                <field name="priority_select" decoration-danger="priority_select in ['1','2']" string="Priority"/>
-                <field name="deadline_date"/>
+                <field name="priority_select" decoration-danger="priority_select in ['1','2']" string="Priority" readonly="1"/>
+                <field name="deadline_date" readonly="1"/>
                 <!--<field name="show_period" string="Period"/>-->
                 <field name="state_color" invisible="1"/>
                 <field name="state" string="State" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'state_color'}"/>

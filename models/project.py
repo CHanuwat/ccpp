@@ -157,15 +157,83 @@ class Project(models.Model):
         ('2', 'Step 2'),
         ('3', 'Step 3'),
         ('4', 'Step 4'),
-        ('5', 'Step 5'),
     ], default='1', string="Step")
+    is_owner = fields.Boolean(string="Is Owner", compute="_compute_is_owner")
 
     def check_view_step(self):
         for obj in self:
             if obj.check_step == '1':
                 action = self.env['ir.actions.act_window'].with_context({'active_id': self.id})._for_xml_id('ccpp.open_view_ccpp_step1')
+                action['context'] = self._context
                 action['res_id'] = self.id
                 return action
+            elif obj.check_step == '2':
+                action = self.env['ir.actions.act_window'].with_context({'active_id': self.id})._for_xml_id('ccpp.open_view_ccpp_step2')
+                action['context'] = self._context
+                action['res_id'] = self.id
+                return action
+            elif obj.check_step == '3':
+                action = self.env['ir.actions.act_window'].with_context({'active_id': self.id})._for_xml_id('ccpp.open_view_ccpp_step3')
+                action['context'] = self._context
+                action['res_id'] = self.id
+                return action
+            elif obj.check_step == '4':
+                action = self.env['ir.actions.act_window'].with_context({'active_id': self.id})._for_xml_id('ccpp.open_view_ccpp_step4')
+                action['context'] = self._context
+                action['res_id'] = self.id
+                return action
+ 
+    def button_next_step(self):
+        if self.check_step == '1':
+            if not self.is_income_cus and not self.is_effectiveness_cus and not self.is_repulation_cus and not self.is_competitive_cus:
+                raise UserError("กรุณาเลือกผลกระทบต่อลูกค้าอย่างน้อย 1 ข้อ")
+            if not self.is_critical and not self.is_not_critical:
+                raise UserError("กรุณาเลือกความเร่งด่วนของลูกค้าที่ต้องการความช่วยเหลือ")
+            if not self.is_critical:
+                raise UserError("Customer Impact must be Critical")
+            self.check_step = '2'
+            action = self.env['ir.actions.act_window'].with_context({'active_id': self.id})._for_xml_id('ccpp.open_view_ccpp_step2')
+            action['res_id'] = self.id
+            return action
+        elif self.check_step == '2':
+            if not self.is_income_comp and not self.is_effectiveness_comp and not self.is_repulation_comp and not self.is_competitive_comp:
+                raise UserError("กรุณาเลือกผลกระทบต่อบริษัทอย่างน้อย 1 ข้อ")
+            if not self.is_short_time and not self.is_long_time:
+                raise UserError("กรุณาเลือกระยะเวลาการแก้ไขปัญหา")
+            self.check_step = '3'
+            action = self.env['ir.actions.act_window']._for_xml_id('ccpp.open_view_ccpp_step3')
+            action['context'] = {'is_create_button_solution': True, 'project_id': self.id, 'is_create_solution': True}
+            return action
+            #action = self.env['ir.actions.act_window'].with_context({'active_id': self.id})._for_xml_id('ccpp.open_view_ccpp_step3')
+            #action['res_id'] = self.id
+            #return action
+        elif self.check_step == '3':
+            self.check_step = '4'
+            if not self.tasks_solution:
+                raise UserError("กรุณาสร้าง Solution ก่อน")
+            for solution_id in self.tasks_solution:
+                if not solution_id.child_ids:
+                    raise UserError("กรุณาสร้าง Strategy ก่อน")
+            action = self.env['ir.actions.act_window'].with_context({'active_id': self.id})._for_xml_id('project.open_view_project_all')
+            action['views'] = [(self.env.ref('project.edit_project').id, 'form')]
+            action['res_id'] = self.id
+            return action
+        
+    def button_back_step(self):
+        if self.check_step == '3':
+            self.check_step = '2'
+            action = self.env['ir.actions.act_window'].with_context({'active_id': self.id})._for_xml_id('ccpp.open_view_ccpp_step2')
+            action['res_id'] = self.id
+            return action
+        elif self.check_step == '2':
+            self.check_step = '1'
+            action = self.env['ir.actions.act_window'].with_context({'active_id': self.id})._for_xml_id('ccpp.open_view_ccpp_step1')
+            action['res_id'] = self.id
+            return action
+        
+    def button_save(self):    
+        action = self.env['ir.actions.server']._for_xml_id('ccpp.action_my_ccpp_group_by_priority_user')
+        return action
 
     def unlink(self):
         if not self._context.get('discard_create'):
@@ -179,7 +247,18 @@ class Project(models.Model):
             if obj.tasks_solution:
                 if len(obj.tasks_solution) - len(obj.tasks_solution.filtered(lambda o:o.state == 'cancel')) != 0:
                     is_ready_create_location = False
+            if not obj.priority_id:
+                is_ready_create_location = False
             obj.is_ready_create_solution = is_ready_create_location
+            
+    @api.depends('job_id')
+    def _compute_is_owner(self):
+        for obj in self:
+            is_owner = False
+            employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+            if obj.job_id in employee_id.job_lines:
+                is_owner = True
+            obj.is_owner = is_owner
     
     @api.depends('state')
     def _compute_state_color(self):
@@ -393,6 +472,12 @@ class Project(models.Model):
             print(self._context)
             if self._context.get('create_from_tree') and not self._context.get('default_allow_billable'):
             #if not self._context.get('default_allow_billable'):
+                sequence_date = datetime.now().strftime("%Y-%m-%d")
+                #sequence_code = 'ccpp.'+'cp.'+employee_id.department_id.code
+                sequence_code = 'ccpp.'+'cp'
+                code = self.env['ir.sequence'].next_by_code(sequence_code,sequence_date=sequence_date)
+                vals['code'] = code
+            if self._context.get('create_step'):
                 sequence_date = datetime.now().strftime("%Y-%m-%d")
                 #sequence_code = 'ccpp.'+'cp.'+employee_id.department_id.code
                 sequence_code = 'ccpp.'+'cp'
@@ -761,10 +846,6 @@ class Project(models.Model):
         return res
         
     def create_solution(self):
-        print("max"*50)
-        print(
-            "self_id", self.id
-        )
         if not self.id:
             raise UserError("กรุณากดบันทึก CCPP ก่อน")
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.open_view_task_all_ccpp')
@@ -955,8 +1036,10 @@ class Project(models.Model):
     
     @api.model
     def open_create_step(self):
-        action = self.env['ir.actions.act_window']._for_xml_id('project.open_create_project')
-        action['target'] = 'new'
+        #action = self.env['ir.actions.act_window']._for_xml_id('project.open_create_project')
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.open_view_ccpp_step1')
+        action['context'] = self._context
+        #action['target'] = 'new'
         return action
         
         
@@ -1052,6 +1135,8 @@ class Task(models.Model):
     is_show_strategy_approve = fields.Boolean(string="Is Show Strategy Approve", compute="_compute_show_strategy_approve")
     is_history = fields.Boolean(string="Is History")
     child_ids = fields.One2many(copy=False)
+    is_owner = fields.Boolean(string="Is Show To Open", compute="_compute_is_owner")
+    check_step = fields.Selection(related="project_id.check_step")
     
     def button_start_next_period(self):
         for solution_id in self:
@@ -1103,10 +1188,24 @@ class Task(models.Model):
                 'target': 'main',
             }
         
-                
-            
-           
-    
+    def button_next_step(self):
+        self.check_step = '4'
+        if not self.tasks_solution:
+            raise UserError("กรุณาสร้าง Solution ก่อน")
+        for solution_id in self.tasks_solution:
+            if not solution_id.child_ids:
+                raise UserError("กรุณาสร้าง Strategy ก่อน")
+        action = self.env['ir.actions.act_window'].with_context({'active_id': self.id})._for_xml_id('project.open_view_project_all')
+        action['views'] = [(self.env.ref('project.edit_project').id, 'form')]
+        action['res_id'] = self.id
+        return action
+        
+    def button_back_step(self):
+        self.check_step = '2'
+        action = self.env['ir.actions.act_window'].with_context({'active_id': self.id})._for_xml_id('ccpp.open_view_ccpp_step2')
+        action['res_id'] = self.id
+        return action            
+ 
     def unlink(self):
         if self.is_solution:
             raise UserError("ระบบไม่สามารถลบ Solution ได้ กรุณา cancel หากไม่ได้ใช้งาน")
@@ -1235,7 +1334,16 @@ class Task(models.Model):
                 strategy_id.show_period = string_show_period
                 strategy_id.deadline_date = deadline_date
                 strategy_id.start_date = obj.start_date
-                
+    
+    @api.depends('project_id.job_id')
+    def _compute_is_owner(self):
+        for obj in self:
+            is_owner = False
+            employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+            if obj.project_id.job_id in employee_id.job_lines:
+                is_owner = True
+            obj.is_owner = is_owner
+           
     @api.depends('last_situation_id.status','last_situation_solution_id.status')
     def _compute_last_update_status(self):
         for obj in self:

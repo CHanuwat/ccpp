@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
     
 	<t t-name="create_test" t-inherit="web.ListView.Buttons" t-inherit-mode="primary" owl="1" >
-		<xpath expr="//button[hasclass('o_list_export_xlsx')]" position="before">
+		<xpath expr="//div[hasclass('o_list_buttons')]" position="inside">
 			<button class="btn btn-primary" t-on-click="openCreate" icon="fa-plus">
 				Create
 			</button>
