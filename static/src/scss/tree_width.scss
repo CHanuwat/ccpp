@@ -81,23 +81,23 @@
 }
 
 .ccpp_list [data-name="code"] {
-  width: 130px !important;
-  max-width: 130px !important;
+  width: 120px !important;
+  max-width: 120px !important;
 }
 
 .ccpp_list [data-name="name"] {
-  width: 400px !important;
-  max-width: 400px !important;
+  width: 350px !important;
+  max-width: 350px !important;
 }
 
 .ccpp_list [data-name="partner_id"] {
-  width: 250px !important;
-  max-width: 250px !important;
+  width: 200px !important;
+  max-width: 200px !important;
 }
 
 .ccpp_list [data-name="priority_select"] {
-  width: 70px !important;
-  max-width: 70px !important;
+  width: 75px !important;
+  max-width: 75px !important;
 }
 
 .ccpp_list [data-name="deadline_date"] {
@@ -108,6 +108,11 @@
 .ccpp_list [data-name="state"] {
   width: 100px !important;
   max-width: 100px !important;
+}
+
+.ccpp_list [data-name="show_period"] {
+  width: 80px !important;
+  max-width: 80px !important;
 }
 
 .task_list [data-name="name"] {

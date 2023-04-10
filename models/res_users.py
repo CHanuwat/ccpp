@@ -6,7 +6,11 @@ import pytz
 import json
 from pprint import pprint
 
-#class Users(models.Model):
-#    _inherit = "res.users"
+class Users(models.Model):
+    _inherit = "res.users"
     
 #    partner_id = fields.Many2one(auto_join=True)
+
+    def unlink(self):
+        raise UserError("ระบบไม่สามารถลบผู้ใช้งานได้")
+        res = super().unlink()

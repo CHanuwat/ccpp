@@ -11,3 +11,6 @@ class Department(models.Model):
     
     code = fields.Char(string="Department Code")
 
+    def unlink(self):
+        raise UserError("ระบบไม่สามารถลบฝ่ายและแผนกได้")
+        res = super().unlink()

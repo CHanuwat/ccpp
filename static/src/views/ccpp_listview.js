@@ -53,8 +53,8 @@ export class CCPPListController extends ListController {
 export const CCPPDashBoardListView = {
     ...listView,
     Renderer: CCPPDashBoardListRenderer,
-    //buttonTemplate: "create_test",
-    //Controller: CCPPListController,
+    buttonTemplate: "create_test",
+    Controller: CCPPListController,
 };
 
 registry.category("views").add("ccpp_dashboard_list", CCPPDashBoardListView);

@@ -68,12 +68,12 @@ class Project(models.Model):
         return self.env.user.company_id
 
     rec_name = fields.Char(string="Record Name", default='CCPP')
-    department_id = fields.Many2one("hr.department",string="Department", related="employee_id.department_id", store=True)
-    division_id = fields.Many2one("hr.department",string="Division", related="employee_id.division_id", store=True)
-    employee_id = fields.Many2one("hr.employee", string="User", related="job_id.employee_id", store="True")
+    department_id = fields.Many2one("hr.department",string="Department", related="employee_id.department_id", store=True, track_visibility="onchange")
+    division_id = fields.Many2one("hr.department",string="Division", related="employee_id.division_id", store=True, track_visibility="onchange")
+    employee_id = fields.Many2one("hr.employee", string="User", related="job_id.employee_id", store=True, track_visibility="onchange")
     job_id = fields.Many2one("hr.job", string="Job Position", default=_get_default_job, required=True, track_visibility="onchange")#default=_get_default_job,     
     domain_job_ids = fields.Many2many("hr.job", string="Domain Job", compute="_compute_domain_job_ids")
-    priority_id = fields.Many2one("ccpp.priority", string="CCPP Priority", compute="_get_priority", store=True)
+    priority_id = fields.Many2one("ccpp.priority", string="CCPP Priority", compute="_get_priority", store=True, track_visibility="onchange")
     priority_select = fields.Selection([
         ('to_define', 'Undefine'),
         ('1', '1st'),
@@ -90,7 +90,7 @@ class Project(models.Model):
     user_id = fields.Many2one(related="employee_id.user_id", string="CCPP User", store=True)
     color = fields.Integer(related="priority_id.color", store=True)
     domain_partner_ids = fields.Many2many("res.partner", string="Domain Customer", compute="_compute_domain_partner_ids")
-    partner_id = fields.Many2one('res.partner', track_visibility="onchange", domain="[('id','in',domain_partner_ids)]")
+    partner_id = fields.Many2one('res.partner', domain="[('id','in',domain_partner_ids)]", track_visibility="onchange")
 
     # Host CCPP
     partner_contact_id = fields.Many2one("res.partner", string="Host of CCPP", track_visibility="onchange")
@@ -173,9 +173,10 @@ class Project(models.Model):
                 action['res_id'] = self.id
                 return action
             elif obj.check_step == '3':
-                action = self.env['ir.actions.act_window'].with_context({'active_id': self.id})._for_xml_id('ccpp.open_view_ccpp_step3')
-                action['context'] = self._context
-                action['res_id'] = self.id
+                action = self.env['ir.actions.act_window']._for_xml_id('ccpp.open_view_ccpp_step3')
+                action['context'] = {'is_create_button_solution': True, 'project_id': self.id, 'is_create_solution': True}
+                solution_id = self.tasks_solution.filtered(lambda o:o.state == 'open')
+                action['res_id'] = solution_id.id
                 return action
             elif obj.check_step == '4':
                 action = self.env['ir.actions.act_window'].with_context({'active_id': self.id})._for_xml_id('ccpp.open_view_ccpp_step4')
@@ -195,7 +196,7 @@ class Project(models.Model):
             action = self.env['ir.actions.act_window'].with_context({'active_id': self.id})._for_xml_id('ccpp.open_view_ccpp_step2')
             action['res_id'] = self.id
             return action
-        elif self.check_step == '2':
+        elif self.check_step in ['2','3']:
             if not self.is_income_comp and not self.is_effectiveness_comp and not self.is_repulation_comp and not self.is_competitive_comp:
                 raise UserError("กรุณาเลือกผลกระทบต่อบริษัทอย่างน้อย 1 ข้อ")
             if not self.is_short_time and not self.is_long_time:
@@ -203,21 +204,24 @@ class Project(models.Model):
             self.check_step = '3'
             action = self.env['ir.actions.act_window']._for_xml_id('ccpp.open_view_ccpp_step3')
             action['context'] = {'is_create_button_solution': True, 'project_id': self.id, 'is_create_solution': True}
+            solution_id = self.tasks_solution.filtered(lambda o:o.state == 'open')
+            if solution_id:
+                action['res_id'] = solution_id.id
             return action
             #action = self.env['ir.actions.act_window'].with_context({'active_id': self.id})._for_xml_id('ccpp.open_view_ccpp_step3')
             #action['res_id'] = self.id
             #return action
-        elif self.check_step == '3':
-            self.check_step = '4'
-            if not self.tasks_solution:
-                raise UserError("กรุณาสร้าง Solution ก่อน")
-            for solution_id in self.tasks_solution:
-                if not solution_id.child_ids:
-                    raise UserError("กรุณาสร้าง Strategy ก่อน")
-            action = self.env['ir.actions.act_window'].with_context({'active_id': self.id})._for_xml_id('project.open_view_project_all')
-            action['views'] = [(self.env.ref('project.edit_project').id, 'form')]
-            action['res_id'] = self.id
-            return action
+        #elif self.check_step == '3':
+        #    self.check_step = '4'
+        #    if not self.tasks_solution:
+        #        raise UserError("กรุณาสร้าง Solution ก่อน")
+        #    for solution_id in self.tasks_solution:
+        #        if not solution_id.child_ids:
+        #            raise UserError("กรุณาสร้าง Strategy ก่อน")
+        #    action = self.env['ir.actions.act_window'].with_context({'active_id': self.id})._for_xml_id('project.open_view_project_all')
+        #    action['views'] = [(self.env.ref('project.edit_project').id, 'form')]
+        #    action['res_id'] = self.id
+        #    return action
         
     def button_back_step(self):
         if self.check_step == '3':
@@ -231,7 +235,7 @@ class Project(models.Model):
             action['res_id'] = self.id
             return action
         
-    def button_save(self):    
+    def button_back_to_list(self):    
         action = self.env['ir.actions.server']._for_xml_id('ccpp.action_my_ccpp_group_by_priority_user')
         return action
 
@@ -239,7 +243,7 @@ class Project(models.Model):
         if not self._context.get('discard_create'):
             raise UserError("ระบบไม่สามารถลบ CCPP ได้ กรุณา cancel หากไม่ได้ใช้งาน")
         res = super().unlink()
-        
+       
     @api.depends('tasks_solution',"is_income_cus", "is_effectiveness_cus", "is_repulation_cus", "is_competitive_cus", "is_critical", "is_not_critical","is_income_comp", "is_effectiveness_comp", "is_repulation_comp", "is_competitive_comp", "is_short_time", "is_long_time")   
     def _compute_ready_create_solution(self):
         for obj in self:
@@ -1044,7 +1048,7 @@ class Project(models.Model):
     def open_create_step(self):
         #action = self.env['ir.actions.act_window']._for_xml_id('project.open_create_project')
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.open_view_ccpp_step1')
-        action['context'] = self._context
+        #action['context'] = self._context
         #action['target'] = 'new'
         return action
         
@@ -1143,6 +1147,7 @@ class Task(models.Model):
     child_ids = fields.One2many(copy=False)
     is_owner = fields.Boolean(string="Is Show To Open", compute="_compute_is_owner")
     check_step = fields.Selection(related="project_id.check_step")
+    is_have_child = fields.Boolean(string="Is have Child", defailt=False, compute="_compute_is_have_child")
     
     
     def button_start_next_period(self):
@@ -1196,22 +1201,33 @@ class Task(models.Model):
             }
         
     def button_next_step(self):
-        self.check_step = '4'
-        if not self.tasks_solution:
+        self.project_id.check_step = '4'
+        if not self.project_id.tasks_solution:
             raise UserError("กรุณาสร้าง Solution ก่อน")
-        for solution_id in self.tasks_solution:
+        for solution_id in self.project_id.tasks_solution:
             if not solution_id.child_ids:
                 raise UserError("กรุณาสร้าง Strategy ก่อน")
-        action = self.env['ir.actions.act_window'].with_context({'active_id': self.id})._for_xml_id('project.open_view_project_all')
-        action['views'] = [(self.env.ref('project.edit_project').id, 'form')]
-        action['res_id'] = self.id
+        action = self.env['ir.actions.act_window'].with_context({'active_id': self.id})._for_xml_id('ccpp.open_view_ccpp_step4')
+        action['context'] = self._context
+        action['res_id'] = self.project_id.id
+        #action = self.env['ir.actions.act_window'].with_context({'active_id': self.id})._for_xml_id('project.open_view_project_all')
+        #action['views'] = [(self.env.ref('project.edit_project').id, 'form')]
+        #action['context'] = self._context
+        #action['res_id'] = self.project_id.id
         return action
         
     def button_back_step(self):
-        self.check_step = '2'
+        self.project_id.check_step = '2'
         action = self.env['ir.actions.act_window'].with_context({'active_id': self.id})._for_xml_id('ccpp.open_view_ccpp_step2')
-        action['res_id'] = self.id
+        if self.project_id:
+            action['res_id'] = self.project_id.id
+        else:
+            action['res_id'] = self._context.get('project_id')
         return action            
+ 
+    def button_back_to_list(self):    
+        action = self.env['ir.actions.server']._for_xml_id('ccpp.action_my_ccpp_group_by_priority_user')
+        return action
  
     def unlink(self):
         if self.is_solution:
@@ -1350,7 +1366,15 @@ class Task(models.Model):
             if obj.project_id.job_id in employee_id.job_lines:
                 is_owner = True
             obj.is_owner = is_owner
-           
+        
+    @api.depends('child_ids')
+    def _compute_is_have_child(self):
+        for obj in self:
+            is_have_child = False
+            if obj.child_ids:
+                is_have_child = True
+            obj.is_have_child = is_have_child    
+       
     @api.depends('last_situation_id.status','last_situation_solution_id.status')
     def _compute_last_update_status(self):
         for obj in self:
@@ -1419,6 +1443,9 @@ class Task(models.Model):
             print("X"*100)
             print(self.env.context)
             print(self._context)
+            #solution_ids = self.project_id.tasks_solution.filtered(lambda o:o.state not in ['cancel'])
+            #if len(solution_ids) > 1:
+            #    raise UserError("Cannot create 2 solution per period. Please cancel previous solution first")
             #if self._context.get('project_id'):
                 #vals['project_id'] = self._context.get('project_id')
             #if self._context.get('is_solution',False) and not self._context.get('is_create_strategy',False) and self._context.get('active_id',False):

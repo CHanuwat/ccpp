@@ -98,7 +98,7 @@
                             <field name="customer_id" domain="[('is_customer','=',True)]"/>
                             <field name="sale_person_id"/>
                             <field name="domain_job_ids" invisible="True"/>
-                            <field name="job_id" domain="[('id','in',domain_job_ids)]"/>
+                            <field name="job_id" domain="[('id','in',domain_job_ids)]" options="{'no_open': True}"/>
                         </group>
                         <group>
                         </group>

@@ -203,18 +203,18 @@
             <form>
                 <sheet>
                     <div class="oe_title">
-                        <label for="name" string="Name"/>
+                        <label for="name" string="Title"/>
                         <h1>
-                            <field name="name" class="o_project_name oe_inline" placeholder="CCPP Name"/>
+                            <field name="name" class="o_project_name oe_inline" placeholder="CCPP Title"/>
                         </h1>
                     </div>
                     <group>
                         <group>
                             <field name="company_id" invisible="True"/>
                             <field name="domain_partner_ids" invisible="True"/>
-                            <field name="partner_id" domain="[('id', 'in', domain_partner_ids)]" options="{'no_create':True}"/>
+                            <field name="partner_id" domain="[('id', 'in', domain_partner_ids)]" options="{'no_create':True}" string="Customer (Company)"/>
                             <field name="domain_partner_contact_ids" invisible="True"/>
-                            <field name="partner_contact_id" domain="[('id','in',domain_partner_contact_ids)]" context="{'show_title_position':True}" options="{'no_create':True}"/>
+                            <field name="partner_contact_id" domain="[('id','in',domain_partner_contact_ids)]" context="{'show_title_position':True}" options="{'no_create':True}"  string="Host of CCPP (Contact)"/>
                             <field name="department_id" invisible="True"/> 
                             <field name="division_id" invisible="True"/>
                             <field name="domain_job_ids" invisible="True"/>
@@ -229,8 +229,8 @@
                     <div>
                         <h3><p style="margin: auto;font-weight: 900;text-align: center;">Impact to customer</p></h3>
                     </div>  
-                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
-                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Critical CPP Criteria</p>
+                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;" class="background-theme-ccpp">
+                        <p style="margin: auto;font-weight: 700;text-align: left;" class="font-theme-ccpp">Critical CPP Criteria</p>
                     </div>
                     <div class="row mt16 o_settings_container" id="impact_cus_setting">
                         <div class="col-12 col-lg-5 o_setting_box" id="is_income_cus">
@@ -278,8 +278,8 @@
                             </div>
                         </div>
                     </div>
-                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
-                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Critical Urgency</p>
+                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;" class="background-theme-ccpp">
+                        <p style="margin: auto;font-weight: 700;text-align: left;" class="font-theme-ccpp">Critical Urgency</p>
                     </div>
                     <div class="row mt16 o_settings_container" id="impact_time_cus_setting">
                         <div class="col-12 col-lg-5 o_setting_box" id="is_critical">
@@ -310,7 +310,7 @@
                 <div style="padding: 10px;margin-top: 30px;">
                     <button name="button_back_step" type="object" class="btn-primary m-1 btn-width-create-ccpp" string="Back" attrs="{'invisible': [('check_step', 'not in', ['2','3'])]}"/>
                     <button name="button_next_step" type="object" class="btn-primary m-1 btn-width-create-ccpp" string="Next" attrs="{'invisible': [('is_critical', '=', False)]}"/>
-                    <button type="object" class="btn-outline-primary m-1 btn-width-create-ccpp" string="Back To List" special="cancel"/>   
+                    <button name="button_back_to_list" type="object" class="btn-outline-primary m-1" string="Back To List" attrs="{'invisible': [('check_step', 'in', ['1']),('name','=',False)]}"/> 
                 </div>
                 </sheet>
             </form>
@@ -325,18 +325,18 @@
             <form>
                 <sheet>
                     <div class="oe_title">
-                        <label for="name" string="Name"/>
+                        <label for="name" string="Title"/>
                         <h1>
-                            <field name="name" class="o_project_name oe_inline" placeholder="CCPP Name"/>
+                            <field name="name" class="o_project_name oe_inline" placeholder="CCPP Title"/>
                         </h1>
                     </div>
                     <group>
                         <group>
                             <field name="company_id" invisible="True"/>
                             <field name="domain_partner_ids" invisible="True"/>
-                            <field name="partner_id" domain="[('id', 'in', domain_partner_ids)]" options="{'no_create':True}"/>
+                            <field name="partner_id" domain="[('id', 'in', domain_partner_ids)]" options="{'no_create':True}" string="Customer (Company)"/>
                             <field name="domain_partner_contact_ids" invisible="True"/>
-                            <field name="partner_contact_id" domain="[('id','in',domain_partner_contact_ids)]" context="{'show_title_position':True}" options="{'no_create':True}"/>
+                            <field name="partner_contact_id" domain="[('id','in',domain_partner_contact_ids)]" context="{'show_title_position':True}" options="{'no_create':True}" string="Host of CCPP (Contact)"/>
                             <field name="department_id" invisible="True"/> 
                             <field name="division_id" invisible="True"/>
                             <field name="domain_job_ids" invisible="True"/>
@@ -353,8 +353,8 @@
                     <div>
                         <h3><p style="margin: auto;font-weight: 900;text-align: center;">Impact to Company/Winmed</p></h3>
                     </div>  
-                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
-                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Priority Criteria</p>
+                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;" class="background-theme-ccpp">
+                        <p style="margin: auto;font-weight: 700;text-align: left;" class="font-theme-ccpp">Priority Criteria</p>
                     </div>
                     <div class="row mt16 o_settings_container" id="impact_company_setting">
                         <div class="col-12 col-lg-5 o_setting_box" id="is_income_comp">
@@ -402,8 +402,8 @@
                             </div>
                         </div>
                     </div>
-                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
-                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Time</p>
+                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;" class="background-theme-ccpp">
+                        <p style="margin: auto;font-weight: 700;text-align: left;" class="font-theme-ccpp">Time</p>
                     </div>
                     <div class="row mt16 o_settings_container" id="impact_time_cus_setting">
                         <div class="col-12 col-lg-5 o_setting_box" id="is_short_time">
@@ -435,7 +435,7 @@
                     <field name="priority_select" invisible="True"/>
                     <button name="button_back_step" type="object" class="btn-primary m-1 btn-width-create-ccpp" string="Back" attrs="{'invisible': [('check_step', 'not in', ['2','3'])]}"/>
                     <button name="button_next_step" type="object" class="btn-primary m-1 btn-width-create-ccpp" string="Next" attrs="{'invisible': [('priority_select', 'not in', ['1','2'])]}"/>
-                    <button name="button_save" type="object" class="btn-outline-primary m-1 btn-width-create-ccpp" string="Back To List"/>    
+                    <button name="button_back_to_list" type="object" class="btn-outline-primary m-1" string="Back To List" attrs="{'invisible': [('check_step', 'in', ['1']),('name','=',False)]}"/>
                 </div>
                 </sheet>
                 
@@ -450,11 +450,12 @@
         <field name="arch" type="xml">
             <form>
                 <sheet>
-                    <field name="company_id" invisible="True"/>
                     <field name="state" invisible="True"/>
-                    <span style="padding-left:30px; padding-top:5px" class="oe_left">
-                        <h1>Create Solution</h1>
-                    </span>
+                    <div class="o_row">
+                        <span style="padding-left:30px; padding-top:5px" class="oe_left">
+                            <h1>Create Solution</h1>
+                        </span>
+                    </div>
                     <div class="oe_title">
                         <label for="name" string="Title"/>
                         <h1>
@@ -462,78 +463,58 @@
                         </h1>
                     </div>
                     <group>
-                    <group>
-                        <field name="code" string="Solution No." attrs="{'invisible': [('is_solution','=',False)]}" readonly="True"/>
-                        <field name="start_date" force_save="1" attrs="{'invisible': [('is_solution','=',False)], 'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])], 'required': [('is_solution','=',True)]}"/>
-                        <field name="code" string="Strategy No." attrs="{'invisible': [('is_strategy','=',False)]}" readonly="True"/>
-                        <field name="code" string="Task No." attrs="{'invisible': [('is_task','=',False),('is_subtask','=',False)]}" readonly="True"/>
-                        <field name="evaluate_method" attrs="{'invisible': [('is_strategy','=',False)], 'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"/>
-                        <field name="next_action" attrs="{'invisible': [('is_strategy','=',False)]}" readonly="True"/>
-                        <field name="reason_reject" readonly="True" attrs="{'invisible': [('reason_reject','=',False)]}" style="color:red;"/>
-                        <field name="reason_cancel" readonly="True" attrs="{'invisible': [('reason_cancel','=',False)]}" style="color:red;"/>
-
-                        <!--<field name="project_id" domain="[('active', '=', True), ('company_id', '=', company_id)]" widget="project_private_task" string="CCPP" />
-                        <field name="parent_id" string="Solution" attrs="{'invisible': [('is_solution','=',True)]}"/>
-                        <field name="parent_id" string="Strategy" attrs="{'invisible': ['|',('is_solution','=',True),('is_strategy','=',True)]}"/>
-                        <field name="partner_id" widget="res_partner_many2one" class="o_task_customer_field"/>
-                        <field name="evaluate_method" attrs="{'invisible': [('is_strategy','=',False)]}"/>-->
-                        <field name="project_id" attrs="{'invisible': True}" />
-                        <field name="parent_id" attrs="{'invisible': True}"/>
-                        <field name="parent_id" attrs="{'invisible': True}"/>
-                        <field name="partner_id" attrs="{'invisible': True}"/>
-                        <field name="project_solution_id" attrs="{'invisible': True}"/>
+                        <group>
+                            <field name="company_id" invisible="True"/>
+                            <field name="code" string="Solution No." readonly="True"/>
+                            <field name="start_date" force_save="1" attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])], 'required': [('is_solution','=',True)]}"/>
+                            <field name="code" string="Strategy No." attrs="{'invisible': [('is_strategy','=',False)]}" readonly="True"/>
+                            <field name="project_id" attrs="{'invisible': True}" />
+                            <field name="parent_id" attrs="{'invisible': True}"/>
+                            <field name="parent_id" attrs="{'invisible': True}"/>
+                            <field name="partner_id" attrs="{'invisible': True}"/>
+                            <field name="project_solution_id" attrs="{'invisible': True}"/>
+                        </group>
+                        <group>
+                            <field name="show_period" readonly="True"/>
+                            <field name="deadline_date"/>
+                            <field name="priority_id"  attrs="{'invisible': True}"/>
+                            <field name="period_id"  attrs="{'invisible': True}"/>
+                            <field name="date_deadline"  attrs="{'invisible': True}"/>
+                            <field name="user_ids"  attrs="{'invisible': True}"/>
+                            <field name="activity_ids"  attrs="{'invisible': True}"/>
+                            <field name="active" invisible="1"/>
+                            <field name="partner_phone" widget="phone" attrs="{'invisible': True}"/>
+                            <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}" context="{'project_id': project_id}" invisible="True"/>
+                            <field name="display_project_id" string="Project" attrs="{'invisible': True}" domain="[('active', '=', True), ('company_id', '=', company_id)]"/>
+                            <field name="milestone_id" placeholder="e.g. Prodquct Launch" context="{'default_project_id': project_id if not parent_id or not display_project_id else display_project_id}" attrs="{'invisible': True}"/>
+                            <field name="is_solution" attrs="{'invisible': True}"/>
+                            <field name="is_strategy" attrs="{'invisible': True}"/>
+                            <field name="is_task" attrs="{'invisible': True}"/>
+                            <field name="is_subtask" attrs="{'invisible': True}"/>
+                        </group>
                     </group>
-                    <group>
-                        <!--<field name="priority_id"/>
-                        <field name="period_id" string="period"/>
-                        <field name="date_deadline" attrs="{'invisible': [('is_closed', '=', True)]}"/>
-                        <field name="user_ids" class="o_task_user_field" options="{'no_open': True, 'no_quick_create': True}" widget="many2many_avatar_user" domain="[('share', '=', False), ('active', '=', True)]"/>
-                        <field name="activity_ids" string="Next Activity" widget="list_activity" attrs="{'invisible': [('is_strategy','=',False)]}"/>-->
-                        <field name="show_period" attrs="{'invisible': [('is_solution','=',False)]}" readonly="True"/>
-                        <field name="deadline_date" attrs="{'invisible': [('is_solution','=',False)]}"/>
-                        <field name="priority_id"  attrs="{'invisible': True}"/>
-                        <field name="period_id"  attrs="{'invisible': True}"/>
-                        <field name="date_deadline"  attrs="{'invisible': True}"/>
-                        <field name="user_ids"  attrs="{'invisible': True}"/>
-                        <field name="activity_ids"  attrs="{'invisible': True}"/>
-                        <field name="active" invisible="1"/>
-                        <field name="partner_phone" widget="phone" attrs="{'invisible': True}"/>
-                        <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}" context="{'project_id': project_id}" invisible="True"/>
-                        <!--<field name="legend_blocked" invisible="1"/>
-                        <field name="legend_normal" invisible="1"/>
-                        <field name="legend_done" invisible="1"/>-->
-                        <field name="display_project_id" string="Project" attrs="{'invisible': True}" domain="[('active', '=', True), ('company_id', '=', company_id)]"/>
-                        <field name="milestone_id" placeholder="e.g. Prodquct Launch" context="{'default_project_id': project_id if not parent_id or not display_project_id else display_project_id}" attrs="{'invisible': True}"/>
-                        <field name="is_solution" attrs="{'invisible': True}"/>
-                        <field name="is_strategy" attrs="{'invisible': True}"/>
-                        <field name="is_task" attrs="{'invisible': True}"/>
-                        <field name="is_subtask" attrs="{'invisible': True}"/>
-                    </group>
-                </group>
                     <notebook>
-                        <page name="strategy_page" string="Strategy" attrs="{'invisible': [['is_solution', '=', False]]}">
+                        <page name="strategy_page" string="Strategy">
                             <field name="child_ids">
-                                <tree create="0" edit="0" delete="0">
-                                    <button type="action" name="ccpp.action_open_solution_strategy_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>
+                                <tree editable="bottom">
+                                    <field name="company_id" invisible="True"/>
                                     <field name="is_solution" attrs="{'readonly': True, 'column_invisible': True}"/>
                                     <field name="is_strategy" attrs="{'readonly': True, 'column_invisible': True}"/>
+                                    <field name="code" string="Strategy No." readonly="True"/>
                                     <field name="name" string="Strategy Title" class="fw-bold" attrs="{'required': True}"/>
-                                    <field name="parent_id" string="Solution"/>
-                                    <field name="project_id" string="CCPP"/>
-                                    <field name="partner_id" string="Customer"/>
-                                    <field name="priority_select" decoration-danger="priority_select in ['1','2']" string="Priority" attrs="{'readonly': True}"/>
-                                    <field name="show_period" string="Period" attrs="{'readonly': True}"/>
-                                    <field name="user_ids" widget="many2many_avatar_user" string="User"/>
+                                    <field name="state_color" invisible="1"/>
+                                    <field name="state" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'state_color'}"/>
                                 </tree>
                             </field>
                         </page>
                     </notebook>
                     <div style="padding: 10px;margin-top: 30px;">
                         <field name="check_step" invisible="True"/>
-                        <button name="button_back_step" type="object" class="btn-primary m-1 btn-width-create-ccpp" string="Back" attrs="{'invisible': [('check_step', 'not in', ['2','3'])]}"/>
-                        <button name="button_next_step" type="object" class="btn-primary m-1 btn-width-create-ccpp" string="Next"/>
-                        <button type="object" class="btn-outline-primary m-1 btn-width-create-ccpp" string="Back To List" special="cancel"/>   
-                    </div> 
+                        <field name="is_have_child" invisible="True"/>
+                        <button name="button_back_step" type="object" class="btn-primary m-1 btn-width-create-ccpp" string="Back" attrs="{'invisible': ['|','|',('name','=',False),('start_date','=',False),('is_have_child','=',False)]}"/>
+                        <button name="button_next_step" type="object" class="btn-primary m-1 btn-width-create-ccpp" string="Next" attrs="{'invisible': ['|','|',('name','=',False),('start_date','=',False),('is_have_child','=',False)]}"/>
+                        <button name="button_back_to_list" type="object" class="btn-outline-primary m-1" string="Back To List" attrs="{'invisible': ['|','|',('name','=',False),('start_date','=',False),('is_have_child','=',False)]}"/>
+                    </div>
                 </sheet>
             </form>
         </field>
@@ -545,6 +526,7 @@
         <field name="view_mode">form</field>
         <field name="view_id" ref="ccpp.project_project_step1_view_form"/>
         <field name="context">{'create_step': 1}</field>
+        <field name="target">current</field>
     </record>
 
     <record id="open_view_ccpp_step2" model="ir.actions.act_window">
@@ -557,17 +539,18 @@
 
     <record id="open_view_ccpp_step3" model="ir.actions.act_window">
         <field name="name">CCPP</field>
-        <field name="res_model">project.project</field>
+        <field name="res_model">project.task</field>
         <field name="view_mode">form</field>
         <field name="view_id" ref="ccpp.project_project_step3_view_form"/>
-        <field name="target">main</field>
+        <field name="target">current</field>
     </record>
 
     <record id="open_view_ccpp_step4" model="ir.actions.act_window">
-        <field name="name">CCPP</field>
+        <field name="name">MY CCPP</field>
         <field name="res_model">project.project</field>
         <field name="view_mode">form</field>
         <field name="view_id" ref="project.edit_project"/>
+        <field name="target">main</field>
     </record>
     
 
@@ -805,7 +788,7 @@
                             <field name="department_id" attrs="{'readonly': True}" options="{'no_open': True}"/> 
                             <field name="division_id" attrs="{'readonly': True}" options="{'no_open': True}"/>
                             <field name="domain_job_ids" invisible="True"/>
-                            <field name="job_id"  domain="[('id', 'in', domain_job_ids)]" attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}"/>
+                            <field name="job_id"  domain="[('id', 'in', domain_job_ids)]" attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay'])]}" options="{'no_open': True}"/>
                             <field name="employee_id" attrs="{'readonly': True}" string="CCPP User" options="{'no_open': True}"/>
                             <field name="company_id" attrs="{'readonly': True}" options="{'no_open': True}"/>
                         </group>
@@ -911,8 +894,8 @@
                     <div>
                         <h3><p style="margin: auto;font-weight: 900;text-align: center;">Impact to customer</p></h3>
                     </div>  
-                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
-                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Critical CPP Criteria</p>
+                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;" class="background-theme-ccpp">
+                        <p style="margin: auto;font-weight: 700;text-align: left;" class="font-theme-ccpp">Critical CPP Criteria</p>
                     </div>
                     
                     <div class="row mt16 o_settings_container" id="impact_cus_setting">
@@ -962,8 +945,8 @@
                         </div>
                     </div>
                     
-                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
-                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Critical Urgency</p>
+                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;" class="background-theme-ccpp">
+                        <p style="margin: auto;font-weight: 700;text-align: left;" class="font-theme-ccpp">Critical Urgency</p>
                     </div>
                     <div class="row mt16 o_settings_container" id="impact_time_cus_setting">
                         <div class="col-12 col-lg-5 o_setting_box" id="is_critical">
@@ -995,8 +978,8 @@
                     <div>
                         <h3><p style="margin: auto;font-weight: 900;text-align: center;">Impact to Company/Winmed</p></h3>
                     </div>  
-                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
-                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Priority Criteria</p>
+                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;" class="background-theme-ccpp">
+                        <p style="margin: auto;font-weight: 700;text-align: left;" class="font-theme-ccpp">Priority Criteria</p>
                     </div>
                     <div class="row mt16 o_settings_container" id="impact_company_setting">
                         <div class="col-12 col-lg-5 o_setting_box" id="is_income_comp">
@@ -1044,8 +1027,8 @@
                             </div>
                         </div>
                     </div>
-                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
-                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Time</p>
+                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;" class="background-theme-ccpp">
+                        <p style="margin: auto;font-weight: 700;text-align: left;" class="font-theme-ccpp">Time</p>
                     </div>
                     <div class="row mt16 o_settings_container" id="impact_time_cus_setting">
                         <div class="col-12 col-lg-5 o_setting_box" id="is_short_time">
@@ -1150,8 +1133,8 @@
                     <div>
                         <h3><p style="margin: auto;font-weight: 900;text-align: center;">Impact to customer</p></h3>
                     </div>  
-                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
-                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Critical CPP Criteria</p>
+                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;" class="background-theme-ccpp">
+                        <p style="margin: auto;font-weight: 700;text-align: left;" class="font-theme-ccpp">Critical CPP Criteria</p>
                     </div>
                     <div class="row mt16 o_settings_container" id="impact_cus_setting">
                         <div class="col-12 col-lg-5 o_setting_box" id="is_income_cus">
@@ -1199,8 +1182,8 @@
                             </div>
                         </div>
                     </div>
-                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
-                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Critical Urgency</p>
+                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;" class="background-theme-ccpp">
+                        <p style="margin: auto;font-weight: 700;text-align: left;" class="font-theme-ccpp">Critical Urgency</p>
                     </div>
                     <div class="row mt16 o_settings_container" id="impact_time_cus_setting">
                         <div class="col-12 col-lg-5 o_setting_box" id="is_critical">
@@ -1231,8 +1214,8 @@
                     <div>
                         <h3><p style="margin: auto;font-weight: 900;text-align: center;">Impact to Company/Winmed</p></h3>
                     </div>  
-                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
-                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Priority Criteria</p>
+                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;" class="background-theme-ccpp">
+                        <p style="margin: auto;font-weight: 700;text-align: left;" class="font-theme-ccpp">Priority Criteria</p>
                     </div>
                     <div class="row mt16 o_settings_container" id="impact_company_setting">
                         <div class="col-12 col-lg-5 o_setting_box" id="is_income_comp">
@@ -1280,8 +1263,8 @@
                             </div>
                         </div>
                     </div>
-                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #706499;">
-                        <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Time</p>
+                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;" class="background-theme-ccpp">
+                        <p style="margin: auto;font-weight: 700;text-align: left;" class="font-theme-ccpp">Time</p>
                     </div>
                     <div class="row mt16 o_settings_container" id="impact_time_cus_setting">
                         <div class="col-12 col-lg-5 o_setting_box" id="is_short_time">
@@ -1385,7 +1368,7 @@
                 <!--<button name="button_to_process" string="To Process" type="object" states="cancel" attrs="{'invisible': ['|',('is_strategy', '=', False),('state','!=','cancel')]}"/>-->
                 <button name="button_cancel_wizard" string="Cancel" type="object" attrs="{'invisible': ['|','|',('state','not in',['open','process']),('id', '=', False),('is_owner','=',False)]}"/>
                 <button name="button_start_next_period" string="Start Next Period" type="object" class="btn-warning" attrs="{'invisible': ['|','|',('is_delay','=',False),('state','=','cancel'),('is_solution','=',False)]}" help="Start Next Period with remaining strategy click here!"/>
-                <!--<span class="o_tooltip o_tooltip_visible right o_animated ccpp_tooltip" attrs="{'invisible': ['|','|',('is_delay','=',False),('state','=','cancel'),('is_solution','=',False)]}"></span>-->
+                <span class="o_tooltip o_tooltip_visible right o_animated ccpp_tooltip" attrs="{'invisible': ['|','|',('is_delay','=',False),('state','=','cancel'),('is_solution','=',False)]}"></span>
             </xpath>
 
             <xpath expr="//form[1]/sheet[1]/group[1]" position="replace">
@@ -2047,7 +2030,7 @@
         <field eval="201" name="priority"/>
         <field name="arch" type="xml">
             <!--<tree delete="0" create="1" expand="1" js_class="ccpp_dashboard_list ccpp_tree" class="ccpp_list">-->
-            <tree delete="0" create="1" expand="1" js_class="ccpp_dashboard_list" class="ccpp_list">
+            <tree delete="0" create="0" expand="1" js_class="ccpp_dashboard_list" class="ccpp_list" editable="bottom">
                 <!--<button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>-->
                 <button type="object" name="check_view_step" icon="fa-folder-open-o" class="oe_highlight"/>
                 <field name="code" string="CCPP No." readonly="1"/>
@@ -2113,6 +2096,7 @@
                 <field name="show_period" string="Period"/>
                 <field name="state_color" invisible="1"/>
                 <field name="state" string="State" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'state_color'}"/>
+                <field name="employee_id" string="User"/>
                 <button name="action_open_solution" type="object" title="Strategy" string="Strategy" class="btn btn-link float-end ri-eye-line"/>
             </tree>
         </field>
@@ -2132,9 +2116,10 @@
                 <field name="priority_select" string="Priority" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'color'}"/>-->
                 <field name="priority_select" decoration-danger="priority_select in ['1','2']" string="Priority"/>
                 <field name="deadline_date"/>
-                <!--<field name="show_period" string="Period"/>-->
+                <field name="show_period" string="Period"/>
                 <field name="state_color" invisible="1"/>
                 <field name="state" string="State" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'state_color'}"/>
+                <field name="employee_id" string="User"/>
                 <button name="action_open_solution" type="object" title="Strategy" string="Strategy" class="btn btn-link float-end ri-eye-line"/>
             </tree>
         </field>
@@ -2154,9 +2139,10 @@
                 <field name="priority_select" string="Priority" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'color'}"/>-->
                 <field name="priority_select" decoration-danger="priority_select in ['1','2']" string="Priority"/>
                 <field name="deadline_date"/>
-                <!--<field name="show_period" string="Period"/>-->
+                <field name="show_period" string="Period"/>
                 <field name="state_color" invisible="1"/>
                 <field name="state" string="State" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'state_color'}"/>
+                <field name="employee_id" string="User"/>
                 <button name="action_open_solution" type="object" title="Strategy" string="Strategy" class="btn btn-link float-end ri-eye-line"/>
             </tree>
         </field>

@@ -13,3 +13,12 @@
       max-width: 100%;
   }
 }
+
+.background-theme-ccpp{
+  background-color: var(--biz-theme-primary-color) !important;
+  border-color: var(--biz-theme-primary-color) !important;
+}
+
+.font-theme-ccpp{
+  color: var(--biz-theme-primary-text-color) !important;
+}

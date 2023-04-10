@@ -202,7 +202,7 @@
                             <field name="sale_area_id"/>
                             <field name="sale_person_id" readonly="True" options="{'no_open': True}" force_save="1"/>
                             <field name="domain_job_ids" invisible="True"/>
-                            <field name="job_id" domain="[('id', 'in', domain_job_ids)]"/>
+                            <field name="job_id" domain="[('id', 'in', domain_job_ids)]" options="{'no_open': True}"/>
                         </group>
                         <group>
                             <field name="customer_category_id"/>
@@ -385,7 +385,7 @@
                             <field name="partner_id" string="Contact Person" context="{'show_title_position':True}" options="{'no_create':True}" domain="[('id','in',domain_partner_ids)]" required="True"/>
                             <field name="sale_person_id" string="User" readonly="True" options="{'no_open': True}" force_save="1"/>
                             <field name="domain_job_ids" invisible="True"/>
-                            <field name="job_id" domain="[('id', 'in', domain_job_ids)]"/>
+                            <field name="job_id" domain="[('id', 'in', domain_job_ids)]" options="{'no_open': True}"/>
                         </group>
                         <group>
                             <field name="customer_category_id"/>
@@ -545,7 +545,7 @@
                             />
                             <field name="sale_person_id" string="User" readonly="True" options="{'no_open': True}" force_save="1"/>
                             <field name="domain_job_ids" invisible="True"/>
-                            <field name="job_id" domain="[('id', 'in', domain_job_ids)]"/>
+                            <field name="job_id" domain="[('id', 'in', domain_job_ids)]" options="{'no_open': True}"/>
                         </group>
                         <group>
                             <field name="customer_category_id"/>

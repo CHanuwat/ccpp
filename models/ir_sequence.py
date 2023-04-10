@@ -25,7 +25,7 @@ class Sequence(models.Model):
             if " " in str(sequence_date): 
                 list_sd = str(sequence_date).split(" ")
                 sequence_date = list_sd[0]
-                return seq_date.with_context(ir_sequence_date_range=seq_date.date_from)._next()
+                return seq_date.with_context(ir_sequence_date=seq_date.date_from)._next()
             else:
                 return seq_date.with_context(ir_sequence_date=sequence_date)._next()
         else:

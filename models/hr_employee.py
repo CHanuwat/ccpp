@@ -13,6 +13,10 @@ class HrEmployeePrivate(models.Model):
     division_id = fields.Many2one("hr.department", string="Division")
     domain_division_ids = fields.Many2many("hr.department", string="Domain Division", compute="_compute_domain_division")
     
+    def unlink(self):
+        raise UserError("ระบบไม่สามารถข้อมูลพนักงานได้")
+        res = super().unlink()
+    
     @api.depends('department_id')
     def _compute_domain_division(self):
         for obj in self:
