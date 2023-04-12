@@ -766,6 +766,7 @@
                 /> <!--options="{'no_create':True}"/>-->
                 <field name="is_show_multi_host" invisible="True"/>
                 <!--<field name="is_multi_host" attrs="{'invisible': [('is_show_multi_host','=',False)]}"/>-->
+                <field name="is_multi_host" attrs="{'invisible': True}"/>
                 <field name="department_ids" widget="many2many_tags" attrs="{'invisible': [('is_multi_host','=',False)]}" options="{'no_create':True}"/>
                 <field name="reason_reject" readonly="True" attrs="{'invisible': [('reason_reject','=',False)]}" style="color:red;"/>
                 <field name="reason_cancel" readonly="True" attrs="{'invisible': [('reason_cancel','=',False)]}" style="color:red;"/>
