@@ -90,10 +90,10 @@ class Project(models.Model):
     user_id = fields.Many2one(related="employee_id.user_id", string="CCPP User", store=True)
     color = fields.Integer(related="priority_id.color", store=True)
     domain_partner_ids = fields.Many2many("res.partner", string="Domain Customer", compute="_compute_domain_partner_ids")
-    partner_id = fields.Many2one('res.partner', domain="[('id','in',domain_partner_ids)]", track_visibility="onchange")
+    partner_id = fields.Many2one('res.partner', string="Customer (Company)", domain="[('id','in',domain_partner_ids)]", track_visibility="onchange")
 
     # Host CCPP
-    partner_contact_id = fields.Many2one("res.partner", string="Host of CCPP", track_visibility="onchange")
+    partner_contact_id = fields.Many2one("res.partner", string="Host of CCPP (Contact)", track_visibility="onchange")
     domain_partner_contact_ids = fields.Many2many("res.partner", string="Domain partner contact", compute="_compute_domain_partner_contact_ids")
     job_position_id = fields.Many2one("res.partner.position", string="Contact Job Position", related="partner_contact_id.job_position_id")
     domain_job_position_ids = fields.Many2many("res.partner.position", string="Domain Job Position", compute="_compute_domain_job_position_ids")
@@ -159,7 +159,56 @@ class Project(models.Model):
         ('4', 'Step 4'),
     ], default='1', string="Step")
     is_owner = fields.Boolean(string="Is Owner", compute="_compute_is_owner")
+    is_already_approve = fields.Boolean(string="Is Already Approve", compute="_compute_is_already_approve")
+    
+    is_multi_host = fields.Boolean(string="Multi Department/Host", default=False)
+    is_show_multi_host = fields.Boolean(string="Is Show Multi Host", default=False, compute="_compute_is_show_multi_host")
+    department_ids = fields.Many2many("hr.department", string="Customer Department")
+    domain_department_ids = fields.Many2many("hr.department", string="Domain Department", compute="_compute_domain_department_ids")
+    partner_contact_ids = fields.Many2many("res.partner", string="Host of CCPP (Contact)")
+    domain_partner_contact = fields.Many2many("res.partner", string="Domain Multi Partner", compute="_compute_domain_partner_contact")
 
+    @api.depends("partner_id")
+    def _compute_is_show_multi_host(self):
+        for obj in self:
+            is_show_multi_host = False
+            company_ids = self.env['res.company'].sudo().search([])
+            if obj.partner_id and obj.partner_id in company_ids.mapped('partner_id'):
+                is_show_multi_host = True
+            obj.is_show_multi_host = is_show_multi_host
+
+    @api.depends("partner_id")
+    def _compute_domain_department_ids(self):
+        for obj in self:
+            domain_department_ids = self.env['hr.department']
+            if obj.department_id:
+                company_id = self.env['res.company'].sudo().search([('partner_id','=',obj.partner_id.id)])
+                domain_department_ids = self.env['hr.department'].search([('company_id','=',company_id.id)])
+            obj.domain_department_ids = domain_department_ids
+
+    @api.depends("department_ids", "partner_id")
+    def _compute_domain_partner_contact(self):
+        for obj in self:
+            domain_partner_contact = self.env['res.partner']
+            partner_contact = self.env['res.partner']
+            if obj.partner_id:
+                partner_contact |= self.env['ccpp.customer.information'].search([('job_id','=',obj.job_id.id),
+                                                                                    ('customer_id','=',obj.partner_id.id),
+                                                                                    ('type', 'in', ['internal','external']), 
+                                                                                    ('partner_id','!=',obj.employee_id.work_contact_id.id)]).mapped('partner_id')
+                partner_contact |= self.env['ccpp.customer.information'].search([('job_id','=',obj.job_id.id),
+                                                                                    ('customer_id','=',obj.partner_id.id),
+                                                                                    ('type', '=', 'customer'), 
+                                                                                    ('partner_ids','not in',obj.employee_id.work_contact_id.id)]).mapped('partner_ids')
+            if obj.department_ids:
+                if partner_contact:
+                    employee_ids = self.env['hr.employee'].search([('work_contact_id','in', partner_contact.ids),('department_id','in',obj.department_ids.ids)])
+                    domain_partner_contact = employee_ids.mapped('work_contact_id')
+                #else:
+                #    employee_ids = self.env['hr.employee'].search([('department_id','in',obj.department_ids.ids)])
+                #    domain_partner_contact = employee_ids.mapped('work_contact_id')
+            obj.domain_partner_contact = domain_partner_contact
+                
     def check_view_step(self):
         for obj in self:
             if obj.check_step == '1':
@@ -263,6 +312,23 @@ class Project(models.Model):
             if obj.job_id in employee_id.job_lines:
                 is_owner = True
             obj.is_owner = is_owner
+            
+    @api.depends('ccpp_approve_lines', 'ccpp_approve_lines.state')
+    def _compute_is_already_approve(self):
+        for obj in self:
+            is_already_approve = False
+            #is_approve = obj.ccpp_approve_lines.filtered(lambda o:o.state == 'approve')
+            is_waiting = obj.ccpp_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
+            model_id = self.env['ir.model'].sudo().search([('model','=',obj._name)])
+            approve_id = self.env['approval'].search([('model_id','=', model_id.id),
+                                                      ('department_id','=', obj.department_id.id),
+                                                      ('job_request_ids','in', obj.job_id.id)])
+            
+            
+            #if is_approve and obj.state == 'waiting_approve':
+            if len(approve_id.lines) != len(is_waiting) and obj.state == 'waiting_approve':
+                is_already_approve = True
+            obj.is_already_approve = is_already_approve
     
     @api.depends('state')
     def _compute_state_color(self):
@@ -427,7 +493,7 @@ class Project(models.Model):
                 partner_contact_ids |= self.env['ccpp.customer.information'].search([('job_id','=',obj.job_id.id),
                                                                                     ('customer_id','=',obj.partner_id.id),
                                                                                     ('type', '=', 'customer'), 
-                                                                                    ('partner_id','!=',obj.employee_id.work_contact_id.id)]).mapped('partner_ids')
+                                                                                    ('partner_ids','not in',obj.employee_id.work_contact_id.id)]).mapped('partner_ids')
             obj.domain_partner_contact_ids = partner_contact_ids.ids
             
     @api.depends("job_id")
@@ -515,17 +581,17 @@ class Project(models.Model):
                 vals_list.append(vals)    
             self.env['ccpp.approve.line'].create(vals_list)
     
-    @api.depends('ccpp_approve_lines', 'ccpp_approve_lines.is_approve', 'ccpp_approve_lines.job_approve_ids', 'ccpp_approve_lines.sequence', 'state' )
+    @api.depends('ccpp_approve_lines', 'ccpp_approve_lines.is_approve', 'ccpp_approve_lines.job_approve_ids', 'ccpp_approve_lines.sequence', 'ccpp_approve_lines.state', 'state' )
     def _compute_current_approve(self):
         for obj in self:
             current_approve_ids = self.env['hr.job']
             for approve_line in obj.ccpp_approve_lines:
-                if not approve_line.is_approve:
+                if approve_line.state == 'waiting_approve':
                     current_approve_ids = approve_line.job_approve_ids
                     break
             obj.current_approve_ids = current_approve_ids.ids
     
-    @api.depends('ccpp_approve_lines', 'ccpp_approve_lines.is_approve', 'ccpp_approve_lines.job_approve_ids', 'ccpp_approve_lines.sequence', 'state' )
+    @api.depends('ccpp_approve_lines', 'ccpp_approve_lines.is_approve', 'ccpp_approve_lines.job_approve_ids', 'ccpp_approve_lines.sequence', 'ccpp_approve_lines.state', 'state' )
     def _compute_show_approve(self):
         for obj in self:
             is_show_approve = False
@@ -681,13 +747,13 @@ class Project(models.Model):
         for obj in self:
             employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
             for approve_line in obj.ccpp_approve_lines:
-                if not approve_line.is_approve:
-                    approve_line.is_approve = True
+                if approve_line.state == 'waiting_approve':
                     approve_line.approve_date = datetime.now()
                     approve_line.job_approve_by_id = employee_id.job_id.id
+                    approve_line.state = 'approve'
                     break
                     
-            waiting_another_level = obj.ccpp_approve_lines.filtered(lambda o:not o.is_approve)
+            waiting_another_level = obj.ccpp_approve_lines.filtered(lambda o:not o.state != 'waiting_approve')
             if not waiting_another_level:
                 obj.button_approve_final()
                 
@@ -712,11 +778,36 @@ class Project(models.Model):
             
     def button_reject(self):
         for obj in self:
+            employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+            for approve_line in obj.ccpp_approve_lines:
+                if approve_line.state == 'waiting_approve':
+                    approve_line.approve_date = datetime.now()
+                    approve_line.job_approve_by_id = employee_id.job_id.id
+                    approve_line.state = 'reject'
+                    break
+            ccpp_approve_line_ids = obj.ccpp_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
+            ccpp_approve_line_ids.write({'state': 'reject'})
             obj.state = 'reject'
             for solution_id in obj.tasks_solution:
+                for approve_line in solution_id.solution_approve_lines:
+                    if approve_line.state == 'waiting_approve':
+                        approve_line.approve_date = datetime.now()
+                        approve_line.job_approve_by_id = employee_id.job_id.id
+                        approve_line.state = 'reject'
+                        break
+                solution_approve_line_ids = solution_id.solution_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
+                solution_approve_line_ids.write({'state': 'reject'})
                 if solution_id.state == 'waiting_approve':
                     solution_id.state = 'reject'
                 for strategy_id in solution_id.child_ids:
+                    for approve_line in strategy_id.strategy_approve_lines:
+                        if approve_line.state == 'waiting_approve':
+                            approve_line.approve_date = datetime.now()
+                            approve_line.job_approve_by_id = employee_id.job_id.id
+                            approve_line.state = 'reject'
+                            break
+                    strategy_approve_line_ids = strategy_id.strategy_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
+                    strategy_approve_line_ids.write({'state': 'reject'})
                     if strategy_id.state == 'waiting_approve':
                         strategy_id.state = 'reject'
                         
@@ -749,12 +840,18 @@ class Project(models.Model):
     def button_cancel(self):
         for obj in self:
             obj.state = 'cancel'
+            ccpp_approve_line_ids = obj.ccpp_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
+            ccpp_approve_line_ids.write({'state': 'cancel'})
             for solution_id in obj.tasks_solution:
+                solution_approve_line_ids = solution_id.solution_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
+                solution_approve_line_ids.write({'state': 'cancel'})
                 if solution_id.state not in ['done','waiting_approve']:
                     solution_id.state = 'cancel'
                 if solution_id.state == 'waiting_approve':
                     raise UserError("Please check solution %s is state in Waiting For Approval"%solution_id.name)
                 for strategy_id in solution_id.child_ids:
+                    strategy_approve_line_ids = strategy_id.strategy_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
+                    strategy_approve_line_ids.write({'state': 'cancel'})
                     if strategy_id.state not in ['done','waiting_approve']:
                         strategy_id.state = 'cancel'
                     if strategy_id.state == 'waiting_approve':
@@ -763,16 +860,16 @@ class Project(models.Model):
     def button_to_open(self):
         for obj in self:
             obj.state = 'open'
-            ccpp_approve_line_ids = obj.ccpp_approve_lines.filtered(lambda o:o.is_approve == False)
-            ccpp_approve_line_ids.unlink()
+            ccpp_approve_line_ids = obj.ccpp_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
+            ccpp_approve_line_ids.write({'state': 'cancel'})
             for solution_id in obj.tasks_solution:
-                solution_approve_line_ids = solution_id.solution_approve_lines.filtered(lambda o:o.is_approve == False)
-                solution_approve_line_ids.unlink()
+                solution_approve_line_ids = solution_id.solution_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
+                solution_approve_line_ids.write({'state': 'cancel'})
                 if solution_id.state in ['reject','waiting_approve']:
                     solution_id.state = 'open'
                 for strategy_id in solution_id.child_ids:
-                    strategy_approve_line_ids = strategy_id.strategy_approve_lines.filtered(lambda o:o.is_approve == False)
-                    strategy_approve_line_ids.unlink()
+                    strategy_approve_line_ids = strategy_id.strategy_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
+                    strategy_approve_line_ids.write({'state': 'cancel'})
                     if strategy_id.state in ['reject','waiting_approve']:
                         strategy_id.state = 'open'
             
@@ -782,15 +879,15 @@ class Project(models.Model):
         ccpp_ids.write({'is_delay': True, 'delay_date': date_today})
         for ccpp_id in ccpp_ids:
             for solution_id in ccpp_id.tasks_solution:
-                if solution_id.state not in ['done','cancel']:
+                #if solution_id.state not in ['done','cancel']:
                     #solution_id.state = 'delay'
-                    solution_id.is_delay = True
-                    solution_id.delay_date = date_today
+                solution_id.is_delay = True
+                solution_id.delay_date = date_today
                 for strategy_id in solution_id.child_ids:
-                    if strategy_id.state not in ['done','cancel']:
+                    #if strategy_id.state not in ['done','cancel']:
                         #strategy_id.state = 'delay'
-                        strategy_id.is_delay = True
-                        strategy_id.delay_date = date_today
+                    strategy_id.is_delay = True
+                    strategy_id.delay_date = date_today
                         
     def run_script_update(self):
         approve_ids = self.env['approval'].search([])
@@ -863,7 +960,7 @@ class Project(models.Model):
         action['target'] = 'new'
         return action
     
-    def action_ccpp_department_approve_manager(self):
+    def action_ccpp_approve_manager(self):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_ccpp_approve_dashboard_action')
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
         #job_ids = self.get_child_job(employee_id.job_lines)
@@ -1148,6 +1245,8 @@ class Task(models.Model):
     is_owner = fields.Boolean(string="Is Show To Open", compute="_compute_is_owner")
     check_step = fields.Selection(related="project_id.check_step")
     is_have_child = fields.Boolean(string="Is have Child", defailt=False, compute="_compute_is_have_child")
+    is_solution_already_approve = fields.Boolean(string="Is Solution Already Approve", compute="_compute_is_solution_already_approve")
+    is_strategy_already_approve = fields.Boolean(string="Is Strategy Already Approve", compute="_compute_is_strategy_already_approve")
     
     
     def button_start_next_period(self):
@@ -1367,6 +1466,40 @@ class Task(models.Model):
                 is_owner = True
             obj.is_owner = is_owner
         
+    @api.depends('solution_approve_lines', 'solution_approve_lines.state')
+    def _compute_is_solution_already_approve(self):
+        for obj in self:
+            is_solution_already_approve = False
+            #is_approve = obj.solution_approve_lines.filtered(lambda o:o.state == 'approve')
+            is_waiting = obj.solution_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
+            model_id = self.env['ir.model'].sudo().search([('model','=',obj.project_id._name)])
+            approve_id = self.env['approval'].search([('model_id','=', model_id.id),
+                                                      ('department_id','=', obj.project_id.department_id.id),
+                                                      ('job_request_ids','in', obj.project_id.job_id.id)])
+            
+            
+            #if is_approve and obj.state == 'waiting_approve':
+            if len(approve_id.lines) != len(is_waiting) and obj.state == 'waiting_approve':
+                is_solution_already_approve = True
+            obj.is_solution_already_approve = is_solution_already_approve   
+            
+    @api.depends('strategy_approve_lines', 'strategy_approve_lines.state')
+    def _compute_is_strategy_already_approve(self):
+        for obj in self:
+            is_strategy_already_approve = False
+            #is_approve = obj.strategy_approve_lines.filtered(lambda o:o.state == 'approve')
+            is_waiting = obj.strategy_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
+            model_id = self.env['ir.model'].sudo().search([('model','=',obj.project_id._name)])
+            approve_id = self.env['approval'].search([('model_id','=', model_id.id),
+                                                      ('department_id','=', obj.project_id.department_id.id),
+                                                      ('job_request_ids','in', obj.project_id.job_id.id)])
+            
+            
+            #if is_approve and obj.state == 'waiting_approve':
+            if len(approve_id.lines) != len(is_waiting) and obj.state == 'waiting_approve':
+                is_strategy_already_approve = True
+            obj.is_strategy_already_approve = is_strategy_already_approve     
+        
     @api.depends('child_ids')
     def _compute_is_have_child(self):
         for obj in self:
@@ -1396,17 +1529,17 @@ class Task(models.Model):
         for obj in self:         
             obj.state_color = STATE_COLOR[obj.state]
     
-    @api.depends('solution_approve_lines', 'solution_approve_lines.is_approve', 'solution_approve_lines.job_approve_ids', 'solution_approve_lines.sequence', 'state' )
+    @api.depends('solution_approve_lines', 'solution_approve_lines.is_approve', 'solution_approve_lines.job_approve_ids', 'solution_approve_lines.sequence', 'solution_approve_lines.state', 'state' )
     def _compute_current_solution_approve(self):
         for obj in self:
             current_solution_approve_ids = self.env['hr.job']
             for approve_line in obj.solution_approve_lines:
-                if not approve_line.is_approve:
+                if approve_line.state == 'waiting_approve':
                     current_solution_approve_ids = approve_line.job_approve_ids
                     break
             obj.current_solution_approve_ids = current_solution_approve_ids.ids
     
-    @api.depends('solution_approve_lines', 'solution_approve_lines.is_approve', 'solution_approve_lines.job_approve_ids', 'solution_approve_lines.sequence', 'state' )
+    @api.depends('solution_approve_lines', 'solution_approve_lines.is_approve', 'solution_approve_lines.job_approve_ids', 'solution_approve_lines.sequence', 'solution_approve_lines.state','state' )
     def _compute_show_solution_approve(self):
         for obj in self:
             is_show_solution_approve = False
@@ -1416,17 +1549,17 @@ class Task(models.Model):
                     is_show_solution_approve = True
             obj.is_show_solution_approve = is_show_solution_approve
     
-    @api.depends('strategy_approve_lines', 'strategy_approve_lines.is_approve', 'strategy_approve_lines.job_approve_ids', 'strategy_approve_lines.sequence', 'state' )
+    @api.depends('strategy_approve_lines', 'strategy_approve_lines.is_approve', 'strategy_approve_lines.job_approve_ids', 'strategy_approve_lines.sequence', 'strategy_approve_lines.state', 'state' )
     def _compute_current_strategy_approve(self):
         for obj in self:
             current_strategy_approve_ids = self.env['hr.job']
             for approve_line in obj.strategy_approve_lines:
-                if not approve_line.is_approve:
+                if approve_line.state == 'waiting_approve':
                     current_strategy_approve_ids = approve_line.job_approve_ids
                     break
             obj.current_strategy_approve_ids = current_strategy_approve_ids.ids
     
-    @api.depends('strategy_approve_lines', 'strategy_approve_lines.is_approve', 'strategy_approve_lines.job_approve_ids', 'strategy_approve_lines.sequence', 'state' )
+    @api.depends('strategy_approve_lines', 'strategy_approve_lines.is_approve', 'strategy_approve_lines.job_approve_ids', 'strategy_approve_lines.sequence', 'strategy_approve_lines.state', 'state' )
     def _compute_show_strategy_approve(self):
         for obj in self:
             is_show_strategy_approve = False
@@ -1793,13 +1926,13 @@ class Task(models.Model):
         for obj in self:
             employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
             for approve_line in obj.strategy_approve_lines:
-                if not approve_line.is_approve:
-                    approve_line.is_approve = True
+                if approve_line.state == 'waiting_approve':
                     approve_line.approve_date = datetime.now()
                     approve_line.job_approve_by_id = employee_id.job_id.id
+                    approve_line.state = 'approve'
                     break
                     
-            waiting_another_level = obj.strategy_approve_lines.filtered(lambda o:not o.is_approve)
+            waiting_another_level = obj.strategy_approve_lines.filtered(lambda o:not o.state != 'waiting_approve')
             if not waiting_another_level:
                 obj.button_approve_strategy_final()
         
@@ -1813,14 +1946,13 @@ class Task(models.Model):
         for obj in self:
             employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
             for approve_line in obj.solution_approve_lines:
-                if not approve_line.is_approve:
-                    print("ษ"*100)
-                    approve_line.is_approve = True
+                if approve_line.state == 'waiting_approve':
                     approve_line.approve_date = datetime.now()
                     approve_line.job_approve_by_id = employee_id.job_id.id
+                    approve_line.state = 'approve'
                     break
                     
-            waiting_another_level = obj.solution_approve_lines.filtered(lambda o:not o.is_approve)
+            waiting_another_level = obj.solution_approve_lines.filtered(lambda o:not o.state != 'waiting_approve')
             if not waiting_another_level:
                 obj.button_approve_solution_final()
                 
@@ -1840,6 +1972,15 @@ class Task(models.Model):
     
     def button_reject_strategy(self):
         for obj in self:
+            employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+            for approve_line in obj.strategy_approve_lines:
+                if approve_line.state == 'waiting_approve':
+                    approve_line.approve_date = datetime.now()
+                    approve_line.job_approve_by_id = employee_id.job_id.id
+                    approve_line.state = 'reject'
+                    break
+            strategy_approve_line_ids = obj.strategy_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
+            strategy_approve_line_ids.write({'state': 'reject'})
             obj.state = 'reject'
             
     def button_reject_strategy_wizard(self):
@@ -1849,8 +1990,25 @@ class Task(models.Model):
             
     def button_reject_solution(self):
         for obj in self:
+            employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+            for approve_line in obj.solution_approve_lines:
+                if approve_line.state == 'waiting_approve':
+                    approve_line.approve_date = datetime.now()
+                    approve_line.job_approve_by_id = employee_id.job_id.id
+                    approve_line.state = 'reject'
+                    break
+            solution_approve_line_ids = obj.solution_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
+            solution_approve_line_ids.write({'state': 'reject'})
             obj.state = 'reject'
             for strategy_id in obj.child_ids:
+                for approve_line in strategy_id.strategy_approve_lines:
+                    if approve_line.state == 'waiting_approve':
+                        approve_line.approve_date = datetime.now()
+                        approve_line.job_approve_by_id = employee_id.job_id.id
+                        approve_line.state = 'reject'
+                        break
+                strategy_approve_line_ids = strategy_id.strategy_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
+                strategy_approve_line_ids.write({'state': 'reject'})
                 if strategy_id.state == 'waiting_approve':
                     strategy_id.state = 'reject'   
                     
@@ -1861,18 +2019,18 @@ class Task(models.Model):
     
     def button_to_open_strategy(self):
         for obj in self:
-            strategy_approve_line_ids = obj.strategy_approve_lines.filtered(lambda o:o.is_approve == False)
-            strategy_approve_line_ids.unlink()
+            strategy_approve_line_ids = obj.strategy_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
+            strategy_approve_line_ids.write({'state': 'cancel'})
             obj.state = 'open'
             
     def button_to_open_solution(self):
         for obj in self:
             obj.state = 'open'
-            solution_approve_line_ids = obj.solution_approve_lines.filtered(lambda o:o.is_approve == False)
-            solution_approve_line_ids.unlink()
+            solution_approve_line_ids = obj.solution_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
+            solution_approve_line_ids.write({'state': 'cancel'})
             for strategy_id in obj.child_ids:
-                strategy_approve_line_ids = strategy_id.strategy_approve_lines.filtered(lambda o:o.is_approve == False)
-                strategy_approve_line_ids.unlink()
+                strategy_approve_line_ids = strategy_id.strategy_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
+                strategy_approve_line_ids.write({'state': 'cancel'})
                 strategy_id.state = 'open'
     
     def button_cancel_wizard(self):
@@ -1886,13 +2044,19 @@ class Task(models.Model):
     def button_cancel(self):
         for obj in self:
             if obj.is_solution:
+                solution_approve_line_ids = obj.solution_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
+                solution_approve_line_ids.write({'state': 'cancel'})
                 obj.state = 'cancel'
                 for strategy_id in obj.child_ids:
+                    strategy_approve_line_ids = strategy_id.strategy_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
+                    strategy_approve_line_ids.write({'state': 'cancel'})
                     if strategy_id.state not in ['waiting_approve','done']:
                         strategy_id.state = 'cancel'
                     if strategy_id.state == 'waiting_approve':
                         raise UserError("Please check strategy %s is state in Waiting For Approval"%strategy_id.name)
             if obj.is_strategy:
+                strategy_approve_line_ids = obj.strategy_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
+                strategy_approve_line_ids.write({'state': 'cancel'})
                 obj.state = 'cancel'
                    
     #def button_to_process(self):
@@ -1947,7 +2111,7 @@ class Task(models.Model):
             'views' : [(self.env.ref('project.view_task_form2').id, 'form')]
         }          
     
-    def action_solution_department_approve_manager(self):
+    def action_solution_approve_manager(self):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_solution_approve_dashboard_action')
         #department_id = self.env.user.employee_id.department_id
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
@@ -1962,7 +2126,7 @@ class Task(models.Model):
         action['domain'] = [('id','in',solution_ids.ids)]
         return action
     
-    def action_strategy_department_approve_manager(self):
+    def action_strategy_approve_manager(self):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_strategy_approve_dashboard_action')
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
         #job_ids = self.get_child_job(employee_id.job_lines)
@@ -2108,5 +2272,23 @@ class ProjectApprovelines(models.Model):
     sequence = fields.Integer(related="approve_line_id.sequence", string="Sequence")
     job_approve_ids = fields.Many2many(related="approve_line_id.job_approve_ids", string="Approver")
     is_approve = fields.Boolean(string="Approved", default=False)   
+    state = fields.Selection([
+        ('waiting_approve', 'Waiting For Approval'),
+        ('approve', 'Approved'),
+        ('cancel', 'Cancelled'),
+        ('reject', 'Rejected'),
+    ], default='waiting_approve', string="State", track_visibility="onchange", tracking=True)
     approve_date = fields.Datetime(string="Approved Date")
     job_approve_by_id = fields.Many2one("hr.job", string="Approved By")
+    user_approve_ids = fields.Many2many('hr.employee', string="User", compute="_compute_user_ids", store=True)
+    
+    @api.depends('state')
+    def _compute_user_ids(self):
+        for obj in self:
+            user_ids = self.env['hr.employee']
+            if obj.state in ['waiting_approve','cancel']:
+                for job_id in obj.job_approve_ids:
+                    user_ids |= job_id.employee_id
+                obj.user_approve_ids = user_ids
+            if obj.state in ['approve','reject']:
+                obj.user_approve_ids = obj.job_approve_by_id.employee_id

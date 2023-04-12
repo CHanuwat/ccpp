@@ -56,7 +56,8 @@ class Partner(models.Model):
     is_potential = fields.Boolean(string="Potential", default=_get_default_potential)
     is_employee = fields.Boolean(string="Employeee", default=False)
     potential_ranking = fields.Integer(string="Potential rank by user", compute="_compute_potential_rank")
-    department_code = fields.Char(string="Department Code", compute="_compute_department_code")
+    department_code = fields.Char(string="Department Code", compute="_compute_department_code_name")
+    department_name = fields.Char(string="Department Name", compute="_compute_department_code_name")
     is_company = fields.Boolean(default=_get_default_is_company)
     parent_id = fields.Many2one(default=_get_default_parent_id)
     job_position_name = fields.Char(string="Job Position Name", related="job_position_id.name", store=True)
@@ -79,12 +80,15 @@ class Partner(models.Model):
                                                                           ('type','=','customer')], limit=1)
             obj.potential_ranking = customer_info.potential_ranking
                     
-    def _compute_department_code(self):
+    def _compute_department_code_name(self):
         for obj in self:
             department_code = ''
+            department_name = ''
             employee_id = self.env['hr.employee'].search([('work_contact_id','=',obj.id)],limit=1)
             department_code = employee_id.department_id.code
+            department_code = employee_id.department_id.name
             obj.department_code = department_code
+            obj.department_name = department_name
 
     def name_get(self):
         #res = []
@@ -128,11 +132,11 @@ class Partner(models.Model):
     
     #@api.model
     #def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
-        #domain = [('job_position_name', operator, name)]
+    #    #domain = [('job_position_name', operator, name)]
     #    domain = []
     #    if name:
-    #        domain = ['|',('name', operator, name),('job_position_name', operator, name)]
-            #domain.append(('job_position_name', operator, name))
+    #        domain = ['|',('name', operator, name),('department_name', operator, name)]
+    #        #domain.append(('job_position_name', operator, name))
     #    return self._search(domain + args, limit=limit, access_rights_uid=name_get_uid)
     
     @api.depends('is_company', 'name', 'parent_id.display_name', 'type', 'company_name', 'job_position_id')
