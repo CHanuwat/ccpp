@@ -14,7 +14,7 @@
                     <field name="company_id"/>
                     <field name="project_test_id"/>
                     <field name="customer_potential"/>
-                     <separator/>
+                    <separator/>
                     <searchpanel view_types="tree,calendar">
                         <!--<field name="task_search" expand="1" hierarchize="1" string="CCPP" icon="fa-folder-open-o"/>-->
                         <!--<field name="customer_potential_id" string="Customer Potential" icon="fa-folder-open-o"/>
@@ -24,6 +24,15 @@
                     </searchpanel>
                     <filter string="Open" name="open" domain="[('state', '=', 'open')]"/>
                     <filter string="Done" name="done" domain="[('state', '=', 'done')]"/>
+                    <filter string="Today" name="today" domain="[('stop', '&gt;=', datetime.datetime.now().strftime('%Y-%m-%d 00:00:00')),('stop', '&lt;=',datetime.datetime.now().strftime('%Y-%m-%d 23:23:59'))]"/>
+                    <!--<filter string="Current Week" name="Current Week" domain="[('stop','&lt;',(context_today()+relativedelta(days=7)).strftime('%Y-%m-%d 23:59:59')), ('stop','&gt;=',context_today().strftime('%Y-%m-%d 00:00:00'))]"/>-->
+                    <filter string="This Week" name="this_week" domain="[
+                        ('stop','&gt;=',(context_today()+relativedelta(weeks=-1,days=1,weekday=0)).strftime('%Y-%m-%d')),
+                        ('stop','&lt;',(context_today()+relativedelta(weeks=1,weekday=0)).strftime('%Y-%m-%d'))
+                    ]" help="Journal invoices of the current and the last weeks" />
+                    <filter string="This Month" name="this_month" domain="[('stop','&lt;',(context_today()+relativedelta(months=1)).strftime('%%Y-%%m-01')), ('stop','&gt;=',time.strftime('%%Y-%%m-01'))]"/>
+                    <filter string="This Year" name="this_year" domain="[('stop', '&lt;', (context_today() + relativedelta(years=1, month=1, day=1)).strftime('%Y-%m-%d')), ('stop', '&gt;=', (context_today() + relativedelta(month=1, day=1)).strftime('%Y-%m-%d'))]"/>
+                    <filter string="All" name="all" domain="[]"/>
                     <group expand="0" string="Group By">
                         <filter string="Sales Person" name="groupby_sales_person" context="{'group_by': 'employee_id'}"/>
                         <filter string="Month" name="groupby_month" context="{'group_by': 'start:day'}"/>
@@ -37,7 +46,8 @@
             <field name="model">account.analytic.line</field>
             <field name="arch" type="xml">
                 <!--<tree js_class="rocker_tree" string="Timesheets" editable="top" create="true" delete="true" edit="true">-->
-                <tree js_class="rocker_tree" string="Timesheets" create="false" delete="false" edit="true" class="task_list" expand="1">
+                <tree js_class="task_dashboard_list" string="Timesheets" create="false" delete="false" edit="true" class="task_list" expand="1">
+                    <button name="update_situation" type="object" string="Check In" class="btn btn-success" icon="fa-sign-in" attrs="{'invisible': [('state','not in',['open'])]}"/>
                     <field name="name" string="Task" />
                     <field name="start" required="1" string="From"/>
                     <field name="stop" required="1" string="To"/>
@@ -54,9 +64,8 @@
                     <field name="company_id" required="1" readonly="1" optional="hide" invisible="1"/>
                     <field name="user_id"  invisible="1" required="1" readonly="1"/>
                     <field name="allday" invisible="1" />
-                    <field name="state" invisible="0" />
-                    <button name="update_situation" type="object" string="Check In" class="btn btn-success" icon="fa-sign-in" attrs="{'invisible': [('state','not in',['open'])]}"/>
-
+                    <field name="state_color" invisible="1"/>
+                    <field name="state" string="State" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'state_color'}"/>
                 </tree>
             </field>
         </record>
@@ -530,14 +539,11 @@
             <field name="view_mode">tree,form</field>
             <field name="view_id" ref="rocker_timesheet_tree"/>
             <field name="search_view_id" ref="rocker_timesheet_search"/>
-            <field name="context">{'search_default_groupby_month': 0, 'search_default_open': 0}</field>
+            <field name="context">{'search_default_groupby_month': 0, 'search_default_open': 0, 'search_default_today': 1}</field>
             <field name="target">main</field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
-                    No timesheets found. Let's start a new one!
-                </p>
-                <p>
-                    Track your working hours by projects every day.
+                    No Task found.
                 </p>
             </field>
         </record>

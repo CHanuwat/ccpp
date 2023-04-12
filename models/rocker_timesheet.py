@@ -25,6 +25,8 @@ from datetime import timedelta, datetime, date, time, timezone
 from dateutil.rrule import rrule, DAILY
 from odoo.osv import expression
 import pytz
+from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
+from dateutil.relativedelta import relativedelta
 
 import logging
 
@@ -44,6 +46,12 @@ daystocreate = 0
 prev_company = -1
 
 # btw....remember to check odoo global defaults....working day, is it 8 or 7.5 hours...has to be in sync with rocker company / user defaults
+
+
+STATE_COLOR = {
+    'open': 0,
+    'done': 20, 
+}
 
 class RockerTimesheet(models.Model):
     _inherit = ['account.analytic.line','mail.thread','portal.mixin','mail.activity.mixin']
@@ -465,6 +473,8 @@ class RockerTimesheet(models.Model):
     division_id = fields.Many2one("hr.department",string="Department", related="employee_id.division_id", store=True, track_visibility="onchange")
     job_id = fields.Many2one("hr.job", string="Job Position", default=_get_default_job, required=True, track_visibility="onchange")#default=_get_default_job, 
     domain_job_ids = fields.Many2many("hr.job", string="Domain Job", compute="_compute_domain_job_ids")
+
+    state_color = fields.Integer(compute='_compute_state_color')
 
     @api.depends("employee_id")
     def _compute_domain_job_ids(self):
@@ -1229,6 +1239,58 @@ class RockerTimesheet(models.Model):
     def open_current_situation(self):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.task_timesheet_update_all_action_tree')
         return action
+    
+    @api.model
+    def retrieve_dashboard(self,context={}):
+        
+        print(self._context)
+        print(context)
+        result = {
+            'today': 0,
+            'this_week': 0,
+            'this_month': 0,
+            'all': 0,
+        }
+        
+        today = date.today()
+
+        user_tz = self.env.user.tz or pytz.utc
+        local = pytz.timezone(user_tz)
+        
+        today_start = str(today) + ' 00:00:00'
+        today_stop = str(today) + ' 23:59:59'
+        #today_start = datetime.strftime(pytz.utc.localize(datetime.strptime(today_start,DEFAULT_SERVER_DATETIME_FORMAT)).astimezone(local),"%Y-%m-%d %H:%M:%S")
+        #today_stop = datetime.strftime(pytz.utc.localize(datetime.strptime(today_stop,DEFAULT_SERVER_DATETIME_FORMAT)).astimezone(local),"%Y-%m-%d %H:%M:%S")
+        today_start = datetime.strptime(today_start, "%Y-%m-%d %H:%M:%S") - relativedelta(hours=7)
+        today_stop = datetime.strptime(today_stop, "%Y-%m-%d %H:%M:%S") - relativedelta(hours=7)
+        
+        week_start = (today + relativedelta(weeks=-1,days=1,weekday=0)).strftime('%Y-%m-%d 00:00:00')
+        week_stop = (today + relativedelta(weeks=1,weekday=0)).strftime('%Y-%m-%d 23:59:59')
+        #week_start = datetime.strftime(pytz.utc.localize(datetime.strptime(week_start,DEFAULT_SERVER_DATETIME_FORMAT)).astimezone(local),"%Y-%m-%d %H:%M:%S")
+        #week_stop = datetime.strftime(pytz.utc.localize(datetime.strptime(week_stop,DEFAULT_SERVER_DATETIME_FORMAT)).astimezone(local),"%Y-%m-%d %H:%M:%S")
+        week_start = datetime.strptime(week_start, "%Y-%m-%d %H:%M:%S")- relativedelta(hours=7)
+        week_stop = datetime.strptime(week_stop, "%Y-%m-%d %H:%M:%S") - relativedelta(hours=7)
+        
+        month_start = today.strftime('%Y-%m-01 00:00:00')
+        month_stop = (today + relativedelta(months=1)).strftime('%Y-%m-01 00:00:00')
+        #week_start = datetime.strftime(pytz.utc.localize(datetime.strptime(week_start,DEFAULT_SERVER_DATETIME_FORMAT)).astimezone(local),"%Y-%m-%d %H:%M:%S")
+        #week_stop = datetime.strftime(pytz.utc.localize(datetime.strptime(week_stop,DEFAULT_SERVER_DATETIME_FORMAT)).astimezone(local),"%Y-%m-%d %H:%M:%S")
+        month_start = datetime.strptime(month_start, "%Y-%m-%d %H:%M:%S") - relativedelta(hours=7)
+        month_stop = datetime.strptime(month_stop, "%Y-%m-%d %H:%M:%S") - relativedelta(hours=7)
+        
+        task = self.env['account.analytic.line']
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        if employee_id.job_id:
+            result['today'] = task.search_count([('stop', '>=', today_start),('stop', '<=', today_stop),('job_id', '=', employee_id.job_id.id)])
+            result['this_week'] = task.search_count([('stop', '>=', week_start),('stop', '<=', week_stop),('job_id', '=', employee_id.job_id.id)])
+            result['this_month'] = task.search_count([('stop', '>=', month_start),('stop', '<', month_stop),('job_id', '=', employee_id.job_id.id)])
+            result['all'] = task.search_count([('job_id', '=', employee_id.job_id.id)])
+        return result
+    
+    @api.depends('state')
+    def _compute_state_color(self):
+        for obj in self:         
+            obj.state_color = STATE_COLOR[obj.state]
     
 class AccountAnalyticLineLog(models.Model):
     _name = "account.analytic.line.log"

@@ -106,8 +106,8 @@
 }
 
 .ccpp_list [data-name="state"] {
-  width: 100px !important;
-  max-width: 100px !important;
+  width: 145px !important;
+  max-width: 145px !important;
 }
 
 .ccpp_list [data-name="show_period"] {
@@ -116,11 +116,36 @@
 }
 
 .task_list [data-name="name"] {
-  width: 300px !important;
-  max-width: 300px !important;
+  width: 280px !important;
+  max-width: 280px !important;
 }
 
 .task_list [data-name="task_strategy_id"] {
-  width: 200px !important;
-  max-width: 200px !important;
+  width: 170px !important;
+  max-width: 170px !important;
+}
+
+.employee_list [data-name="name"] {
+  width: 100px !important;
+  max-width: 100px !important;
+}
+
+.employee_list [data-name="job_id"] {
+  width: 100px !important;
+  max-width: 100px !important;
+}
+
+.employee_list [data-name="department_id"] {
+  width: 150px !important;
+  max-width: 150px !important;
+}
+
+.employee_list [data-name="division_id"] {
+  width: 100px !important;
+  max-width: 100px !important;
+}
+
+.employee_list [data-name="company_id"] {
+  width: 150px !important;
+  max-width: 150px !important;
 }
