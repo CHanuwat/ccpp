@@ -16,15 +16,19 @@ access_rocker_user_defaults,rocker.user.defaults,model_rocker_user_defaults,base
 access_rocker_company_defaults,rocker.company.defaults,model_rocker_company_defaults,base.group_user,1,1,1,1
 access_rocker_company_defaults_user,rocker.company.defaults.user,model_rocker_company_defaults,base.group_user,1,1,1,1
 access_ccpp_purchase_history_line,access_ccpp_purchase_history_line,model_ccpp_purchase_history_line,base.group_user,1,1,1,1
+access_ccpp_purchase_history_detail_line,access_ccpp_purchase_history_detail_line,model_ccpp_purchase_history_detail_line,base.group_user,1,1,1,1
 access_ccpp_customer_budget,access_ccpp_customer_budget,model_ccpp_customer_budget,base.group_user,1,1,1,1
 access_customer_potential,access_customer_potential,model_customer_potential,base.group_user,1,1,1,1
 access_account_analytic_line_log,access_account_analytic_line_log,model_account_analytic_line_log,base.group_user,1,1,1,1
 access_ccpp_wizard_reject,access_ccpp_wizard_reject,model_ccpp_wizard_reject,base.group_user,1,1,1,1
 access_ccpp_wizard_cancel,access_ccpp_wizard_cancel,model_ccpp_wizard_cancel,base.group_user,1,1,1,1
 access_ccpp_wizard_done_task,access_ccpp_wizard_done_task,model_ccpp_wizard_done_task,base.group_user,1,1,1,1
+access_ccpp_wizard_fill_history,access_ccpp_wizard_fill_history,model_ccpp_wizard_fill_history,base.group_user,1,1,1,1
+access_ccpp_wizard_fill_history_order,access_ccpp_wizard_fill_history_order,model_ccpp_wizard_fill_history_order,base.group_user,1,1,1,1
+access_ccpp_wizard_fill_history_borrow,access_ccpp_wizard_fill_history_borrow,model_ccpp_wizard_fill_history_borrow,base.group_user,1,1,1,1
 access_approval,access_approval,model_approval,base.group_user,1,1,1,1
 access_approval_line,access_approval_line,model_approval_line,base.group_user,1,1,1,1
 access_ccpp_approve_line,access_ccpp_approve_line,model_ccpp_approve_line,base.group_user,1,1,1,1
-
+access_asset,access_asset,model_asset,base.group_user,1,1,1,1
 
 

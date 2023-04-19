@@ -26,3 +26,5 @@ from . import ccpp_wizard_reject
 from . import ccpp_wizard_cancel
 from . import ccpp_wizard_done_task
 from . import approval
+from . import asset
+from . import ccpp_wizard_fill_history

@@ -31,10 +31,16 @@
     <record model="ir.ui.menu" id="crm.menu_crm_opportunities">
         <field name="action" eval="False"/>
     </record>
+    <record model="ir.ui.menu" id="sale_crm.sale_order_menu_quotations_crm">
+        <field name="action" eval="False"/>
+    </record>
 
     <record model="ir.ui.menu" id="crm.crm_menu_root">
         <field name="sequence" eval="2"/>
     </record>
+
+    	
+
 
     <menuitem
         id="ccpp_crm_customer"
@@ -49,7 +55,7 @@
         id="ccpp_crm_sale_target_user"
         name="Sales Target"
         parent="crm.crm_menu_root"
-        action="ccpp_sale_target_action"
+        action="ccpp_sale_target_action_user"
         sequence="2"
         groups="ccpp.group_ccpp_frontoffice_user"
     />
@@ -84,39 +90,82 @@
     <!-- Purchase History -->
 
     <menuitem
-        id="ccpp_crm_purchase_history_user"
+        id="ccpp_purchase_history"
         name="Purchase History"
         parent="crm.crm_menu_root"
-        action="ccpp_purchase_history_action"
         sequence="3"
+    /> 
+
+    <menuitem
+        id="ccpp_crm_purchase_history_user"
+        name="Customer Purchase History"
+        parent="ccpp_purchase_history"
+        action="ccpp_purchase_history_action_user"
+        sequence="1"
         groups="ccpp.group_ccpp_frontoffice_user"
     />  
 
     <menuitem
         id="ccpp_crm_purchase_history_manager"
-        name="Purchase History"
-        parent="crm.crm_menu_root"
+        name="Customer Purchase History"
+        parent="ccpp_purchase_history"
         action="ccpp_purchase_history_action_manager"
-        sequence="3"
+        sequence="1"
         groups="ccpp.group_ccpp_frontoffice_manager"
     />
 
     <menuitem
         id="ccpp_crm_purchase_history_manager_all_department"
-        name="Purchase History"
-        parent="crm.crm_menu_root"
+        name="Customer Purchase History"
+        parent="ccpp_purchase_history"
         action="ccpp_purchase_history_action_manager_all_department"
-        sequence="3"
+        sequence="1"
         groups="ccpp.group_ccpp_frontoffice_manager_all_department"
     />
 
     <menuitem
         id="ccpp_crm_purchase_history_ceo"
-        name="Purchase History"
-        parent="crm.crm_menu_root"
+        name="Customer Purchase History"
+        parent="ccpp_purchase_history"
         action="ccpp_purchase_history_action_ceo"
-        sequence="3"
+        sequence="1"
         groups="ccpp.group_ccpp_ceo"
     />
-    
+
+    <menuitem
+        id="ccpp_crm_purchase_history_detail_line_user"
+        name="Purchase History Detail"
+        parent="ccpp_purchase_history"
+        action="ccpp_purchase_history_detail_line_action_user"
+        sequence="2"
+        groups="ccpp.group_ccpp_frontoffice_user"
+    />  
+
+    <menuitem
+        id="ccpp_crm_purchase_history_detail_line_manager"
+        name="Purchase History Detail"
+        parent="ccpp_purchase_history"
+        action="ccpp_purchase_history_detail_line_action_manager"
+        sequence="2"
+        groups="ccpp.group_ccpp_frontoffice_manager"
+    />
+
+    <menuitem
+        id="ccpp_crm_purchase_history_detail_line_manager_all_department"
+        name="Purchase History Detail"
+        parent="ccpp_purchase_history"
+        action="ccpp_purchase_history_detail_line_action_manager_all_department"
+        sequence="2"
+        groups="ccpp.group_ccpp_frontoffice_manager_all_department"
+    />
+
+    <menuitem
+        id="ccpp_crm_purchase_history_detail_line_ceo"
+        name="Purchase History Detail"
+        parent="ccpp_purchase_history"
+        action="ccpp_purchase_history_detail_line_action_ceo"
+        sequence="2"
+        groups="ccpp.group_ccpp_ceo"
+    />
+
 </odoo>

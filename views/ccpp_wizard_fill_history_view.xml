@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="ccpp_wizard_fill_history_action" model="ir.actions.act_window">
+        <field name="name">Purchase History</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">ccpp.wizard.fill.history</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="ccpp_wizard_fill_history_view_form" model="ir.ui.view">
+        <field name="name">ccpp.wizard.fill.history.view.form</field>
+        <field name="model">ccpp.wizard.fill.history</field>
+        <field name="arch" type="xml">
+            <form string="Fill History">
+                <sheet>
+                    <div class="o_row">
+                        <span>
+                            <h3>
+                                Fill Purchase History.
+                            </h3>
+                        </span>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="task_id" attrs="{'invisible': True}" readonly="True" force_save="True"/>
+                        </group>
+                    </group>
+                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;" class="background-theme-ccpp">
+                        <p style="margin: auto;font-weight: 700;text-align: left;" class="font-theme-ccpp">Order</p>
+                    </div>
+                    <field name="order_lines">
+                        <tree create="false" delete="false" editable="bottom">
+                            <field name="history_line_id" force_save="True" invisible="True"/>
+                            <field name="product_id"/>
+                            <field name="asset_id"/>
+                            <field name="order_qty" force_save="True"/>
+                            <field name="remain_qty" force_save="True"/>
+                        </tree>
+                    </field>
+                    <div style="border: 0px solid #9790b4;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;" class="background-theme-ccpp">
+                        <p style="margin: auto;font-weight: 700;text-align: left;" class="font-theme-ccpp">Borrow</p>
+                    </div>
+                    <field name="borrow_lines">
+                        <tree create="false" delete="false" editable="bottom">
+                            <field name="history_line_id" force_save="True" invisible="True"/>
+                            <field name="product_id"/>
+                            <field name="asset_id"/>
+                            <field name="borrow_qty" force_save="True"/>
+                            <field name="order_borrow_qty" force_save="True"/>
+                        </tree>
+                    </field>
+
+                    <footer>
+                        <button name="button_skip" string="Skip &amp; Done" type="object" class="btn-secondary"/>
+                        <button name="button_done" string="Done" type="object" class="btn-success"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+</odoo>

@@ -1167,7 +1167,7 @@
             <field name="company_id" eval="False" />
         </record>
 
-<record id="seq_ccpp_ccpp_src" model="ir.sequence">
+        <record id="seq_ccpp_ccpp_src" model="ir.sequence">
             <field name="name">CCPP CCPP SRC Department</field>
             <field name="code">ccpp.cp.src</field>
             <field name="prefix">SRC-CP%(month)s%(y)s-</field>
@@ -1322,6 +1322,18 @@
             <field name="code">ccpp.ta.whd</field>
             <field name="prefix">WHD-TA%(month)s%(y)s-</field>
             <field name="padding">3</field>
+            <field name="type_range">month</field>
+            <field name="use_date_range">True</field>
+            <field name="company_id" eval="False" />
+        </record>
+
+        <!-- Asset -->
+
+        <record id="seq_asset" model="ir.sequence">
+            <field name="name">ASSET</field>
+            <field name="code">asset</field>
+            <field name="prefix">F%(month)s%(y)s-</field>
+            <field name="padding">4</field>
             <field name="type_range">month</field>
             <field name="use_date_range">True</field>
             <field name="company_id" eval="False" />

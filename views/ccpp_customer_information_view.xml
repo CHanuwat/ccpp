@@ -534,6 +534,12 @@
                             domain="[('id','in',domain_partner_ids)]" 
                             required="True" 
                             options="{'no_quick_create': True}"
+                            />
+                            <!--<field name="partner_id" string="Contact Person" 
+                            context="{'show_title_position':True, 'create_external_contact':True, 'external_parent': customer_id}" 
+                            domain="[('id','in',domain_partner_ids)]" 
+                            required="True" 
+                            options="{'no_quick_create': True}"
                             attrs="{'invisible': [('is_company_group','=', True)]}"
                             />
                             <field name="partner_id" string="Contact Person" 
@@ -542,7 +548,7 @@
                             required="True" 
                             options="{'no_create': True}"
                             attrs="{'invisible': [('is_company_group','=', False)]}"
-                            />
+                            />-->
                             <field name="sale_person_id" string="User" readonly="True" options="{'no_open': True}" force_save="1"/>
                             <field name="domain_job_ids" invisible="True"/>
                             <field name="job_id" domain="[('id', 'in', domain_job_ids)]" options="{'no_open': True}"/>

@@ -1015,18 +1015,24 @@ class Project(models.Model):
         return action
     # use
     def action_ccpp_department_group_by_priority_manager_all_department(self):
+        company_ids = self._context.get('allowed_company_ids')
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.action_all_ccpp_group_by_priority_manager_all_department')
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
         job_ids = self.get_child_job(employee_id.job_lines)
-        ccpp_ids = self.env['project.project'].search([('department_id','=',employee_id.department_id.id)])
+        ccpp_ids = self.env['project.project'].search([('department_id','=',employee_id.department_id.id),
+                                                       ('company_id', 'in', company_ids)
+                                                        ])
         action['domain'] = [('id','in',ccpp_ids.ids)]
         return action
     # use
     def action_ccpp_department_group_by_priority_ceo(self):
+        company_ids = self._context.get('allowed_company_ids')
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.action_all_ccpp_group_by_priority_ceo')
-        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-        job_ids = self.get_child_job(employee_id.job_lines)
-        ccpp_ids = self.env['project.project'].search([])
+        ccpp_ids = self.env['project.project'].search([
+                                                        ('company_id', 'in', company_ids)
+                                                       ])
+        print("bow"*100)
+        print(ccpp_ids)
         action['domain'] = [('id','in',ccpp_ids.ids)]
         return action
         
@@ -1039,9 +1045,12 @@ class Project(models.Model):
         return action
     
     def action_my_ccpp_group_by_priority_user(self):
+        company_ids = self._context.get('allowed_company_ids')
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.action_my_ccpp_group_by_priority')
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-        ccpp_ids = self.env['project.project'].search([('job_id', '=', employee_id.job_id.id),('job_id','!=',False)])
+        ccpp_ids = self.env['project.project'].search([('job_id', 'in', employee_id.job_lines.ids),
+                                                       ('job_id','!=',False),
+                                                       ('company_id', 'in', company_ids)])
         action['domain'] = [('id','in',ccpp_ids.ids)]
         return action
     

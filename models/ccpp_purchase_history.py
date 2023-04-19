@@ -255,6 +255,18 @@ class CCPPPurchaseHistory(models.Model):
                 if check_duplicate:
                     raise UserError("Customer %s already have Purchase History in year %s"%(obj.customer_id.name,obj.year_selection))
 
+    def action_purchase_history_user(self):
+        self = self.sudo()
+        company_ids = self._context.get('allowed_company_ids')
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_purchase_history_action')
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        history_ids = self.env['ccpp.purchase.history'].search([
+                                                                ('job_id', '=', employee_id.job_id.id),
+                                                                ('company_id', 'in', company_ids),
+                                                                ])
+        action['domain'] = [('id','in',history_ids.ids)]
+        return action
+
     def action_purchase_history_manager(self):
         self = self.sudo()
         company_ids = self._context.get('allowed_company_ids')
@@ -299,7 +311,7 @@ class CCPPPurchaseHistory(models.Model):
             job_ids |= self.get_child_job(job_id.child_lines, job_ids)   
         return job_ids
             
-class CCPPPurchaseHistory(models.Model):
+class CCPPPurchaseHistoryLine(models.Model):
     _name = "ccpp.purchase.history.line"
     
     def _get_default_type(self):
@@ -317,9 +329,13 @@ class CCPPPurchaseHistory(models.Model):
     
     history_id = fields.Many2one("ccpp.purchase.history", index=True, ondelete='cascade', readonly=True)
     product_id = fields.Many2one("product.product", string="Product", required=True)
+    asset_id = fields.Many2one("asset", string="Asset")
     unit_price = fields.Float(string="Unit Price")
-    order_qty = fields.Float(string="Ordered Qty")
-    use_qty = fields.Float(string="Used Qty") 
+    uom_id = fields.Many2one("uom.uom", string="UoM")
+    borrow_qty = fields.Float(string="Borrow Balance Qty", compute="_compute_qty")
+    order_qty = fields.Float(string="Ordered Qty",compute="_compute_qty")
+    use_qty = fields.Float(string="Used Qty", compute="_compute_qty")
+    remain_qty = fields.Float(string="Remain Qty", compute="_compute_qty")
     vendor_id = fields.Many2one("res.partner", string="Vendor", default=_get_default_vendor)
     customer_id = fields.Many2one(related="history_id.customer_id", store=True)
     year_selection = fields.Selection(related="history_id.year_selection", store=True)
@@ -332,7 +348,25 @@ class CCPPPurchaseHistory(models.Model):
         ('competitor', 'Competitors'),
     ], default=_get_default_type, string="Potential Type")
     note = fields.Text("Sales Strategy")
-    
+    company_id = fields.Many2one(related="history_id.company_id", store=True)
+    detail_lines = fields.One2many("ccpp.purchase.history.detail.line", "history_line_id", string="Competitor Purchase History Detail Lines")
+
+    @api.depends("detail_lines","detail_lines.borrow_qty","detail_lines.order_borrow_qty","detail_lines.order_qty","detail_lines.remain_qty")
+    def _compute_qty(self):
+        for obj in self:
+            borrow = obj.detail_lines.mapped('borrow_qty')
+            borrow_qty = sum(borrow) or 0
+            order_borrow = obj.detail_lines.mapped('order_borrow_qty')
+            order_borrow_qty = sum(order_borrow) or 0
+            order = obj.detail_lines.mapped('order_qty')
+            order_qty = sum(order) or 0
+            remain_line = self.env['ccpp.purchase.history.detail.line'].search([('history_line_id','=',obj.id)], order="date desc, id desc", limit=1)
+
+            obj.borrow_qty = borrow_qty - order_borrow_qty
+            obj.order_qty = order_qty + order_borrow_qty
+            obj.use_qty = order_qty + order_borrow_qty - (remain_line.remain_qty or 0)
+            obj.remain_qty = (remain_line.remain_qty or 0) + (remain_line.order_qty or 0) + (remain_line.order_borrow_qty or 0)
+
     @api.model_create_multi
     def create(self, vals_list):
         #for vals in vals_list:
@@ -341,9 +375,14 @@ class CCPPPurchaseHistory(models.Model):
         #        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_purchase_history_action_form')
         #        return action
             
-        res = super(CCPPPurchaseHistory, self).create(vals_list)
+        res = super(CCPPPurchaseHistoryLine, self).create(vals_list)
         
         return res
+    
+    def unlink(self):
+        if self.detail_lines: 
+            raise UserError("ไม่สามารถลรายการที่มีการอัพเดทข้อมูลมาแล้วได้")
+        res = super().unlink()
     
     @api.depends("customer_id")
     def _compute_domain_key_user_ids(self):
@@ -360,7 +399,95 @@ class CCPPPurchaseHistory(models.Model):
             action['res_id'] = obj.history_id.id
             return action
         
+    @api.onchange("product_id")
+    def onchange_product(self):
+        for obj in self:
+            uom_id = self.env['uom.uom']
+            if obj.product_id:
+                uom_id = obj.product_id.uom_id
+            obj.uom_id = uom_id
         
+class CCPPPurchaseHistoryDetailLine(models.Model):
+    _name = "ccpp.purchase.history.detail.line"
+    
+    history_line_id = fields.Many2one("ccpp.purchase.history.line", index=True, ondelete='cascade')#, readonly=True
+    product_id = fields.Many2one(related="history_line_id.product_id", store=True)
+    asset_id = fields.Many2one(related="history_line_id.asset_id", store=True)
+    unit_price = fields.Float(related="history_line_id.unit_price")
+    uom_id = fields.Many2one(related="history_line_id.uom_id")
+    date = fields.Date(string="Date")
+    borrow_qty = fields.Float(string="Borrow Qty")
+    order_borrow_qty = fields.Float(string="Ordered (Borrow) Qty")
+    order_qty = fields.Float(string="Ordered (Normal) Qty")
+    remain_qty = fields.Float(string="Remaining Qty") 
+    vendor_id = fields.Many2one(related="history_line_id.vendor_id")
+    customer_id = fields.Many2one(related="history_line_id.customer_id", store=True)
+    year_selection = fields.Selection(related="history_line_id.year_selection", store=True)
+    sale_person_id = fields.Many2one(related="history_line_id.sale_person_id")
+    job_id = fields.Many2one(related="history_line_id.job_id", store=True)
+    key_user_id = fields.Many2one(related="history_line_id.key_user_id")
+    potential_type = fields.Selection(related="history_line_id.potential_type")
+    company_id = fields.Many2one(related="history_line_id.company_id")
+    task_id = fields.Many2one("account.analytic.line", string="Task")
+    
+    
+    def action_purchase_history_detail_line_user(self):
+        self = self.sudo()
+        company_ids = self._context.get('allowed_company_ids')
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_purchase_history_detail_line_action')
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        history_ids = self.env['ccpp.purchase.history.detail.line'].search([
+                                                                ('job_id', '=', employee_id.job_id.id),
+                                                                ('company_id', 'in', company_ids),
+                                                                ])
+        print("Max"*100)
+        print(history_ids)
+        action['domain'] = [('id','in',history_ids.ids)]
+        return action
+
+    def action_purchase_history_detail_line_manager(self):
+        self = self.sudo()
+        company_ids = self._context.get('allowed_company_ids')
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_purchase_history_detail_line_action')
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        job_ids = self.get_child_job(employee_id.job_lines)
+        history_ids = self.env['ccpp.purchase.history.detail.line'].search([
+                                                                ('job_id', 'in', job_ids.ids),
+                                                                ('company_id', 'in', company_ids),
+                                                                ])
+        action['domain'] = [('id','in',history_ids.ids)]
+        return action
+    
+    def action_purchase_history_detail_line_manager_all_department(self):
+        self = self.sudo()
+        company_ids = self._context.get('allowed_company_ids')
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_purchase_history_detail_line_action')
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        history_ids = self.env['ccpp.purchase.history.detail.line'].search([
+                                                                ('department_id', '=', employee_id.department_id.id),
+                                                                ('company_id', 'in', company_ids),
+                                                                ])
+        action['domain'] = [('id','in',history_ids.ids)]
+        return action
+    
+    def action_purchase_history_detail_line_ceo(self):
+        self = self.sudo()
+        company_ids = self._context.get('allowed_company_ids')
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_purchase_history_detail_line_action')
+        history_ids = self.env['ccpp.purchase.history.detail.line'].search([
+                                                                ('company_id', 'in', company_ids),
+                                                                ])
+        action['domain'] = [('id','in',history_ids.ids)]
+        return action
+    
+    def get_child_job(self,job_lines,job_ids=False):
+        if not job_ids:
+            job_ids = self.env['hr.job']
+        for job_id in job_lines:
+            job_ids |= job_id
+            job_ids |= self.get_child_job(job_id.child_lines, job_ids)   
+        return job_ids
+
 
     
     

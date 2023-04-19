@@ -248,7 +248,19 @@ class CCPPSaleTarget(models.Model):
         orderby = "year_selection desc"
         res = super(CCPPSaleTarget, self).read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
         return res
-            
+       
+    def action_sale_target_user(self):
+        self = self.sudo()
+        company_ids = self._context.get('allowed_company_ids')
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_sale_target_action')
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        sale_target_ids = self.env['ccpp.sale.target'].search([
+                                                            ('job_id', 'in', employee_id.job_lines.ids),
+                                                            ('company_id', 'in', company_ids),
+                                                            ])
+        action['domain'] = [('id','in',sale_target_ids.ids)]
+        return action   
+         
     def action_sale_target_manager(self):
         self = self.sudo()
         company_ids = self._context.get('allowed_company_ids')

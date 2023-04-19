@@ -24,23 +24,6 @@
         </field>
     </record>
 
-    <record id="ccpp_purchase_history_action" model="ir.actions.act_window">
-        <field name="name">Customer Purchase History</field>
-        <field name="type">ir.actions.act_window</field>
-        <field name="res_model">ccpp.purchase.history</field>
-        <field name="context">{'search_default_customer': 1}</field>
-        <field name="domain">[('user_id', '=', uid)]</field>
-        <field name="view_mode">tree,form</field>
-    </record>
-
-    <record id="ccpp_purchase_history_action_form" model="ir.actions.act_window">
-        <field name="name">Customer Purchase History</field>
-        <field name="type">ir.actions.act_window</field>
-        <field name="res_model">ccpp.purchase.history</field>
-        <field name="view_mode">form</field>
-        <field name="target">main</field>
-    </record>
-
     <record id="ccpp_purchase_history_view_tree" model="ir.ui.view">
         <field name="name">ccpp.purchase.history.view.tree</field>
         <field name="model">ccpp.purchase.history</field>
@@ -119,21 +102,44 @@
                         <page name="winmed_lines" string="Winmed Products">
                             <field name="winmed_lines" domain="[('potential_type','=','company')]" context="{'potential_type':'company'}">
                                 <tree editable="bottom">
-                                    <field name="product_id"/>
-                                    <field name="potential_type" invisible="True"/>
                                     <field name="domain_key_user_ids" invisible="True"/>
+                                    <field name="potential_type" invisible="True"/>
                                     <field name="key_user_id" domain="[('id','in',domain_key_user_ids)]" context="{'show_title_position':True}"/>
+                                    <field name="asset_id" options="{'no_create': True}"/>
+                                    <field name="product_id" options="{'no_create': True}"/>
+                                    <field name="uom_id" options="{'no_create': True}"/>
                                     <field name="unit_price"/>
+                                    <field name="borrow_qty"/>
                                     <field name="order_qty"/>
                                     <field name="use_qty"/>
+                                    <field name="remain_qty"/>
                                     <field name="note" string="Winmed Sales Strategy"/>
                                 </tree>
+                                <form>
+                                    <group>
+                                        <group>
+                                            <field name="potential_type" invisible="True"/>
+                                            <field name="domain_key_user_ids" invisible="True"/>
+                                            <field name="key_user_id" domain="[('id','in',domain_key_user_ids)]" context="{'show_title_position':True}"/>
+                                            <field name="asset_id" options="{'no_create': True}"/>
+                                            <field name="product_id" options="{'no_create': True}"/>
+                                            <field name="uom_id" options="{'no_create': True}"/>
+                                            <field name="unit_price"/>
+                                            <field name="borrow_qty"/>
+                                            <field name="order_qty"/>
+                                            <field name="use_qty"/>
+                                            <field name="remain_qty"/>
+                                            <field name="note" string="Winmed Sales Strategy"/>
+                                        </group>
+                                    </group>
+                                </form>
+
                             </field>
                         </page>
                         <page name="competitor_lines" string="Competitor Products">
                             <field name="competitor_lines" domain="[('potential_type','=','competitor')]" context="{'potential_type':'competitor'}">
                                 <tree editable="bottom">
-                                    <field name="product_id"/>
+                                    <field name="product_id" options="{'no_create': True}"/>
                                     <field name="vendor_id" domain="[('is_competitor','=',True)]"/>
                                     <field name="potential_type" invisible="True"/>
                                     <field name="domain_key_user_ids" invisible="True"/>
@@ -143,6 +149,20 @@
                                     <field name="use_qty"/>
                                     <field name="note" string="Competitor's Sales Strategy"/>
                                 </tree>
+                                <form>
+                                    <group>
+                                        <group>
+                                            <field name="product_id" options="{'no_create': True}"/>
+                                            <field name="potential_type" invisible="True"/>
+                                            <field name="domain_key_user_ids" invisible="True"/>
+                                            <field name="key_user_id" domain="[('id','in',domain_key_user_ids)]" context="{'show_title_position':True}"/>
+                                            <field name="unit_price"/>
+                                            <field name="order_qty"/>
+                                            <field name="use_qty"/>
+                                            <field name="note" string="Winmed Sales Strategy"/>
+                                        </group>
+                                    </group>
+                                </form>
                             </field>
                         </page>
                     </notebook>
@@ -153,6 +173,23 @@
                 </div>
             </form>
         </field>
+    </record>
+
+    <record id="ccpp_purchase_history_action" model="ir.actions.act_window">
+        <field name="name">Customer Purchase History</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">ccpp.purchase.history</field>
+        <field name="context">{'search_default_customer': 1}</field>
+        <!--<field name="domain">[('user_id', '=', uid)]</field>-->
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="ccpp_purchase_history_action_form" model="ir.actions.act_window">
+        <field name="name">Customer Purchase History</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">ccpp.purchase.history</field>
+        <field name="view_mode">form</field>
+        <field name="target">main</field>
     </record>
 
     <record id="ccpp_purchase_history_search_by_product" model="ir.ui.view">
@@ -174,15 +211,6 @@
         </field>
     </record>
 
-    <record id="ccpp_purchase_history_action_by_product" model="ir.actions.act_window">
-        <field name="name">Customer Purchase History 2</field>
-        <field name="type">ir.actions.act_window</field>
-        <field name="res_model">ccpp.purchase.history.line</field>
-        <field name="domain">[('potential_type', '=', 'company')]</field>
-        <field name="context">{'search_default_customer': 1, 'search_default_year': 1, 'is_create_history':True}</field>
-        <field name="view_mode">tree,form</field>
-    </record>
-
     <record id="ccpp_purchase_history_view_tree_by_product" model="ir.ui.view">
         <field name="name">ccpp.purchase.history.view.tree.by.product</field>
         <field name="model">ccpp.purchase.history.line</field>
@@ -201,6 +229,23 @@
                 <button name="action_open_history_form" type="object" string="More Information"/>
             </tree>
         </field>
+    </record>
+
+    <record id="ccpp_purchase_history_action_by_product" model="ir.actions.act_window">
+        <field name="name">Customer Purchase History 2</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">ccpp.purchase.history.line</field>
+        <field name="domain">[('potential_type', '=', 'company')]</field>
+        <field name="context">{'search_default_customer': 1, 'search_default_year': 1, 'is_create_history':True}</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="ccpp_purchase_history_action_user" model="ir.actions.server">
+        <field name="name">Purchase History</field>
+        <field name="model_id" ref="model_ccpp_purchase_history"/>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="code">action = model.action_purchase_history_user()</field>
     </record>
 
     <record id="ccpp_purchase_history_action_manager" model="ir.actions.server">
@@ -230,4 +275,106 @@
     <!--<menuitem id="menu_ccpp_purchase_history" name="Customer Purchase History" parent="crm.crm_menu_sales" action="ccpp_purchase_history_action" sequence="103"/>-->
     <!--<menuitem id="menu_ccpp_purchase_history_by_prodecy" name="Customer Purchase History 2" parent="crm.crm_menu_sales" action="ccpp_purchase_history_action_by_product" sequence="103"/>-->
     
+    <!-- Purchase History Detail Line-->
+    <record id="ccpp_purchase_history_detail_line_search" model="ir.ui.view">
+        <field name="name">Customer Purchase History Detail Line Search</field>
+        <field name="model">ccpp.purchase.history.detail.line</field>
+        <field name="arch" type="xml">
+            <search string="Search Puechase History Detail Line">
+                <field name="product_id"/>
+                <field name="asset_id"/>
+                <field name="date"/>
+                <field name="customer_id"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Asset" name="asset" context="{'group_by': 'asset_id'}"/>
+                    <filter string="Product" name="product" context="{'group_by': 'product_id'}"/>
+                    <filter string="Customer" name="customer" context="{'group_by': 'customer_id'}"/>
+                    <filter string="Year" name="year" context="{'group_by': 'year_selection'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="ccpp_purchase_history_detail_line_view_tree" model="ir.ui.view">
+        <field name="name">ccpp.purchase.history.detail.line.view.tree</field>
+        <field name="model">ccpp.purchase.history.detail.line</field>
+        <field name="arch" type="xml">
+            <tree multi_edit="1" editable="top" create="0" delete="0">
+                <field name="date"/>
+                <field name="customer_id"/>
+                <field name="key_user_id" context="{'show_title_position':True}"/>
+                <field name="asset_id"/>
+                <field name="product_id"/>
+                <field name="uom_id"/>
+                <field name="borrow_qty" sum="sum_borrow"/>
+                <field name="order_borrow_qty" sum="sum_order_borrow"/>
+                <field name="order_qty" sum="sum_order"/>
+                <field name="remain_qty"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ccpp_purchase_history_detail_line_view_form" model="ir.ui.view">
+        <field name="name">ccpp.purchase.history.detail.line.view.form</field>
+        <field name="model">ccpp.purchase.history.detail.line</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <group>
+                        <field name="history_line_id" invisible="True"/>
+                        <field name="date" readonly="True"/>
+                        <field name="key_user_id" context="{'show_title_position':True}"/>
+                        <field name="asset_id"/>
+                        <field name="product_id"/>
+                        <field name="borrow_qty" readonly="True"/>
+                        <field name="order_borrow_qty" readonly="True"/>
+                        <field name="order_qty" readonly="True"/>
+                        <field name="remain_qty" readonly="True"/>
+                    </group>
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <record id="ccpp_purchase_history_detail_line_action" model="ir.actions.act_window">
+        <field name="name">Purchase History Detail</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">ccpp.purchase.history.detail.line</field>
+        <field name="view_mode">tree</field>
+        <field name="target">main</field>
+    </record>
+
+    <record id="ccpp_purchase_history_detail_line_action_user" model="ir.actions.server">
+        <field name="name">Purchase History Detail</field>
+        <field name="model_id" ref="model_ccpp_purchase_history_detail_line"/>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="code">action = model.action_purchase_history_detail_line_user()</field>
+    </record>
+
+    <record id="ccpp_purchase_history_detail_line_action_manager" model="ir.actions.server">
+        <field name="name">Purchase History Detail</field>
+        <field name="model_id" ref="model_ccpp_purchase_history_detail_line"/>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="code">action = model.action_purchase_history_detail_line_manager()</field>
+    </record>
+
+    <record id="ccpp_purchase_history_detail_line_action_manager_all_department" model="ir.actions.server">
+        <field name="name">Purchase History Detail</field>
+        <field name="model_id" ref="model_ccpp_purchase_history_detail_line"/>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="code">action = model.action_purchase_history_detail_line_manager_all_department()</field>
+    </record>
+
+    <record id="ccpp_purchase_history_detail_line_action_ceo" model="ir.actions.server">
+        <field name="name">Purchase History Detail</field>
+        <field name="model_id" ref="model_ccpp_purchase_history_detail_line"/>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="code">action = model.action_purchase_history_detail_line_ceo()</field>
+    </record>
+
 </odoo>

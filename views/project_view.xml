@@ -2067,7 +2067,7 @@
         <field name="model">project.task</field>
         <field eval="201" name="priority"/>
         <field name="arch" type="xml">
-            <tree delete="0" create="0" expand="0">
+            <tree delete="0" create="0" expand="1">
                 <button type="action" name="ccpp.action_open_solution_strategy_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>
                 <field name="code" string="Strategy No." class="fw-bold"/>
                 <field name="name" string="Strategy Title" class="fw-bold"/>
