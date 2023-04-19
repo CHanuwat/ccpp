@@ -146,6 +146,7 @@ class Project(models.Model):
     task_current_action = fields.Char(related="task_last_update_id.current_action", string="Task Current Situation")
     task_next_action = fields.Char(related="task_last_update_id.next_action", string="Task Next Action")
     company_id = fields.Many2one('res.company', string='Company', required=True, default=_default_company_id)
+    customer_company_id = fields.Many2one('res.company', string="Customer Company", compute="_compute_customer_company")
     ccpp_approve_lines = fields.One2many("ccpp.approve.line", "ccpp_id", string="CCPP Approve Lines")
     is_show_approve = fields.Boolean(string="Is Show Approve", compute="_compute_show_approve")
     current_approve_ids = fields.Many2many("hr.job", string="Current Apporver", compute="_compute_current_approve", store="True")
@@ -202,8 +203,8 @@ class Project(models.Model):
                                                                                     ('partner_ids','not in',obj.employee_id.work_contact_id.id)]).mapped('partner_ids')
             if obj.department_ids:
                 if partner_contact:
-                    employee_ids = self.env['hr.employee'].search([('work_contact_id','in', partner_contact.ids),('department_id','in',obj.department_ids.ids)])
-                    domain_partner_contact = employee_ids.mapped('work_contact_id')
+                    employee_ids = self.env['hr.employee'].sudo().search([('work_contact_id','in', partner_contact.ids),('department_id','in',obj.department_ids.ids)])
+                    domain_partner_contact = employee_ids.mapped('work_contact_id') 
                 #else:
                 #    employee_ids = self.env['hr.employee'].search([('department_id','in',obj.department_ids.ids)])
                 #    domain_partner_contact = employee_ids.mapped('work_contact_id')
@@ -424,6 +425,14 @@ class Project(models.Model):
             #raise UserError("กรุณาเลือกความเร่งด่วนอย่างใดอย่างหนึ่ง")
         #if self.is_short_time and self.is_long_time:
             #raise UserError("กรุณาเลือกระยะเวลาในการแก้ปัญหาใดอย่างหนึ่ง")
+            
+    @api.onchange("partner_id")
+    def _compute_customer_company(self):
+        for obj in self:
+            customer_company_id = self.env['res.company']
+            if obj.partner_id:
+                customer_company_id = self.env['res.company'].sudo().search([('partner_id','=',obj.partner_id.id)])
+            obj.customer_company_id = customer_company_id
     
     @api.onchange("is_critical") 
     def onchange_is_critical(self):
@@ -993,7 +1002,7 @@ class Project(models.Model):
         return action
     # use
     def action_ccpp_department_group_by_priority_manager(self):
-        self = self.sudo()
+        #self = self.sudo()
         company_ids = self._context.get('allowed_company_ids')
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.action_all_ccpp_group_by_priority')
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)

@@ -14,7 +14,8 @@
                                 <a href="#" class="btn btn-primary w-100 h-100 border-0 rounded-0 text-capitalize fw-normal">
                                     <div class="fs-2" t-out="ccppData['priority_1']"/>1st Priority
                                 </a>
-                            </div><div class="g-col-2 p-0" t-on-click="setSearchContext" title="2nd Priority" filter_name="priority_2">
+                            </div>
+                            <div class="g-col-2 p-0" t-on-click="setSearchContext" title="2nd Priority" filter_name="priority_2">
                                 <a href="#" class="btn btn-primary w-100 h-100 border-0 rounded-0 text-capitalize fw-normal">
                                     <div class="fs-2" t-out="ccppData['priority_2']"/>2nd Priority
                                 </a>
