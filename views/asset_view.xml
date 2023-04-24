@@ -51,7 +51,7 @@
                         <group>
                             <field name="code" readonly="True"/>
                             <field name="date"/>
-                            <field name="customer_id" options="{'no_create': True}"/>
+                            <field name="customer_id" options="{'no_create': True}" invisible="True"/>
                             <field name="active" widget="boolean_toggle"/>
                             <field name="company_id" readonly="True" groups="base.group_multi_company"/>
                             

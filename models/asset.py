@@ -15,7 +15,7 @@ class Asset(models.Model):
     name = fields.Char(string="Asset Name", track_visibility="onchange", required=True)
     date = fields.Date(string="Create Date", default=fields.Date.today, track_visibility="onchange", required=True)
     active = fields.Boolean(string="Active", default="True")
-    customer_id = fields.Many2one("res.partner", string="Customer", track_visibility="onchange", required=True)
+    customer_id = fields.Many2one("res.partner", string="Customer", track_visibility="onchange", required=False)
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.user.company_id)
     
     @api.model_create_multi
