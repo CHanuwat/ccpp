@@ -105,7 +105,7 @@
                                     <field name="domain_key_user_ids" invisible="True"/>
                                     <field name="potential_type" invisible="True"/>
                                     <field name="key_user_id" domain="[('id','in',domain_key_user_ids)]" context="{'show_title_position':True}"/>
-                                    <field name="asset_id" options="{'no_create': True}"/>
+                                    <field name="asset_id" options="{'no_create': True}" context="{'show_code':True}"/>
                                     <field name="product_id" options="{'no_create': True}"/>
                                     <field name="uom_id" options="{'no_create': True}"/>
                                     <field name="unit_price"/>

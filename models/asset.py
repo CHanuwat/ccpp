@@ -24,8 +24,21 @@ class Asset(models.Model):
         for asset in res:
             sequence_code = 'asset'
             sequence_date = asset.date
-            code = self.env['ir.sequence'].next_by_code(sequence_code,sequence_date=sequence_date)
-            asset.code = code or 'New'
+            if not asset.code:
+                code = self.env['ir.sequence'].next_by_code(sequence_code,sequence_date=sequence_date)
+                asset.code = code or 'New'
         return res
     
-    
+    def name_get(self):
+        res = super(Asset, self).name_get()
+        if self._context.get("show_code", False):
+            res = []
+            for obj in self:
+                new_name_list = []
+                if obj.code:
+                    new_name_list.append(obj.code)
+                if obj.name:
+                    new_name_list.append(obj.name)
+                new_name = ', '.join(new_name_list)
+                res.append((obj.id, new_name))
+        return res
