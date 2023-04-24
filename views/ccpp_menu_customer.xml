@@ -92,7 +92,7 @@
             parent="menu_main_customer"
             action="ccpp_external_information_action"
             sequence="3"
-            groups="ccpp.group_ccpp_frontoffice_user,ccpp.group_ccpp_backoffice_user"
+            groups="ccpp.group_ccpp_backoffice_user"
             />
 
         <menuitem
@@ -101,7 +101,7 @@
             parent="menu_main_customer"
             action="ccpp_external_information_action_manager"
             sequence="3"
-            groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"
+            groups="ccpp.group_ccpp_backoffice_manager"
             />
 
         <menuitem
@@ -110,7 +110,7 @@
             parent="menu_main_customer"
             action="ccpp_external_information_action_manager_all_department"
             sequence="3"
-            groups="ccpp.group_ccpp_frontoffice_manager_all_department,ccpp.group_ccpp_backoffice_manager_all_department"
+            groups="ccpp.group_ccpp_backoffice_manager_all_department"
             />
 
         <menuitem
