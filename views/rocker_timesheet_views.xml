@@ -12,13 +12,11 @@
                     <field name="project_id"/>
                     <field name="task_search"/>
                     <field name="company_id"/>
-                    <field name="project_test_id"/>
                     <field name="customer_potential"/>
                     <separator/>
                     <searchpanel view_types="tree,calendar">
                         <!--<field name="task_search" expand="1" hierarchize="1" string="CCPP" icon="fa-folder-open-o"/>-->
                         <!--<field name="customer_potential_id" string="Customer Potential" icon="fa-folder-open-o"/>
-                        <field name="project_test_id" string="Project Test" icon="fa-folder-open-o"/>
                         <field name="project_id" string="Project" icon="fa-folder-open-o"/>
                         <field name="customer_potential" string="Customer Potential" icon="fa-folder-open-o"/>-->
                     </searchpanel>
@@ -41,6 +39,12 @@
             </field>
         </record>
 
+        <record id="action_check_in" model="ir.actions.client">
+            <field name="name">Check In</field>
+            <field name="tag">check_in_view</field>
+            <field name="context">{'active_id': active_id}</field>
+        </record>
+
         <record id="rocker_timesheet_tree" model="ir.ui.view">
             <field name="name">rocker_timesheet_tree</field>
             <field name="model">account.analytic.line</field>
@@ -48,6 +52,7 @@
                 <!--<tree js_class="rocker_tree" string="Timesheets" editable="top" create="true" delete="true" edit="true">-->
                 <tree js_class="task_dashboard_list" string="Timesheets" create="false" delete="false" edit="true" class="task_list" expand="1">
                     <button name="update_situation" type="object" string="Check In" class="btn btn-success" icon="fa-sign-in" attrs="{'invisible': [('state','not in',['open'])]}"/>
+                    <!--<button name="ccpp.action_check_in" type="action" string="Check In" class="btn btn-danger" icon="fa-sign-in" attrs="{'invisible': [('state','not in',['open'])]}"/>-->
                     <field name="name" string="Task" />
                     <field name="start" required="1" string="From"/>
                     <field name="stop" required="1" string="To"/>
@@ -368,16 +373,17 @@
                                         <field name="domain_solution_ids" invisible="True"/>
                                         <field name="domain_strategy_ids" invisible="True"/>
 
-                                        <field name="project_id" required="0" string="CCPP"
-                                        domain="[('company_id', '=', company_id),('id', 'in', domain_ccpp_ids)]"
+                                        <field name="temp_project_id" required="0" string="CCPP" domain="[('id','in',domain_ccpp_ids)]"
                                         attrs="{'invisible': [('is_go_ccpp_customer','=',False)]}"
                                         options="{'no_create':True}"/>
-                                        <field name="task_id" required="0" string="Solution"
+                                        <field name="project_id" invisible="True"/>
+                                        <field name="temp_task_id" required="0" string="Solution"
                                                 domain="[('project_id', '=', project_id), 
                                                          ('is_solution', '=', True),
                                                          ('state', '=', 'process')]"
                                                 attrs="{'invisible': [('is_go_ccpp_customer','=',False)]}"
                                                 options="{'no_create':True}"/>
+                                        <field name="task_id" invisible="True"/>
                                         <field name="task_strategy_id" string="Strategy"
                                                 domain="[('project_id', '=', project_id),
                                                          ('parent_id', '=', task_id),

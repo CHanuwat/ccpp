@@ -27,6 +27,9 @@ from odoo.osv import expression
 import pytz
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from dateutil.relativedelta import relativedelta
+import requests
+from pprint import pprint
+import googlemaps
 
 import logging
 
@@ -70,16 +73,37 @@ class RockerTimesheet(models.Model):
         # _logger.debug('_default_user')
         return self.env.context.get('user_id', self.env.user.id)
 
+    @api.depends("customer_id","priority_id")
     def _domain_project_id(self):
-        domain = [('allow_timesheets', '=', True)]
+        #domain = [('allow_timesheets', '=', True)]
         # odoo 14
         # return expression.AND([domain,
         #                        ['|', ('privacy_visibility', '!=', 'followers'), ('allowed_internal_user_ids', 'in', self.env.user.ids)]
         #                        ])
         # odoo 15
-        return expression.AND([domain,
-                               ['|', ('privacy_visibility', '!=', 'followers'), ('message_partner_ids', 'in', [self.env.user.partner_id.id])]
-                               ])
+        #return expression.AND([domain,
+        #                       ['|', ('privacy_visibility', '!=', 'followers'), ('message_partner_ids', 'in', [self.env.user.partner_id.id])]
+        #                       ])
+        print("Bank"*100)
+        print(self)
+        for obj in self:
+            domain = []
+            domain_project = []
+            ccpp_ids = self.env['project.project']
+            if obj.customer_id:
+                domain = [('job_id','=',obj.job_id.id),
+                          ('state','=','process'),
+                          ('company_id','=',obj.company_id.id)
+                          ]
+                domain.append(('partner_id','=',obj.customer_id.id))
+                if obj.priority_id:
+                    domain.append(('priority_id','=',obj.priority_id.id))
+                ccpp_ids = self.env['project.project'].search(domain)
+            domain_project = (['id','in',ccpp_ids.ids])
+            print(ccpp_ids)
+            print(domain_project)
+            
+            return domain_project
         
     def _domain_project_test_id(self):
         ccpp_ids = self.env['project.project'].search([('user_id','=',self.env.user.id)])
@@ -87,7 +111,10 @@ class RockerTimesheet(models.Model):
         return domain
 
     def _domain_project_id_search(self):
-        domain = [('company_id', '=', self.env.company.id)]
+        print("1"*100)
+        company_ids = self._context.get('allowed_company_ids')
+        domain = [('company_id', '=', company_ids)]
+        #domain = [('company_id', '=', self.env.company.id)]
         return domain
 
     def _set_rolling(self, bset):
@@ -177,6 +204,7 @@ class RockerTimesheet(models.Model):
 
     def _domain_get_search_domain(self, filt):
         # default = all
+        print('2'*100)
         _search_panel_domain = [('company_id', '=', self.env.company.id)]  # ok
         if filt == 'all':
             _search_panel_domain = _search_panel_domain + []
@@ -233,6 +261,8 @@ class RockerTimesheet(models.Model):
         global default_rolling_amount
         global default_time_roundup
 
+
+        print('3'*100)
         _defaults = None
         _company_defaults = None
         _company_defaults = self.env['rocker.company.defaults'].search([('company_id', '=', self.env.company.id)])
@@ -379,26 +409,26 @@ class RockerTimesheet(models.Model):
         return employee_id.job_id
 
     # existing fields
-    company_id = fields.Many2one('res.company', "Company", default=lambda self: self.env.company, store=True,
+    company_id = fields.Many2one('res.company', "Company", default=lambda self: self.env.user.company_id, store=True,
                                  required=True)
     #task_id = fields.Many2one(
     #    'project.task', 'Task', compute='_compute_task_id', store=True, readonly=False, index=True,
     #    domain="[('company_id', '=', company_id), ('project_id.allow_timesheets', '=', True), ('project_id', '=?', project_id)]")
     task_id = fields.Many2one(
-        'project.task', string='Solution', default=_default_task_solution, store=True, readonly=False, index=True,
-        domain="[('company_id', '=', company_id), ('project_id.allow_timesheets', '=', True), ('project_id', '=?', project_id), ('is_solution', '=', True)]")
+        'project.task', string='Solution', default=_default_task_solution, related="temp_task_id" ,store=True, readonly=False, index=True)
+    temp_task_id = fields.Many2one(
+        'project.task', string='Solution')
     task_strategy_id = fields.Many2one(
-        'project.task', string='Strategy', default=_default_task_strategy, store=True, readonly=False, index=True,
-        domain="[('company_id', '=', company_id), ('project_id.allow_timesheets', '=', True), ('project_id', '=?', project_id), ('is_strategy', '=', True)]")
+        'project.task', string='Strategy', default=_default_task_strategy, readonly=False, index=True)
+    
     #project_id = fields.Many2one(
     #    'project.project', 'Project', compute='_compute_project_id', store=True, readonly=False,
     #    domain=_domain_project_id)
     
     project_id = fields.Many2one(
-        'project.project', string='CCPP', default=_default_project, domain=_domain_project_id, store=True, readonly=False)
-    project_test_id = fields.Many2one(
-        'project.project', string='CCPP', default=_default_project, store=True, readonly=False,
-        domain=_domain_project_test_id)
+        'project.project', string='CCPP', default=_default_project, related="temp_project_id", readonly=False, store=True)
+    temp_project_id = fields.Many2one(
+        'project.project', string='CCPP') # add temp field because can't edit domain in project
     # name = fields.Char('Comments', required=False, default=_default_name)
     name = fields.Char(required=False, default=_default_name)
 
@@ -440,10 +470,11 @@ class RockerTimesheet(models.Model):
     # date = fields.Date('Date', required=True, index=True, default=_default_date, store=True)
     date = fields.Date('Date', required=True, index=True, store=True)
     user_id = fields.Many2one('res.users', string='User', default=lambda self: self.env.user, required=True)
-    employee_id = fields.Many2one('hr.employee', "Employee",
-                                  default=lambda self: self.env['hr.employee'].search(
-                                      [('user_id', '=', self.env.user.id),
-                                       ('company_id', '=', self.env.company.id)]).id, store=True)
+    #employee_id = fields.Many2one('hr.employee', "Employee",
+    #                              default=lambda self: self.env['hr.employee'].search(
+    #                                  [('user_id', '=', self.env.user.id),
+    #                                   ('company_id', '=', self.env.company.id)]).id, store=True)
+    employee_id = fields.Many2one("hr.employee", string="User", related="job_id.employee_id", store=True, track_visibility="onchange")
     department_id = fields.Many2one('hr.department', "Department", compute='_compute_department_id', store=True,
                                     compute_sudo=True)
     unit_amount = fields.Float('Actual Work', default=_default_work, required=True, help="Work amount in hours")
@@ -475,6 +506,8 @@ class RockerTimesheet(models.Model):
     domain_job_ids = fields.Many2many("hr.job", string="Domain Job", compute="_compute_domain_job_ids")
 
     state_color = fields.Integer(compute='_compute_state_color')
+    latitude = fields.Float(string="Latitude")
+    longitude = fields.Float(string="Longitude")
 
     @api.depends("employee_id")
     def _compute_domain_job_ids(self):
@@ -1075,7 +1108,7 @@ class RockerTimesheet(models.Model):
         global default_time_roundup
 
         self._get_defaults()
-
+        print('4'*100)
         if not self.start:
             _broll = None
             _broll = self._get_rolling()
@@ -1291,6 +1324,126 @@ class RockerTimesheet(models.Model):
     def _compute_state_color(self):
         for obj in self:         
             obj.state_color = STATE_COLOR[obj.state]
+            
+    @api.model
+    def get_employee(self,context):
+        print("Max"*100)
+        print('x --> ', context)
+        print(self._context)
+        
+        analytic_line = context
+        print(analytic_line)
+        analytic_line_id = self.env['account.analytic.line'].browse(analytic_line)
+        
+        print('y -- > ',analytic_line_id)
+        print('z -- > ',analytic_line_id.employee_id)
+        
+        date_now = datetime.now().strftime("%d %b %Y").upper()
+        time_now = (datetime.now() + timedelta(hours=7)).strftime("%H:%M:%S")
+        date_time_now = date_now + ', Time ' + time_now
+        
+        return {'employee': {'id': analytic_line_id.employee_id.id,
+                             'name': analytic_line_id.employee_id.name
+                },
+                'analytic_line': {'analytic_line_id': analytic_line_id.id,
+                                 'task': analytic_line_id.name,
+                                 'customer': analytic_line_id.customer_id.name,
+                                 'ccpp': analytic_line_id.project_id.name,
+                                 'solution': analytic_line_id.task_id.name,
+                                 'strategy': analytic_line_id.task_strategy_id.name,
+                                 'ccpp_host': analytic_line_id.project_id.partner_contact_id.name,
+                },
+                'date': {'date_now': date_now,
+                         'time_now': time_now,
+                         'date_time_now': date_time_now,
+                         }
+                }
+    
+    @api.model
+    def get_location_name(self,latitude,longitude):
+        print("C"*100)
+        print(latitude,longitude)
+        location_name = ""
+        
+        key = "AIzaSyBGMY2ya5VHQ8_2GqA31xfKhpfFGOUQGwg" # key max
+        gmaps = googlemaps.Client(key="AIzaSyD3nsr3IPMf1VheJjOyujfcDArTtQli0YM") # key P'Bank
+        # Geocoding an address
+        geocode_result = gmaps.geocode('1600 Amphitheatre Parkway, Mountain View, CA')
+
+        # Look up an address with reverse geocoding
+        reverse_geocode_result = gmaps.reverse_geocode((latitude, longitude))
+        if reverse_geocode_result:
+            try:
+                location_name = reverse_geocode_result[0]['formatted_address']
+            except:
+                location_name = ""
+                
+        pprint(reverse_geocode_result)
+        
+        return {'location_name': location_name}
+        
+        # key = "AIzaSyBGMY2ya5VHQ8_2GqA31xfKhpfFGOUQGwg"
+        # url = "https://maps.googleapis.com/maps/api/geocode/json?latlng=%s,%skey=%s"%(latitude,longitude,key)
+        # params = {"key": "AIzaSyBGMY2ya5VHQ8_2GqA31xfKhpfFGOUQGwg"}
+        # print(url)
+        # response = requests.post(url)
+        # print(response)
+        # if response.ok:
+        #     print(response)
+        #     location = response.json()["location"]
+        #     latitude = location["lat"]
+        #     longitude = location["lng"]
+        #     accuracy = response.json()["accuracy"]
+        #     print("Latitude:", latitude)
+        #     print("Longitude:", longitude)
+        #     print("Accuracy:", accuracy)
+        # else:
+        #     print("response:",response)
+        #     print("Error:", response.status_code)
+        
+    @api.model
+    def update_check_in(self,context):
+        print(context)
+        obj=self.browse(context[0])
+        obj.write({'latitude': context[1],
+                   'longitude': context[2],
+                   'current_action': context[3],
+                   'next_action': context[4],
+        })
+        
+        current_year = str(datetime.now().year)
+        purchase_history_id = self.env['ccpp.purchase.history'].search([('customer_id','=',obj.customer_id.id),
+                                                                        ('year_selection','=',current_year),
+                                                                        ('job_id','=',obj.job_id.id)
+                                                                        ]) 
+        order_line_list = []
+        borrow_line_list = []
+        for history_line_id in purchase_history_id.winmed_lines:
+            val = {'phlid' : history_line_id.id,
+                   'product': history_line_id.product_id.name,
+                   'uom': history_line_id.uom_id.name,
+                   
+            }
+                   
+            order_line_list.append(val)
+            borrow_line_list.append(val)
+            
+        is_purchase_history = False
+        if purchase_history_id:
+            is_purchase_history = True
+        #else:
+            #obj.state = 'done'
+        
+        return {'purchase_history': True,
+                'order_lines': order_line_list,
+                'borrow_lines': borrow_line_list,
+                }
+        
+    @api.model
+    def done(self,context):
+        pprint(context)
+        
+        
     
 class AccountAnalyticLineLog(models.Model):
     _name = "account.analytic.line.log"

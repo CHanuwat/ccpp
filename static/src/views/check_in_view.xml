@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates id="template" xml:space="preserve">
+
+     <t t-name="CheckInTemplateMain">
+         <div class="oh_dashboards" style="margin-left: 2%;">
+            <div class="container-fluid my-5 o_ccpp_check_in1"/>
+            <div class="container-fluid my-5 o_ccpp_check_in2"/>
+        </div>
+    </t>
+
+
+    <t t-name="CheckInTemplate1">
+		<t t-call="HrAttendanceCardLayout" style="min-width: 700px !important;">
+            <t t-set="bodyContent">
+                <t t-if="widget.employee">
+
+                    <t t-call="HrAttendanceUserBadge">
+                        <t t-set="userId" t-value="widget.employee.id"/>
+                        <t t-set="userName" t-value="widget.employee.name"/>
+                    </t>
+
+                    <div class="flex-grow-1">
+                        <h1 class="mt-5" t-esc="widget.employee.name"/>
+                        <h3>Welcome!</h3>
+                        <h3 class="" t-esc="widget.date.date_time_now"/>
+                    </div>
+                    <div t-if="widget.step == '1'" id="first_step" class="container mt-3">
+                        <div style="text-align: left; font-size: 15px;" class="row">
+                            <div class="col-3">
+                                <b>Task</b>
+                            </div>
+                            <div class="col-9">
+                                <span t-esc="widget.analytic_line.task"></span>
+                            </div>
+                        </div>
+                        <div style="text-align: left; font-size: 15px;" class="row">
+                            <div class="col-3">
+                                <b>Customer</b>
+                            </div>
+                            <div class="col-9">
+                                <span t-esc="widget.analytic_line.customer"></span>
+                            </div>
+                        </div>
+                        <div t-if="widget.analytic_line.ccpp_host != false" style="text-align: left; font-size: 15px;" class="row">
+                            <div class="col-3">
+                                <b>Host of CCPP</b>
+                            </div>
+                            <div class="col-9">
+                                <span t-esc="widget.analytic_line.ccpp_host"></span>
+                            </div>
+                        </div>
+                        <div t-if="widget.analytic_line.ccpp != false" style="text-align: left; font-size: 15px;" class="row">
+                            <div class="col-3">
+                                <b>CCPP</b>
+                            </div>
+                            <div class="col-9">
+                                <span t-esc="widget.analytic_line.ccpp"></span>
+                            </div>
+                        </div>
+                        <div t-if="widget.analytic_line.solution != false" style="text-align: left; font-size: 15px;" class="row">
+                            <div class="col-3">
+                                <b>Solution</b>
+                            </div>
+                            <div class="col-9">
+                                <span t-esc="widget.analytic_line.solution"></span>
+                            </div>
+                        </div>
+                        <div t-if="widget.analytic_line.strategy != false" style="text-align: left; font-size: 15px;" class="row">
+                            <div class="col-3">
+                                <b>Strategy</b>
+                            </div>
+                            <div class="col-9">
+                                <span t-esc="widget.analytic_line.strategy"></span>
+                            </div>
+                        </div>
+                        <!--<div style="text-align: left; font-size: 15px;" class="row">
+                            <div class="col-3">
+                                <b>Latitude</b>
+                            </div>
+                            <div class="col-9">
+                                <span t-esc="widget.latitude"></span>
+                            </div>
+                        </div>
+                        <div style="text-align: left; font-size: 15px;" class="row">
+                            <div class="col-3">
+                                <b>Longitude</b>
+                            </div>
+                            <div class="col-9">
+                                <span t-esc="widget.longitude"></span>
+                            </div>
+                        </div>-->
+
+                        <div style="text-align: left; font-size: 15px;" class="row">
+                            <div class="col-3">
+                                <b>Location</b>
+                            </div>
+                            <div class="col-9">
+                                <a t-attf-href="https://maps.google.com/?q={{widget.latitude}},{{widget.longitude}}" tabindex="-1" target="_blank" class="btn btn-sm btn-light" id="btn-view-on-googlemaps" data-toggle="tooltip" title="View on Google Maps website">
+                                    <i class="fa fa-external-link-square"></i>
+                                    <span>View on Google Maps</span>
+                                </a>
+                            </div>
+                        </div>
+                        <div style="text-align: left; font-size: 15px;" class="row">
+                            <input type="text" name="current_situation" t-att-value="current_situation" id="current_situation" class="form-control form-control-sm" autofocus="autofocus"
+                            autocapitalize="off" required="required" placeholder="Current Situation"/>      
+                        </div>
+                        <div style="text-align: left; font-size: 15px;" class="row">
+                            <input type="text" name="next_action" t-att-value="next_action" id="next_action" class="form-control form-control-sm" autofocus="autofocus"
+                            autocapitalize="off" required="required" placeholder="Next Action"/>      
+                        </div>
+                    </div>
+
+                    <div t-if="widget.step == '2'" id="first_step" class="container mt-3">
+                        <div style="text-align: left; font-size: 15px;" class="row">
+                            <div class="col-3">
+                                <b>Task</b>
+                            </div>
+                            <div class="col-9">
+                                <span t-esc="widget.analytic_line.task"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div t-if="widget.step == '1'" class="flex-grow-1 update_check_in">
+                        <button t-attf-class="o_hr_attendance_sign_in_out_icon btn btn-{{ checked_in ? 'warning' : 'success' }} align-self-center px-5 py-3 mt-4 mb-2">
+                            <span class="align-middle fs-2 me-3 text-white">Check IN</span>
+                            <i t-attf-class="fa fa-4x fa-sign-in align-middle"/>
+                        </button>
+                    </div>
+                    <div t-if="widget.step == '2'" class="flex-grow-1">
+                        <button t-attf-class="align-self-center px-5 py-3 mt-4 mb-2" class="skip_done">
+                            <span class="align-middle fs-2 me-3 text-white">Skip & Done</span>
+                            <i t-attf-class="fa fa-4x fa-sign-in align-middle"/>
+                        </button>
+                        <button t-attf-class="align-self-center px-5 py-3 mt-4 mb-2" class="done">
+                            <span class="align-middle fs-2 me-3 text-white">Done</span>
+                            <i t-attf-class="fa fa-4x fa-sign-in align-middle"/>
+                        </button>
+                    </div>
+
+                </t>
+                <div class="alert alert-warning" t-else="">
+                    <b>Warning</b> : Your user should be linked to an employee to use attendance.<br/> Please contact your administrator.
+                </div>
+                
+            </t>
+        </t>
+    </t>
+
+    <t t-name="CheckInTemplate2">
+		<t t-call="HrAttendanceCardLayout" style="min-width: 700px !important;">
+            <t t-set="bodyContent">
+                <t t-if="widget.employee">
+
+                    <t t-call="HrAttendanceUserBadge">
+                        <t t-set="userId" t-value="widget.employee.id"/>
+                        <t t-set="userName" t-value="widget.employee.name"/>
+                    </t>
+
+                    <div class="flex-grow-1">
+                        <h1 class="mt-5" t-esc="widget.employee.name"/>
+                        <h3>Welcome!</h3>
+                        <h3 class="" t-esc="widget.date.date_time_now"/>
+                    </div>
+                    <!-- table order -->
+                    <h5 style="text-align: left;"><span>Order</span></h5>
+                    <div style="border-top: 2px solid #e6e6e6;padding: 0px;margin-top: 10px; margin-bottom: 10px"/>
+                    <div class="row">
+                        <div class="col-12">
+                            <table class="table table-bordered" style="" id="order_lines">
+                                <thead style="display: table-row-group">
+                                    <tr>
+                                        <th class="text-center" style="width: 20%; font-weight: bold;" scope="col">Product</th>
+                                        <th class="text-center" style="width: 20%; font-weight: bold;" scope="col">UoM</th>
+                                        <th class="text-center" style="width: 20%; font-weight: bold;" scope="col">ID</th>
+                                        <th class="text-center" style="width: 20%; font-weight: bold;" scope="col">Ordered</th>
+                                        <th class="text-center" style="width: 20%; font-weight: bold;" scope="col">Remaining</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="widget.order_lines" t-as="o" id="t_order_lines">
+                                        <tr>
+                                            <td><span t-esc="o['product']"/></td>
+                                            <td><span t-esc="o['uom']"/></td>
+                                            <td><span t-esc="o['phlid']"/></td>
+                                            
+                                            <td><input type="number" name="order+widget.phlid" t-att-data-id="o['phlid']" id="order" class="form-control form-control-sm" autofocus="autofocus"
+                                            autocapitalize="off"/></td>
+                                            <td><input type="number" name="remain+widget.phlid" t-att-value="remain+widget.phlid" id="remain+widget.phlid" class="form-control form-control-sm" autofocus="autofocus"
+                                            autocapitalize="off"/></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- table borrow -->
+                    <h5 style="text-align: left;"><span>Borrow</span></h5>
+                    <div style="border-top: 2px solid #e6e6e6;padding: 0px;margin-top: 10px; margin-bottom: 10px"/>
+                    <div class="row">
+                        <div class="col-12">
+                            <table class="table table-bordered" style="" id="borrow_lines">
+                                <thead style="display: table-row-group">
+                                    <tr>
+                                        <th class="text-center" style="width: 30%; font-weight: bold;" scope="col">Product</th>
+                                        <th class="text-center" style="width: 30%; font-weight: bold;" scope="col">UoM</th>
+                                        <th class="text-center" style="width: 20%; font-weight: bold;" scope="col">Borrow</th>
+                                        <th class="text-center" style="width: 20%; font-weight: bold;" scope="col">Ordered(Borrow)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="widget.borrow_lines" t-as="b" id="t_borrow_lines">
+                                        <tr>
+                                            <td><span t-esc="b['product']"/></td>
+                                            <td><span t-esc="b['uom']"/></td>
+                                            <td><input type="number" name="borrow+widget.phlid" t-att-value="borrow+widget.phlid" id="borrow+widget.phlid" class="form-control form-control-sm" autofocus="autofocus"
+                                            autocapitalize="off" value="0"/></td>
+                                            <td><input type="number" name="orderborrow+widget.phlid" t-att-value="orderborrow+widget.phlid" id="orderborrow+widget.phlid" class="form-control form-control-sm" autofocus="autofocus"
+                                            autocapitalize="off" value="0"/></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div t-if="widget.step == '2'" class="flex-grow-1">
+                        <button type="button" class="btn-secondary skip_done">
+                            <span>Skip && Done</span>
+                        </button>
+                        <button  type="button" class="btn-success done">
+                            <span>Done</span>
+                        </button>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </t>
+
+	<!--
+    <t t-name="BloodBankTitle">
+        <section class="dashboard_main_section" id="main_section_harder">
+            <div class="row">
+                <div class="col-sm-12 mb-4">
+                    <div class="row">
+                        <div class="col-12 col-sm-12 col-md-12 text-center">
+                            <h2 class="section-header">Inventory</h2>
+                        </div>
+                    </div>
+                    <hr/>
+                </div>
+            </div>
+        </section>
+    </t>
+    <t t-name="BloodBankGroups">
+        <section class="dashboard_main_section" id="main_section_groups">
+            <div class="crm_dash_cards row">
+                <div class="col-sm-12 col-md-3">
+                    <div class="dashboard-card card-shadow group_a">
+                        <div class="dashboard-card__icon-container bg-mauve-light d-flex justify-content-center align-items-center">
+                            <i class="fa fa-line-chart text-mauve"/>
+                        </div>
+                        <div class="dashboard-card__details">
+                            <h3>
+                                <span>
+                                    <div id="total_group_a"/>
+                                </span>
+                            </h3>
+                            <h4>Group A</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-12 col-md-3">
+                    <div class="dashboard-card card-shadow group_b">
+                        <div class="dashboard-card__icon-container bg-mauve-light d-flex justify-content-center align-items-center">
+                            <i class="fa fa-trophy text-mauve"/>
+                        </div>
+                        <div class="dashboard-card__details">
+                            <h3>
+                                <span>
+                                    <div id="total_group_b"/>
+                                </span>
+                            </h3>
+                            <h4>Group B</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-12 col-md-3">
+                    <div class="dashboard-card card-shadow group_o">
+                        <div class="dashboard-card__icon-container bg-mauve-light d-flex justify-content-center align-items-center">
+                            <i class="fa fa-usd text-mauve"/>
+                        </div>
+                        <div class="dashboard-card__details">
+                            <h3>
+                                <span>
+                                    <div id="total_group_o"/>
+                                </span>
+                            </h3>
+                            <h4>Group O</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-12 col-md-3">
+                    <div class="dashboard-card card-shadow group_ab">
+                        <div class="dashboard-card__icon-container bg-mauve-light d-flex justify-content-center align-items-center">
+                            <i class="fa fa-usd text-mauve"/>
+                        </div>
+                        <div class="dashboard-card__details">
+                            <h3>
+                                <span>
+                                    <div id="total_group_ab"/>
+                                </span>
+                            </h3>
+                            <h4>Group AB</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <table class="table table-bordered" style="table-layout: fixed" id="main_section_groups_table">
+                        <thead style="display: table-row-group">
+                            <tr>
+                                <th class="text-center" style="width: 40%" scope="col">เลขที่ถุงเลือด</th>
+                                <th class="text-center" style="width: 10%" scope="col">หมู่เลือด</th>
+                                <th class="text-center" style="width: 10%" scope="col">ประเภท</th>
+                                <th class="text-center" style="width: 10%" scope="col">วันที่รับ</th>
+                                <th class="text-center" style="width: 10%" scope="col">วันที่จัดเก็บ</th>
+                                <th class="text-center" style="width: 10%" scope="col">วันที่หมดอายุ</th>
+                                <th class="text-center" style="width: 10%" scope="col">วันคงเหลือ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="widget.lines" t-as="l" id="table_lines">
+                                <tr>
+                                    <td><span t-esc="l['blood_bag_no']"/></td>
+                                    <td><span t-esc="l['blood_group']"/></td>
+                                    <td><span t-esc="l['blood_type']"/></td>
+                                    <td><span t-esc="l['date_receive']"/></td>
+                                    <td><span t-esc="l['date_store']"/></td>
+                                    <td><span t-esc="l['date_exp']"/></td>
+                                    <td><span t-esc="l['remain_day']"/></td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </t>-->
+</templates>

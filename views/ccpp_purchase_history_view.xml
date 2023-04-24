@@ -15,7 +15,7 @@
                 <field name="sale_person_id"/>
                 <!--<filter string="My Projects" name="own_projects" domain="[('user_id', '=', uid)]"/>-->
                 <separator/>
-                <group expand="0" string="Group By">
+                <group expand="1" string="Group By">
                     <filter string="Customer" name="customer" context="{'group_by': 'customer_id'}"/>
                     <filter string="Year" name="year" context="{'group_by': 'year_selection'}"/>
                     <filter string="Month" name="monthh" context="{'group_by': 'month'}"/>
@@ -114,6 +114,7 @@
                                     <field name="use_qty"/>
                                     <field name="remain_qty"/>
                                     <field name="note" string="Winmed Sales Strategy"/>
+                                    <button name="action_open_detail" type="object" title="View Detail" string="View Detail" class="btn btn-link float-end ri-eye-line"/>
                                 </tree>
                                 <form>
                                     <group>

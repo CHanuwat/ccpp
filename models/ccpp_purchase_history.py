@@ -364,8 +364,8 @@ class CCPPPurchaseHistoryLine(models.Model):
 
             obj.borrow_qty = borrow_qty - order_borrow_qty
             obj.order_qty = order_qty + order_borrow_qty
-            obj.use_qty = order_qty + order_borrow_qty - (remain_line.remain_qty or 0)
-            obj.remain_qty = (remain_line.remain_qty or 0) + (remain_line.order_qty or 0) + (remain_line.order_borrow_qty or 0)
+            obj.use_qty = order_qty + borrow_qty - ((remain_line.remain_qty or 0) + (remain_line.order_qty or 0) + (remain_line.borrow_qty or 0))
+            obj.remain_qty = (remain_line.remain_qty or 0) + (remain_line.order_qty or 0) + (remain_line.borrow_qty or 0)
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -406,7 +406,15 @@ class CCPPPurchaseHistoryLine(models.Model):
             if obj.product_id:
                 uom_id = obj.product_id.uom_id
             obj.uom_id = uom_id
-        
+    
+    def action_open_detail(self):
+        for obj in self:
+            action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_purchase_history_detail_line_action')
+            detail_ids = self.env['ccpp.purchase.history.detail.line'].search([('history_line_id','=',obj.id)])
+            action['domain'] = [('id','in',detail_ids.ids)]
+            return action
+    
+    
 class CCPPPurchaseHistoryDetailLine(models.Model):
     _name = "ccpp.purchase.history.detail.line"
     
