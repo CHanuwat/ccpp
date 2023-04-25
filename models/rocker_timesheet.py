@@ -712,8 +712,8 @@ class RockerTimesheet(models.Model):
         
         last_situation_solution_id = self.search([('task_id', "=", solution_id.id)], order="date desc", limit=1)
         solution_id.task_last_situation_solution_id = last_situation_solution_id
-        solution_id.task_next_action_solution = last_situation_solution_id.next_action_solution
-        solution_id.task_last_current_action_solution = last_situation_solution_id.next_action_solution
+        solution_id.task_next_action_solution = last_situation_solution_id.next_action
+        solution_id.task_last_current_action_solution = last_situation_solution_id.current_action
         
         last_situation_ccpp_id = self.search([('project_id', "=", solution_id.id)], order="date desc", limit=1)
         ccpp.last_update_id = last_situation_ccpp_id
