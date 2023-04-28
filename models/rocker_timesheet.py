@@ -1345,8 +1345,6 @@ class RockerTimesheet(models.Model):
             diff = 0
             gmaps = googlemaps.Client(key="AIzaSyD3nsr3IPMf1VheJjOyujfcDArTtQli0YM")
             geocode_result = gmaps.geocode(obj.customer_id.name)
-            print(obj.customer_id.name)
-            pprint(geocode_result)
             if obj.latitude and obj.longitude and geocode_result:
                 
                 geometry = geocode_result[0].get('geometry')
@@ -1387,7 +1385,6 @@ class RockerTimesheet(models.Model):
             except:
                 location_name = ""
                 
-        #pprint(reverse_geocode_result)
         
         return {'location_name': location_name}
         
@@ -1415,7 +1412,6 @@ class RockerTimesheet(models.Model):
                    
         })
         if 'done_strategy' in context[5]:
-            print("Bank"*200)
             obj.task_strategy_id.button_done()
 
         current_year = str(datetime.now().year)

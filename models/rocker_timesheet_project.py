@@ -49,7 +49,6 @@ class RockerTask(models.Model):
     @api.model
     def _domain_customer(self):
         customer_ids = self.env['ccpp.customer.information'].search([('user_id','=',self.env.user.id)]).mapped('customer_id')
-        print('cus ids --->',customer_ids)
         domain = [('id', 'in', customer_ids.ids)]   
         return domain
 
@@ -73,8 +72,6 @@ class RockerTask(models.Model):
     def init(self):
         _logger.debug('Init: create view')
         tools.drop_view_if_exists(self.env.cr, self._table)
-        print("XXXXXXXXXXXXXXXX"*100)
-        print(self.env.user)
         # self._cr.execute("""DROP VIEW IF EXISTS ROCKER_TASK""")
         # id when taken from project_id can not be the same number than task_id, convert project_id to negative
         # odoo 14
