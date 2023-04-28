@@ -2,9 +2,9 @@
 <odoo>
 
     <!-- Dashboard Menu -->
-    <record model="ir.ui.menu" id="odoo_dynamic_dashboard.menu_dashboard">
+    <!--<record model="ir.ui.menu" id="odoo_dynamic_dashboard.menu_dashboard">
         <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
-    </record>
+    </record>-->
 
     <!-- Discuss -->
     <record model="ir.ui.menu" id="mail.menu_root_discuss">
@@ -27,9 +27,9 @@
     </record>
 
     <!-- Website -->
-    <record model="ir.ui.menu" id="website.menu_website_configuration">
+    <!--<record model="ir.ui.menu" id="website.menu_website_configuration">
         <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
-    </record>
+    </record>-->
 
     <!-- Knowledge -->
     <record model="ir.ui.menu" id="document_knowledge.menu_document_root">
