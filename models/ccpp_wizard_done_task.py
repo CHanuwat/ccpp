@@ -42,8 +42,6 @@ class WizardRejectDoneTask(models.TransientModel):
     
     def button_done(self):
         for obj in self:
-            print(obj.task_id)
-            print(obj.strategy_id)
             if obj.strategy_id:
                 obj.strategy_id.button_done()
             obj.task_id.button_done()
@@ -60,7 +58,6 @@ class WizardRejectDoneTask(models.TransientModel):
                 
     def button_done_and_skip(self):
         for obj in self:
-            print(obj.task_id)
             obj.task_id.button_done()
             
             current_year = str(datetime.now().year)

@@ -316,7 +316,6 @@ class CCPPPurchaseHistoryLine(models.Model):
     
     def _get_default_type(self):
         if self._context.get('potential_type'):
-            print("Max"*50)
             if self._context.get('potential_type') == 'company':
                 return 'company'
             elif self._context.get('potential_type') == 'competitor':
@@ -448,8 +447,6 @@ class CCPPPurchaseHistoryDetailLine(models.Model):
                                                                 ('job_id', '=', employee_id.job_id.id),
                                                                 ('company_id', 'in', company_ids),
                                                                 ])
-        print("Max"*100)
-        print(history_ids)
         action['domain'] = [('id','in',history_ids.ids)]
         return action
 

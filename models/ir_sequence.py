@@ -18,7 +18,6 @@ class Sequence(models.Model):
         seq_date = self.env['ir.sequence.date_range'].search([('sequence_id', '=', self.id), ('date_from', '<=', dt), ('date_to', '>=', dt)], limit=1)
         if not seq_date:
             seq_date = self._create_date_range_seq(dt)
-        print(" ======== sequence_date : ",sequence_date)
         
         if sequence_date:
             ## case : have time

@@ -184,11 +184,8 @@ class CCPPCustomerInformation(models.Model):
         for obj in self:
             is_company_group = False
             partner_ids = self.env['res.company'].sudo().search([]).mapped('partner_id')
-            print(partner_ids)
-            print(obj.customer_id)
             if obj.customer_id in partner_ids:
                 is_company_group = True
-            print(is_company_group)
             obj.is_company_group = is_company_group
             
     
@@ -233,9 +230,6 @@ class CCPPCustomerInformation(models.Model):
     @api.constrains('potential_ranking','competitor_ranking',"customer_id","year_selection")
     def constraint_customer(self):
         for obj in self:
-            print("Y"*100)
-            print(obj.date_from)
-            print(obj.date_to)
             customer_potential_rank = self.env["ccpp.customer.information"].search([("job_id",'=',obj.job_id.id),
                                                                                     ("year_selection",'=',obj.year_selection),
                                                                                     ("type",'=',obj.type),
@@ -333,10 +327,6 @@ class CCPPCustomerInformation(models.Model):
                                                                               ("total_sale_revenue",'=',False),
                                                                               ],order="date_from desc")
             
-            print("X")
-            print(customer_info_ids)
-            print("y")
-            print(customer_info_norank_ids)
             rank = 1
             for info in customer_info_ids:
                 info.actual_sale_ranking = rank

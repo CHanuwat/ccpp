@@ -344,9 +344,7 @@ class Project(models.Model):
             if len(obj.tasks_solution.filtered(lambda o:o.state == 'cancel')) == len(obj.tasks_solution):
                 is_done = False
             for solution_id in obj.tasks_solution.filtered(lambda o:o.state not in ['done','cancel']):
-                print(solution_id.name)
                 for strategy_id in solution_id.child_ids:
-                    print(strategy_id.name)
                     if strategy_id.state not in ['done','cancel']:
                         is_done = False
             obj.is_ccpp_done = is_done
@@ -509,12 +507,10 @@ class Project(models.Model):
     @api.depends("job_id")
     def _compute_domain_partner_ids(self):
         for obj in self:
-            print("Pass"*100)
             customer_ids = self.env['ccpp.customer.information']
             if obj.job_id:
                 customer_ids = self.env['ccpp.customer.information'].search([('job_id','=',obj.job_id.id)]).mapped('customer_id')
                 customer_name = self.env['ccpp.customer.information'].search([('job_id','=',obj.job_id.id)]).mapped('customer_id.name')
-                print(customer_name)
             obj.domain_partner_ids = customer_ids.ids
     
     
@@ -544,12 +540,10 @@ class Project(models.Model):
             vals['employee_id'] = employee_id.id
             vals['department_id'] = employee_id.department_id.id
             vals['sale_team_id'] = sale_team_id.id
-            #print()
             #if not vals.get('is_income_cus') and not vals.get('is_effectiveness_cus') and not vals.get('is_repulation_cus') and not vals.get('is_competitive_cus'):
             #    raise UserError("กรุณาเลือกผลกระทบต่อลูกค้าอย่างน้อย 1 ข้อ")
             #if not vals.get('is_critical') and not vals.get('is_not_critical'):
             #    raise UserError("กรุณาเลือกความเร่งด่วนของลูกค้าที่ต้องการความช่วยเหลือ")
-            print(self._context)
             if self._context.get('create_from_tree') and not self._context.get('default_allow_billable'):
             #if not self._context.get('default_allow_billable'):
                 sequence_date = datetime.now().strftime("%Y-%m-%d")
@@ -939,10 +933,6 @@ class Project(models.Model):
         #action['context'] = {'search_default_groupby_task_type': 1}
         action['context'] = context
         #return action
-        print("XXX"*50)
-        print(context)
-        print(self._context)
-        print(self.env.context)
         strategy_ids = self.env['project.task'].search([("project_id","=",self.id),('is_strategy','=',True)])
         
         return {
@@ -986,9 +976,6 @@ class Project(models.Model):
         ccpp_ids |= self.env['project.project'].search([('state', '=', 'waiting_approve'),
                                                         ('current_approve_ids','in',employee_id.job_lines.ids)
                                                         ])
-        print(employee_id)
-        print(employee_id.job_lines)
-        print(ccpp_ids)
         #job_approve_id = self.env['hr.job']
         #ccpp_for_approve_ids = self.env['project.project']
         #for ccpp_id in ccpp_ids:
@@ -1010,9 +997,6 @@ class Project(models.Model):
         job_ids = self.get_child_job(employee_id.job_lines)
         ccpp_ids = self.env['project.project'].search([('job_id', 'in', job_ids.ids),('company_id','in',company_ids)])
         action['domain'] = [('id','in',ccpp_ids.ids)]
-        print(employee_id)
-        print(job_ids)
-        print(ccpp_ids)
         return action
     # use
     def action_ccpp_department_group_by_priority_manager_all_department(self):
@@ -1032,8 +1016,6 @@ class Project(models.Model):
         ccpp_ids = self.env['project.project'].search([
                                                         ('company_id', 'in', company_ids)
                                                        ])
-        print("bow"*100)
-        print(ccpp_ids)
         action['domain'] = [('id','in',ccpp_ids.ids)]
         return action
         
@@ -1058,8 +1040,6 @@ class Project(models.Model):
     @api.model
     def retrieve_dashboard(self,context={}):
         
-        print(self._context)
-        print(context)
         result = {
             'priority_1': 0,
             'priority_2': 0,
@@ -1444,17 +1424,9 @@ class Task(models.Model):
                                 replace_year -= 1
                                 
                             
-                            print("x1")
-                            print(start_period_date_obj)
-                            print("x2")
-                            print(replace_month,replace_year)
                             end_period_date_obj = start_period_date_obj
-                            print("x3")
-                            print(end_period_date_obj)
                             end_period_date_obj = end_period_date_obj.replace(month=replace_month,year=replace_year)
                             end_period_date_obj = end_period_date_obj + relativedelta(day=31)
-                            print("x4")
-                            print(end_period_date_obj)
                         
                         
                         if start_date_obj >= start_period_date_obj and start_date_obj <= end_period_date_obj:
@@ -1591,31 +1563,8 @@ class Task(models.Model):
         
     @api.model_create_multi
     def create(self, vals_list):
-        for vals in vals_list:
-            print("X"*100)
-            print(self.env.context)
-            print(self._context)
-            #solution_ids = self.project_id.tasks_solution.filtered(lambda o:o.state not in ['cancel'])
-            #if len(solution_ids) > 1:
-            #    raise UserError("Cannot create 2 solution per period. Please cancel previous solution first")
-            #if self._context.get('project_id'):
-                #vals['project_id'] = self._context.get('project_id')
-            #if self._context.get('is_solution',False) and not self._context.get('is_create_strategy',False) and self._context.get('active_id',False):
-            #    params = self._context.get('params')
-            #    if params:
-            #        vals['project_id'] = params.get('id')
-            #    else:
-            #        vals['project_id'] = self._context.get('active_id')
         res = super(Task, self).create(vals_list)
-        print("Y"*100)
-        print(res)
         for rec in res:
-            print("type solution/strategy----->",rec.is_solution,rec.is_strategy)
-            print("project ------>", rec.project_id)
-            print("project solution ------>", rec.project_solution_id)
-            print("project ------>", rec.parent_id.project_id)
-            print("project solution ------>", rec.parent_id.project_solution_id,rec.parent_id.project_solution_id.department_id.code )
-            
             if rec.is_solution:
                 if rec.project_solution_id:
                     rec.project_id = rec.project_solution_id.id
@@ -1704,8 +1653,6 @@ class Task(models.Model):
     @api.depends('parent_id')
     def _compute_level(self):
         for obj in self:
-            print('check level xxx')
-            print(obj.project_solution_id.id)
             is_solution = True
             is_strategy = False
             is_task = False
@@ -1864,7 +1811,6 @@ class Task(models.Model):
         import socket   
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(("8.8.8.8", 80))
-        print(s.getsockname()[0])
         s.close()   
         
         
@@ -1876,20 +1822,13 @@ class Task(models.Model):
         r = requests.get('https://get.geojs.io/', headers=headers)
         ip_request = requests.get('https://get.geojs.io/v1/ip.json', headers=headers)
         ip_address = ip_request.json()['ip']
-        print("IP -->", ip_address)
         url = 'https://get.geojs.io/v1/ip/geo/' + x +  '.json'
         geo_request = requests.get(url, headers=headers)
         geo_data = geo_request.json()
         
-        print("new lati -->", geo_data['latitude'])
-        print("new long -->", geo_data['longitude'])
-        print("xxx->",x)
-        print('My public IP address is: {}'.format(ip))
         
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)])
         test = employee_id._attendance_action_change()
-        print("yyy-->",test)
-        #print(resp_json_payload['results'][0]['geometry']['location'])
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.strategy_update_all_action')
         #action['display_name'] = _("%(name)s's Updates", name=self.name)
         
@@ -1910,9 +1849,6 @@ class Task(models.Model):
                                         cell_towers=None, 
                                         wifi_access_points=None)
 
-        print("Location  : ",geolocation_result)
-        print("Geocoding : ")
-        pprint(geocode_result)
         return action
     
     def button_done(self):
@@ -2242,9 +2178,7 @@ class ProjectUpdate(models.Model):
         if result.get('project_id') and self._context.get('update_strategy'):
             #result.update({'strategy_id':   result.get('project_id')})
             result.pop('project_id')
-        print("Y"*100)
         if 'strategy_id' in fields and not result.get('strategy_id') and not self.env.context.get("update_task"):
-            print("Y"*100)
             strategy = self.env.context.get('active_id')
             result['strategy_id'] = strategy
             strategy_id = self.env['project.task'].browse(strategy)
@@ -2271,8 +2205,6 @@ class ProjectUpdate(models.Model):
     def get_location(self):
         latitude = self.env.context.get("latitude", False)
         longitude = self.env.context.get("longitude", False)
-        print("la-->",latitude)
-        print("long-->",longitude)
         self.latitude = latitude
         self.longitude = longitude
         
