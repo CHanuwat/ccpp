@@ -18,6 +18,7 @@
 #
 #############################################################################
 
+import dataclasses
 from odoo import api, fields, models, _, exceptions
 from odoo.exceptions import UserError, AccessError, Warning
 from odoo import tools
@@ -30,6 +31,7 @@ from dateutil.relativedelta import relativedelta
 import requests
 from pprint import pprint
 import googlemaps
+import math
 
 import logging
 
@@ -84,8 +86,6 @@ class RockerTimesheet(models.Model):
         #return expression.AND([domain,
         #                       ['|', ('privacy_visibility', '!=', 'followers'), ('message_partner_ids', 'in', [self.env.user.partner_id.id])]
         #                       ])
-        print("Bank"*100)
-        print(self)
         for obj in self:
             domain = []
             domain_project = []
@@ -100,8 +100,6 @@ class RockerTimesheet(models.Model):
                     domain.append(('priority_id','=',obj.priority_id.id))
                 ccpp_ids = self.env['project.project'].search(domain)
             domain_project = (['id','in',ccpp_ids.ids])
-            print(ccpp_ids)
-            print(domain_project)
             
             return domain_project
         
@@ -111,7 +109,6 @@ class RockerTimesheet(models.Model):
         return domain
 
     def _domain_project_id_search(self):
-        print("1"*100)
         company_ids = self._context.get('allowed_company_ids')
         domain = [('company_id', '=', company_ids)]
         #domain = [('company_id', '=', self.env.company.id)]
@@ -204,7 +201,6 @@ class RockerTimesheet(models.Model):
 
     def _domain_get_search_domain(self, filt):
         # default = all
-        print('2'*100)
         _search_panel_domain = [('company_id', '=', self.env.company.id)]  # ok
         if filt == 'all':
             _search_panel_domain = _search_panel_domain + []
@@ -262,7 +258,6 @@ class RockerTimesheet(models.Model):
         global default_time_roundup
 
 
-        print('3'*100)
         _defaults = None
         _company_defaults = None
         _company_defaults = self.env['rocker.company.defaults'].search([('company_id', '=', self.env.company.id)])
@@ -362,7 +357,6 @@ class RockerTimesheet(models.Model):
         # _logger.debug('_default_project')
         _selected_id = 0
         _selected_id = self._get_search_id()
-        print(_selected_id)
         if _selected_id > 0:
             search_task = self.env['project.task'].search([('id', '=', _selected_id)], limit=1)
             if search_task.id > 0:
@@ -373,7 +367,6 @@ class RockerTimesheet(models.Model):
         # _logger.debug('_default_project')
         _selected_id = 0
         _selected_id = self._get_search_id()
-        print(_selected_id)
         if _selected_id > 0:
             search_task = self.env['project.task'].search([('id', '=', _selected_id)], limit=1)
             if search_task.id > 0:
@@ -382,20 +375,16 @@ class RockerTimesheet(models.Model):
 
     def _domain_customer(self):
         customer_ids = self.env['ccpp.customer.information'].search([('user_id','=',self.env.user.id)]).mapped('customer_id')
-        print('cus ids --->',customer_ids)
         domain = [('id', 'in', customer_ids.ids)]   
         return domain
     
     def _get_default_customer(self):
         customer_id = self.env['res.partner']
-        print("U"*50)
-        print(self._context)
         if self._context.get('default_customer_id'):
             customer_id = self._context.get('default_customer_id')
         return customer_id
     
     #def _get_default_checkin_date(self):
-    #    print(self._context)
     #    checkin_date = False
     #    if self._context.get('default_checkin_date'):
     #        checkin_date = datetime.now()
@@ -404,7 +393,6 @@ class RockerTimesheet(models.Model):
     def _get_default_job(self):
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
         #if not employee_id:
-            #print(self.env.user.name)
             #raise UserError("Not recognize the Employee. Please Configure User to Employee to get the job")
         return employee_id.job_id
 
@@ -495,7 +483,7 @@ class RockerTimesheet(models.Model):
     log_lines = fields.One2many("account.analytic.line.log", "analytic_line_id", string="Log")
     current_action = fields.Char("Current Situation")
     next_action = fields.Char("Next Action")
-    location = fields.Char("Location")
+    location = fields.Char("Location", compute="_compute_location")
     note = fields.Text("Note")
     checkin_date = fields.Datetime(string="Check In Date")
     
@@ -508,6 +496,8 @@ class RockerTimesheet(models.Model):
     state_color = fields.Integer(compute='_compute_state_color')
     latitude = fields.Float(string="Latitude")
     longitude = fields.Float(string="Longitude")
+    diff_distance = fields.Float(string="Diff.Distance(Km.)", compute="_compute_distance")
+    is_diff_distance = fields.Boolean(string="Is Diff", compute="_compute_distance")
 
     @api.depends("employee_id")
     def _compute_domain_job_ids(self):
@@ -607,7 +597,6 @@ class RockerTimesheet(models.Model):
     
     def _compute_customer(self):
         customer_ids = self.env['ccpp.customer.information'].search([('user_id','=',self.env.user.id)]).mapped('customer_id')
-        print('cus ids --->',customer_ids)
         domain = [('id', 'in', customer_ids.ids)]
         return customer_ids
     
@@ -626,9 +615,6 @@ class RockerTimesheet(models.Model):
     @api.depends('task_id', 'task_id.project_id')
     def _compute_project_id(self):
         # _logger.debug('api depends task')
-        print("Max2"*50)
-        print("task",self.task_id)
-        print("search",self._get_search_id())
         if not self.task_id and self._get_search_id() > 0:
             search_task = self.env['project.task'].search([('id', '=', self._get_search_id())], limit=1)
             if not search_task.id:
@@ -640,7 +626,6 @@ class RockerTimesheet(models.Model):
     @api.depends('project_id')
     def _compute_task_id(self):
         # _logger.debug('api depends project')
-        print("Max3"*50)
         for line in self.filtered(lambda line: not line.project_id):
             line.task_id = False
 
@@ -769,7 +754,6 @@ class RockerTimesheet(models.Model):
             _logger.debug('Values:')
             _logger.debug(vals)
 
-            print("X"*100)
             record = super(RockerTimesheet, self).create(vals)
             return record
         # Rocker specific data
@@ -811,7 +795,6 @@ class RockerTimesheet(models.Model):
             #vals['account_id'] = project.analytic_account_id.id
             #if not project.analytic_account_id.id:
             #    vals['account_id'] = 1
-        print("Y"*100)
         record = super(RockerTimesheet, self).create(vals)
         global daystocreate
         #if daystocreate > 0:
@@ -822,8 +805,6 @@ class RockerTimesheet(models.Model):
                 vals['date'] = fields.Datetime.from_string(vals['date']) + timedelta(days=1)
                 vals['start'] = fields.Datetime.from_string(vals['start']) + timedelta(days=1)
                 vals['stop'] = fields.Datetime.from_string(vals['stop']) + timedelta(days=1)
-                print("Z"*100)
-                print(daystocreate)
                 record = super(RockerTimesheet, self).create(vals)
                 i += 1
         self._set_rolling(False)  # default is Create button with default starty & Stop, Rolling is set is Rolling button clicked
@@ -846,7 +827,7 @@ class RockerTimesheet(models.Model):
             return False
 
     def write(self, vals):
-        if self.state == 'done':
+        if self.state == 'done' and not 'current_situation' in vals and not 'next_action' in vals:
             raise UserError("Cannot edit task in state done.")
         if (('name' in vals and vals['name'] != self.name) or \
         ('priority_id' in vals and vals['priority_id'] != self.priority_id.id) or \
@@ -1108,7 +1089,6 @@ class RockerTimesheet(models.Model):
         global default_time_roundup
 
         self._get_defaults()
-        print('4'*100)
         if not self.start:
             _broll = None
             _broll = self._get_rolling()
@@ -1276,8 +1256,6 @@ class RockerTimesheet(models.Model):
     @api.model
     def retrieve_dashboard(self,context={}):
         
-        print(self._context)
-        print(context)
         result = {
             'today': 0,
             'this_week': 0,
@@ -1327,16 +1305,9 @@ class RockerTimesheet(models.Model):
             
     @api.model
     def get_employee(self,context):
-        print("Max"*100)
-        print('x --> ', context)
-        print(self._context)
         
         analytic_line = context
-        print(analytic_line)
         analytic_line_id = self.env['account.analytic.line'].browse(analytic_line)
-        
-        print('y -- > ',analytic_line_id)
-        print('z -- > ',analytic_line_id.employee_id)
         
         date_now = datetime.now().strftime("%d %b %Y").upper()
         time_now = (datetime.now() + timedelta(hours=7)).strftime("%H:%M:%S")
@@ -1359,10 +1330,48 @@ class RockerTimesheet(models.Model):
                          }
                 }
     
+    @api.depends('latitude','longitude')
+    def _compute_location(self):
+        for obj in self:
+            location_name = ""
+            if obj.latitude and obj.longitude:
+                location = self.get_location_name(obj.latitude,obj.longitude)
+                location_name = location.get('location_name',"")
+            obj.location = location_name
+    
+    @api.depends('latitude','longitude')
+    def _compute_distance(self):
+        for obj in self:
+            diff = 0
+            gmaps = googlemaps.Client(key="AIzaSyD3nsr3IPMf1VheJjOyujfcDArTtQli0YM")
+            geocode_result = gmaps.geocode(obj.customer_id.name)
+            print(obj.customer_id.name)
+            pprint(geocode_result)
+            if obj.latitude and obj.longitude and geocode_result:
+                
+                geometry = geocode_result[0].get('geometry')
+                customer_location = geometry.get('location')
+                customer_latitude = customer_location.get('lat') 
+                customer_longitude = customer_location.get('lng')
+                
+                # r = 3958.8 Radius of the Earth in miles
+                r = 6371 # Radius of the Earth in km
+                rlat1 = obj.latitude * math.pi / 180 # Convert degrees to radians
+                rlat2 = customer_latitude * math.pi / 180 # Convert degrees to radians
+                difflat = rlat2-rlat1 #  Radian difference (latitudes)
+                difflon = (customer_longitude - obj.longitude) * (math.pi / 180) #Radian difference (longitudes)
+
+                diff = 2 * r * math.asin(math.sqrt(math.sin(difflat/2)*math.sin(difflat/2)+math.cos(rlat1)*math.cos(rlat2)*math.sin(difflon/2)*math.sin(difflon/2)))
+                #diff = math.acos(math.sin(obj.latitude)*math.sin(customer_latitude)+math.cos(obj.latitude)*math.cos(customer_latitude)*math.cos(customer_longitude-obj.longitude)) * r
+                
+                obj.is_diff_distance = True
+            else:
+                obj.is_diff_distance = False
+
+            obj.diff_distance = diff
+    
     @api.model
     def get_location_name(self,latitude,longitude):
-        print("C"*100)
-        print(latitude,longitude)
         location_name = ""
         
         key = "AIzaSyBGMY2ya5VHQ8_2GqA31xfKhpfFGOUQGwg" # key max
@@ -1378,39 +1387,37 @@ class RockerTimesheet(models.Model):
             except:
                 location_name = ""
                 
-        pprint(reverse_geocode_result)
+        #pprint(reverse_geocode_result)
         
         return {'location_name': location_name}
         
         # key = "AIzaSyBGMY2ya5VHQ8_2GqA31xfKhpfFGOUQGwg"
         # url = "https://maps.googleapis.com/maps/api/geocode/json?latlng=%s,%skey=%s"%(latitude,longitude,key)
         # params = {"key": "AIzaSyBGMY2ya5VHQ8_2GqA31xfKhpfFGOUQGwg"}
-        # print(url)
         # response = requests.post(url)
-        # print(response)
         # if response.ok:
-        #     print(response)
         #     location = response.json()["location"]
         #     latitude = location["lat"]
         #     longitude = location["lng"]
         #     accuracy = response.json()["accuracy"]
-        #     print("Latitude:", latitude)
-        #     print("Longitude:", longitude)
-        #     print("Accuracy:", accuracy)
-        # else:
-        #     print("response:",response)
-        #     print("Error:", response.status_code)
         
     @api.model
     def update_check_in(self,context):
-        print(context)
         obj=self.browse(context[0])
+        if not context[1] or not context[2]:
+            raise UserError("Not found location !!. Please check network or refresh browser")
+        checkin_date = datetime.now()
         obj.write({'latitude': context[1],
                    'longitude': context[2],
                    'current_action': context[3],
                    'next_action': context[4],
+                   'checkin_date': checkin_date,
+                   
         })
-        
+        if 'done_strategy' in context[5]:
+            print("Bank"*200)
+            obj.task_strategy_id.button_done()
+
         current_year = str(datetime.now().year)
         purchase_history_id = self.env['ccpp.purchase.history'].search([('customer_id','=',obj.customer_id.id),
                                                                         ('year_selection','=',current_year),
@@ -1431,17 +1438,115 @@ class RockerTimesheet(models.Model):
         is_purchase_history = False
         if purchase_history_id:
             is_purchase_history = True
-        #else:
-            #obj.state = 'done'
+        else:
+            obj.state = 'done'
         
-        return {'purchase_history': True,
+        return {'purchase_history': is_purchase_history,
                 'order_lines': order_line_list,
                 'borrow_lines': borrow_line_list,
                 }
         
     @api.model
-    def done(self,context):
-        pprint(context)
+    def done(self,analytic_line):
+        obj = self.browse(analytic_line)
+        current_year = str(datetime.now().year)
+        purchase_history_id = self.env['ccpp.purchase.history'].search([('customer_id','=',obj.customer_id.id),
+                                                                        ('year_selection','=',current_year),
+                                                                        ('job_id','=',obj.job_id.id)
+                                                                ])
+
+        for purchase_history_line_id in purchase_history_id.winmed_lines:
+            detail_line = self.env['ccpp.purchase.history.detail.line'].search([('task_id','=',analytic_line),('history_line_id','=',purchase_history_line_id.id)])
+            date_today = date.today()
+            if not detail_line:
+                vals = {'history_line_id': purchase_history_line_id.id,
+                    'date': date_today,
+                    'task_id': obj.id,
+                    'borrow_qty': 0,
+                    'order_borrow_qty': 0,
+                    'order_qty': 0,
+                    'remain_qty': 0,
+                    }
+                detail_line.create(vals)
+        obj.state = 'done'
+                
+    @api.model
+    def skip(self,analytic_line):
+        obj = self.browse(analytic_line)
+        current_year = str(datetime.now().year)
+        purchase_history_id = self.env['ccpp.purchase.history'].search([('customer_id','=',obj.customer_id.id),
+                                                                        ('year_selection','=',current_year),
+                                                                        ('job_id','=',obj.job_id.id)
+                                                                ])
+
+        for purchase_history_line_id in purchase_history_id.winmed_lines:
+            detail_line = self.env['ccpp.purchase.history.detail.line'].search([('task_id','=',analytic_line),('history_line_id','=',purchase_history_line_id.id)])
+            date_today = date.today()
+            if not detail_line:
+                vals = {'history_line_id': purchase_history_line_id.id,
+                    'date': date_today,
+                    'task_id': obj.id,
+                    'borrow_qty': 0,
+                    'order_borrow_qty': 0,
+                    'order_qty': 0,
+                    'remain_qty': 0,
+                    }
+                detail_line.create(vals)
+            else:
+                detail_line.write({
+                    'borrow_qty': 0,
+                    'order_borrow_qty': 0,
+                    'order_qty': 0,
+                    'remain_qty': 0,
+                })
+        
+        obj.state = 'done'
+                
+            
+            
+    
+    @api.model
+    def input_value(self, purchase_line, value, type, task):
+        purchase_line_id = self.env['ccpp.purchase.history.line'].browse(int(purchase_line))
+        detail_line = self.env['ccpp.purchase.history.detail.line'].search([('history_line_id','=',int(purchase_line)),('task_id','=',int(task))])
+        order = 0
+        remain = 0
+        borrow = 0
+        order_borrow = 0
+        
+        if 'order[1]' in type:
+            order = value
+        elif 'remain[2]' in type:
+            remain = value
+        elif 'borrow[3]' in type:
+            borrow = value
+        elif 'order_borrow[4]' in type:
+            order_borrow = value
+
+        if detail_line and order:
+            detail_line.write({'order_qty': order})
+        elif detail_line and remain:
+            detail_line.write({'remain_qty': remain})
+        elif detail_line and order_borrow:
+            detail_line.write({'order_borrow_qty': order_borrow})
+        elif detail_line and borrow:
+            detail_line.write({'borrow_qty': borrow})
+            
+        date_today = date.today()
+        if not detail_line:
+            vals = {'history_line_id': purchase_line_id.id,
+                    'date': date_today,
+                    'task_id': task,
+                    'borrow_qty': borrow,
+                    'order_borrow_qty': order_borrow,
+                    'order_qty': order,
+                    'remain_qty': remain,
+                    }
+            detail_line.create(vals)
+            
+        
+        
+        
         
         
     

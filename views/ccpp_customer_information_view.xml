@@ -304,10 +304,8 @@
             <tree string="Customer Information" expand="1" default_order="potential_ranking" multi_edit="1" sample="1" class="customer_information_tree">
                 <field name="year_selection" string="Year"/>
                 <field name="date_from" string="Create Date" optional="hide"/>
-                <!--<field name="date_to"/>-->
                 <field name="customer_id"/>
                 <field name="partner_id" string="Contact Person"/>
-                <!--<field name="state"/>-->
                 <field name="sale_person_id" string="User"/>
                 <field name="job_id"/>
             </tree>

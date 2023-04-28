@@ -23,32 +23,21 @@ export class CCPPListController extends ListController {
         this.user = useService("user");
     }
 
+    // button create step
     async openCreate() {
         const action = await this.orm.call('project.project', 'open_create_step');
         this.actionService.doAction(action);
     }
+
+    // action on click tree
+    async openRecord(record) {
+        const action = await this.orm.call('project.project', 'check_view_step', [record.resId]);
+        this.actionService.doAction(action);
+    }
+
 }
 
-/*var TreeButton = ListController.extend({
-    button_template: 'ccpp.buttons',
-    xmlDependencies: ['/ccpp/static/src/xml/tree_button.xml'],
-    events: _.extend({}, ListController.prototype.events, {
-        'click .open_create_ccpp': '_OpenWizard',
-    }),
-    _OpenWizard: function () {
-        var self = this;
-         this.do_action({
-            type: 'ir.actions.act_window',
-            res_model: 'ccpp.purchase.history.line',
-            name :'Open Wizard',
-            view_mode: 'form',
-            view_type: 'form',
-            views: [[false, 'form']],
-            target: 'new',
-            res_id: false,
-        });
-    }
- });*/
+
 
 export const CCPPDashBoardListView = {
     ...listView,

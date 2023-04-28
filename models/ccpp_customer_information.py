@@ -518,3 +518,12 @@ class CCPPCustomerInformation(models.Model):
             job_ids |= job_id
             job_ids |= self.get_child_job(job_id.child_lines, job_ids)   
         return job_ids
+    
+    @api.model
+    def retrieve_dashboard_internal(self,context={}):
+        result = {
+            'my_customer': 0,
+            'all_customer': 0,
+        }
+        
+        return result

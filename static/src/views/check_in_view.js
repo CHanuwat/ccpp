@@ -18,6 +18,7 @@ odoo.define('ccpp.check_in_view', function (require) {
             'click .update_check_in': '_update_check_in',
             'click .skip_done': '_skip_done',
             'click .done': '_done',
+            'change .input_value': '_input_value',
         },
 
         init: function(parent, context) {
@@ -52,7 +53,7 @@ odoo.define('ccpp.check_in_view', function (require) {
             }).then(function(result) {
                 self.employee = result.employee;
                 self.analytic_line = result.analytic_line;
-                self.date = result.date
+                self.date = result.date   
             });
 
             navigator.geolocation.getCurrentPosition(self._getPosition.bind(self))
@@ -114,7 +115,7 @@ odoo.define('ccpp.check_in_view', function (require) {
 
         },
 
-        _update_check_in: function(){
+        _update_check_in: function(ev){
             var self = this;
             var analytic_line = this.analytic_line.analytic_line_id;
             debugger
@@ -122,7 +123,8 @@ odoo.define('ccpp.check_in_view', function (require) {
             var next_action = document.getElementById("next_action").value;
             var latitude = this.latitude;
             var longitude = this.longitude;
-            var ctx = [analytic_line, latitude, longitude, current_situation, next_action];
+            var check_class = $(ev.target).getAttributes('class').class
+            var ctx = [analytic_line, latitude, longitude, current_situation, next_action, check_class];
             var def0 =  self._rpc({
                 model: 'account.analytic.line',
                 method: 'update_check_in',
@@ -148,40 +150,70 @@ odoo.define('ccpp.check_in_view', function (require) {
 
         _skip_done: function(){
             self = this;
-            self.do_action('ccpp.act_rocker_timesheet_tree');
+            var ctx;
+            var analytic_line = this.analytic_line.analytic_line_id
+            var def =  self._rpc({
+                model: 'account.analytic.line',
+                method: 'skip',
+                 args: [analytic_line],
+            }).then(function(result) {    
+                    self.do_action('ccpp.act_rocker_timesheet_tree');
+                }
+            );
         },
         
         _done: function(ev){
             var self = this;
             var ctx;
-            var order_list = []
-            var remain_list = []
-            var borrow_list = []
-            var orderborrow_list = []
-            _.each(this.order_lines, function(order_line) {
-                debugger
-                var order = "order" + order_line.phlid
-                var order_dict = {phlid: document.getElementById(order).value}
-                order_list.append(order_dict)
-                var remain = "remain" + order_line.phlid
-                var remain_dict = {phlid: document.getElementById(remain).value}
-                remain_list.append(remain_dict)
-                var borrow = "borrow" + order_line.phlid
-                var borrow_dict = {phlid: document.getElementById(borrow).value}
-                borrow_list.append(borrow_dict)
-                var orderborrow = "orderborrow" + order_line.phlid
-                var oderborrow_dict = {phlid: document.getElementById(orderborrow).value}
-                orderborrow_list.append(oderborrow_dict)
-            });
-            ctx = [order_list,remain_list,borrow_list,orderborrow_list]
+            var analytic_line = this.analytic_line.analytic_line_id
+            // var order_list = []
+            // var remain_list = []
+            // var borrow_list = []
+            // var orderborrow_list = []
+            // _.each(this.order_lines, function(order_line) {
+            //     debugger
+            //     var order = "order" + order_line.phlid
+            //     var order_dict = {phlid: document.getElementById(order).value}
+            //     order_list.append(order_dict)
+            //     var remain = "remain" + order_line.phlid
+            //     var remain_dict = {phlid: document.getElementById(remain).value}
+            //     remain_list.append(remain_dict)
+            //     var borrow = "borrow" + order_line.phlid
+            //     var borrow_dict = {phlid: document.getElementById(borrow).value}
+            //     borrow_list.append(borrow_dict)
+            //     var orderborrow = "orderborrow" + order_line.phlid
+            //     var oderborrow_dict = {phlid: document.getElementById(orderborrow).value}
+            //     orderborrow_list.append(oderborrow_dict)
+            // });
+            // ctx = [order_list,remain_list,borrow_list,orderborrow_list]
             var def =  self._rpc({
                 model: 'account.analytic.line',
                 method: 'done',
-                args: [ctx],
+                args: [analytic_line],
             }).then(function(result) {    
                     self.do_action('ccpp.act_rocker_timesheet_tree');
                 }
             );
+
+        },
+
+        _input_value: function(ev){
+            var self = this;
+            var phlid;
+            var ctx;
+            var val;
+            var type;
+            var task;
+            debugger
+            phlid = $(ev.target).attr('data-id')
+            val = $(ev.target).val()
+            type = $(ev.target).getAttributes('class').class
+            task = this.analytic_line.analytic_line_id;
+            var def =  self._rpc({
+                model: 'account.analytic.line',
+                method: 'input_value',
+                args: [phlid,val,type,task],
+            })
 
         },
 

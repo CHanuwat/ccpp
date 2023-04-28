@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <!-- Dashboard Menu -->
+    <record model="ir.ui.menu" id="odoo_dynamic_dashboard.menu_dashboard">
+        <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
+    </record>
+
+    <!-- Discuss -->
+    <record model="ir.ui.menu" id="mail.menu_root_discuss">
+        <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
+    </record>
+
+    <!-- Calendar -->
+    <record model="ir.ui.menu" id="calendar.mail_menu_calendar">
+        <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
+    </record>
+
+    <!-- Contacts -->
+    <record model="ir.ui.menu" id="contacts.menu_contacts">
+        <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
+    </record>
+
+    <!-- Timesheet -->
+    <record model="ir.ui.menu" id="hr_timesheet.timesheet_menu_root">
+        <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
+    </record>
+
+    <!-- Website -->
+    <record model="ir.ui.menu" id="website.menu_website_configuration">
+        <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
+    </record>
+
+    <!-- Knowledge -->
+    <record model="ir.ui.menu" id="document_knowledge.menu_document_root">
+        <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
+    </record>
+
+    <!-- Purchase -->
+    <record model="ir.ui.menu" id="purchase.menu_purchase_root">
+        <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
+    </record>
+
+    <!-- Inventory -->
+    <record model="ir.ui.menu" id="stock.menu_stock_root">
+        <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
+    </record>
+
+    <!-- Employees -->
+    <record model="ir.ui.menu" id="hr.menu_hr_root">
+        <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
+    </record>
+
+    <!-- Attendance -->
+    <record model="ir.ui.menu" id="hr_attendance.menu_hr_attendance_root">
+        <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
+    </record>
+
+    <!-- Time Off -->
+    <record model="ir.ui.menu" id="hr_holidays.menu_hr_holidays_root">
+        <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
+    </record>
+
+    <!-- Live Chat -->
+    <record model="ir.ui.menu" id="im_livechat.menu_livechat_root">
+        <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
+    </record>
+
+    <!-- Expense -->
+    <record model="ir.ui.menu" id="hr_expense.menu_hr_expense_root">
+        <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
+    </record>
+
+    <!-- Link Tracker -->
+    <record model="ir.ui.menu" id="utm.menu_link_tracker_root">
+        <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
+    </record>
+
+    <!-- Apps -->
+    <record model="ir.ui.menu" id="base.menu_management">
+        <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
+    </record>
+
+    <!-- Invoicing -->
+    <record model="ir.ui.menu" id="account.menu_finance">
+        <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
+    </record>
+
+    <!-- Dashboards -->
+    <record model="ir.ui.menu" id="base.menu_board_root">
+        <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
+    </record>
+
+    <!-- Sales -->
+    <record model="ir.ui.menu" id="sale.sale_menu_root">
+        <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
+    </record>
+
+</odoo>

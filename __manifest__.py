@@ -48,9 +48,11 @@
         "views/approval_view.xml",
         "views/asset_view.xml",
         "views/ccpp_wizard_fill_history_view.xml",
+        "views/res_user_view.xml",
         "views/ccpp_menu_crm.xml",
         "views/ccpp_menu_customer.xml",
         "views/ccpp_menu_task.xml",
+        "views/ccpp_menu_replace_all.xml",
         ],
     'qweb': [ 
         

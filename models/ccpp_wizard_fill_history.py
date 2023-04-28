@@ -118,8 +118,7 @@ class CCPPWizardFillHistoryOrder(models.TransientModel):
     product_id = fields.Many2one(related="history_line_id.product_id")
     asset_id = fields.Many2one(related="history_line_id.asset_id")
     order_qty = fields.Float(string="Ordered Qty")
-    remain_qty = fields.Float(string="Remaining Qty")
-    
+    remain_qty = fields.Float(string="Remaining Qty")    
 
 class CCPPWizardFillHistoryBorrow(models.TransientModel):
     _name = "ccpp.wizard.fill.history.borrow"

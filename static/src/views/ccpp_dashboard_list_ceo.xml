@@ -3,7 +3,7 @@
     <t t-name="ccpp.CCPPDashboardListCeo" owl="1">
         <div class="o_ccpp_dashboard_list container-fluid py-4 border-bottom bg-white">
             <div class="row justify-content-between gap-3 gap-lg-0">
-                <div class="col-12 col-lg-12 col-xl-5 col-xxl-8 flex-grow-1 flex-lg-grow-0 flex-shrink-0">
+                <div class="col-12 col-lg-12 col-xl-12 col-xxl-12 flex-grow-1 flex-lg-grow-0 flex-shrink-0">
                     
                     <div class="gap-4" style="padding-bottom:5px">
                         <!--<div class="g-col-3 g-col-sm-2 d-flex align-items-center py-2 justify-content-end text-end justify-content-lg-start text-lg-start">

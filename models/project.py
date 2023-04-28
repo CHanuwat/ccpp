@@ -232,8 +232,9 @@ class Project(models.Model):
                 action = self.env['ir.actions.act_window'].with_context({'active_id': self.id})._for_xml_id('ccpp.open_view_ccpp_step4')
                 action['context'] = self._context
                 action['res_id'] = self.id
+                action['target'] = 'current'
                 return action
- 
+            
     def button_next_step(self):
         if self.check_step == '1':
             if not self.is_income_cus and not self.is_effectiveness_cus and not self.is_repulation_cus and not self.is_competitive_cus:
@@ -1381,7 +1382,7 @@ class Task(models.Model):
     def _compute_deadline(self):
         for obj in self:
             deadline_date = False
-            string_show_period = False
+            string_show_period = ""
             #priority_line_id = obj.project_id.priority_id.lines.filtered(lambda o:o.active)
             if obj.project_id.priority_id and obj.start_date: #and obj.project_id.priority_id.point <= 2:
                 start_date_obj = obj.start_date
@@ -1464,7 +1465,7 @@ class Task(models.Model):
                             count += 1
                 if period == 0:
                     period = math.ceil(12/frequency_time)
-                string_show_period = 'Period '+ str(period)
+                string_show_period = 'Period ' + str(period)
                 
             obj.show_period = string_show_period
             obj.deadline_date = deadline_date

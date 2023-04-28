@@ -202,11 +202,11 @@
         <field name="arch" type="xml">
             <form>
                 <sheet>
-                    <div class="oe_title">
+                    <div style="padding-bottom:10px; word-break: break-word;">
                         <label for="name" string="Title"/>
-                        <h1>
-                            <field name="name" class="o_project_name oe_inline" placeholder="CCPP Title"/>
-                        </h1>
+                        <h3 class="d-flex flex-row">
+                            <field name="name" widget="text" class="o_text_overflow" placeholder="CCPP Title"/>
+                        </h3>
                     </div>
                     <group>
                         <group>
@@ -324,11 +324,11 @@
         <field name="arch" type="xml">
             <form>
                 <sheet>
-                    <div class="oe_title">
+                    <div style="padding-bottom:10px; word-break: break-word;">
                         <label for="name" string="Title"/>
-                        <h1>
-                            <field name="name" class="o_project_name oe_inline" placeholder="CCPP Title"/>
-                        </h1>
+                        <h3 class="d-flex flex-row">
+                            <field name="name" widget="text" class="o_text_overflow" placeholder="CCPP Title"/>
+                        </h3>
                     </div>
                     <group>
                         <group>
@@ -456,11 +456,11 @@
                             <h1>Create Solution</h1>
                         </span>
                     </div>
-                    <div class="oe_title">
+                    <div style="padding-bottom:10px; word-break: break-word;">
                         <label for="name" string="Title"/>
-                        <h1>
-                            <field name="name" class="o_project_name oe_inline" placeholder="Solution Title"/>
-                        </h1>
+                        <h3 class="d-flex flex-row">
+                            <field name="name" widget="text" class="o_text_overflow" placeholder="Solution Title"/>
+                        </h3>
                     </div>
                     <group>
                         <group>
@@ -681,7 +681,7 @@
                 <button name="button_approve" string="Approve" type="object" class="btn-primary"  attrs="{'invisible': ['|',('is_show_approve','=',False),('state','!=','waiting_approve')]}" /><!-- states="waiting_approve" groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>-->
                 <button name="button_reject_wizard" string="Reject" type="object" class="btn-danger" attrs="{'invisible': ['|',('is_show_approve','=',False),('state','!=','waiting_approve')]}"/><!--states="waiting_approve" groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"/>-->
                 <button name="button_done" string="Done" type="object" class="btn-success" attrs="{'invisible': ['|','|',('state','!=','process'),('is_ccpp_done','=',False),('is_owner','=',False)]}" confirm="Are you sure to done this CCPP?"/>
-                <button name="button_cancel_wizard" string="Cancel" type="object" attrs="{'invisible': ['|',('state','not in',['open','process']),('is_owner','=',False)]}"/>
+                <button name="button_cancel_wizard" string="Cancel" type="object" attrs="{'invisible': ['|',('state','not in',['open','process','done']),('is_owner','=',False)]}"/>
                 <button name="button_to_open" string="To Open" type="object" class="btn-primary" attrs="{'invisible': ['|','|',('state', 'not in', ['reject','waiting_approve']),('is_owner', '=', False),('is_already_approve','=',True)]}"/>
             </xpath>
 
@@ -1383,7 +1383,7 @@
                 <button name="button_to_open_solution" string="To Open Solution" type="object" class="btn-primary" attrs="{'invisible': ['|','|','|','|',('is_solution', '=', False),('state','not in',['reject','waiting_approve']),('is_ccpp_on_process','=',False),('is_owner','=',False),('is_solution_already_approve','=',True)]}"/>
 
                 <!--<button name="button_to_process" string="To Process" type="object" states="cancel" attrs="{'invisible': ['|',('is_strategy', '=', False),('state','!=','cancel')]}"/>-->
-                <button name="button_cancel_wizard" string="Cancel" type="object" attrs="{'invisible': ['|','|',('state','not in',['open','process']),('id', '=', False),('is_owner','=',False)]}"/>
+                <button name="button_cancel_wizard" string="Cancel" type="object" attrs="{'invisible': ['|','|',('state','not in',['open','process','done']),('id', '=', False),('is_owner','=',False)]}"/>
                 <button name="button_start_next_period" string="Start Next Period" type="object" class="btn-warning" attrs="{'invisible': ['|','|',('is_delay','=',False),('state','=','cancel'),('is_solution','=',False)]}" help="Start Next Period with remaining strategy click here!"/>
                 <span class="o_tooltip o_tooltip_visible right o_animated ccpp_tooltip" attrs="{'invisible': ['|','|',('is_delay','=',False),('state','=','cancel'),('is_solution','=',False)]}"></span>
             </xpath>
@@ -1486,8 +1486,9 @@
                 <!--<button name="action_open_task2" type="object" title="View Strategy" string="View Strategy" class="btn btn-link float-end" attrs="{'invisible': [('parent.is_solution','=',False)]}"/>-->
                 <button name="button_send_approve_strategy" type="object" class="btn-primary" string="Send Approve Strategy" attrs="{'invisible': ['|','|',('state','!=','open'),('is_ccpp_on_process','=',False),('is_solution_on_approve','=',True)]}"/>
                 <button name="button_done" type="object" string="Done" class="btn-success ri-arrow-right-up-line me-2" attrs="{'invisible': ['|','|',('state','!=','process'),('is_delay','=',True),('is_owner','=',False)]}" confirm="Are you sure to done this strategy?"/>
-                <button name="button_cancel_wizard" type="object" string="Cancel" class="btn-secondary-ccpp"   attrs="{'invisible': ['|','|',('state','!=','process'),('is_delay','=',True),('is_owner','=',False)]}"/>
+                <button name="button_cancel_wizard" type="object" string="Cancel" class="btn-secondary-ccpp"   attrs="{'invisible': ['|','|',('state','not in',['open','process','done']),('is_delay','=',True),('is_owner','=',False)]}"/>
                 <button name="action_open_task2" type="object" title="View Task" string="View Task" class="btn btn-link float-end" attrs="{'invisible': [('parent.is_strategy','=',False)]}"/>
+                <!--<button name="unlink" icon="gtk-cancel" type="object" string="Delete"/>-->
             </xpath>
             <xpath expr="//page[@name='sub_tasks_page']/field[@name='child_ids']/tree[1]/field[@name='activity_ids']" position="replace">
                 <!--<field name="activity_ids" string="Next Activity" widget="list_activity" attrs="{'column_invisible': [('parent.is_solution','=',False)]}"/>-->
@@ -2120,7 +2121,7 @@
         <field name="model">project.project</field>
         <field eval="201" name="priority"/>
         <field name="arch" type="xml">
-            <tree delete="0" create="0" expand="0" js_class="ccpp_dashboard_list" class="ccpp_list" editable="bottom">
+            <tree delete="0" create="0" expand="0" js_class="ccpp_dashboard_list" class="ccpp_list">
                 <button type="object" name="check_view_step" icon="fa-folder-open-o" class="oe_highlight"/>
                 <field name="code" string="CCPP No." readonly="1"/>
                 <field name="name" string="CCPP Title" class="fw-bold" readonly="1"/>
@@ -2218,7 +2219,7 @@
         <field eval="203" name="priority"/>
         <field name="arch" type="xml">
             <tree delete="0" create="0" expand="0" js_class="ccpp_dashboard_list_ceo" class="ccpp_list">
-                <button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>
+                <button type="object" name="check_view_step" icon="fa-folder-open-o" class="oe_highlight"/>
                 <field name="code" string="CCPP No."/>
                 <field name="name" string="CCPP Title" class="fw-bold"/>
                 <field name="partner_id" string="Customer"/>

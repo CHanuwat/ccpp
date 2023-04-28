@@ -31,9 +31,9 @@
     <record model="ir.ui.menu" id="crm.menu_crm_opportunities">
         <field name="action" eval="False"/>
     </record>
-    <record model="ir.ui.menu" id="sale_crm.sale_order_menu_quotations_crm">
+    <!-- <record model="ir.ui.menu" id="sale_crm.sale_order_menu_quotations_crm">
         <field name="action" eval="False"/>
-    </record>
+    </record> -->
 
     <record model="ir.ui.menu" id="crm.crm_menu_root">
         <field name="sequence" eval="2"/>
