@@ -385,6 +385,7 @@ class CCPPCustomerInformation(models.Model):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.act_rocker_timesheet_tree')
         update_ids = self.env['account.analytic.line'].search([('job_id','=',self.job_id.id),('customer_id','=',self.customer_id.id)])
         action['domain'] = [('id', 'in', update_ids.ids)]
+        action['context'] = {}
         return action
     
     @api.model
