@@ -830,7 +830,7 @@
                     <field name="tasks_solution" style="padding-top:20px" context="{'is_create_solution': True, 'project_id': active_id, 'default_project_id': active_id}" 
                      >
                     <!--attrs="{'readonly': [('state','not in',['open']),('is_delay','=',False)]}"-->
-                        <tree decoration-muted="is_closed == True" create="0" delete="0" edit="1" multi_edit="false">
+                        <tree decoration-muted="is_closed == True" create="0" delete="1" edit="1" multi_edit="false">
                             <!--<field name="legend_normal" invisible="1"/>
                             <field name="legend_done" invisible="1"/>
                             <field name="legend_blocked" invisible="1"/>-->
@@ -1990,7 +1990,7 @@
         <field name="model">project.project</field>
         <field eval="202" name="priority"/>
         <field name="arch" type="xml">
-            <tree js_class="ccpp_tree" expand="0" default_order="partner_id" delete="0">
+            <tree js_class="ccpp_tree" expand="0" default_order="partner_id" delete="1">
                 <button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>
                 <field name="name" string="CCPP" class="fw-bold"/>
                 <field name="partner_id" string="Customer"/>
@@ -2105,7 +2105,7 @@
         <field name="model">project.task</field>
         <field eval="202" name="priority"/>
         <field name="arch" type="xml">
-            <tree delete="0" create="0">
+            <tree delete="1" create="0">
                 <field name="name" string="Strategy"/>
                 <field name="task_last_current_action" string="Current Situation"/>
                 <field name="task_next_action" string="Next Action"/>
@@ -2121,7 +2121,7 @@
         <field name="model">project.project</field>
         <field eval="201" name="priority"/>
         <field name="arch" type="xml">
-            <tree delete="0" create="0" expand="0" js_class="ccpp_dashboard_list" class="ccpp_list">
+            <tree delete="1" create="0" expand="0" js_class="ccpp_dashboard_list" class="ccpp_list">
                 <button type="object" name="check_view_step" icon="fa-folder-open-o" class="oe_highlight"/>
                 <field name="code" string="CCPP No." readonly="1"/>
                 <field name="name" string="CCPP Title" class="fw-bold" readonly="1"/>

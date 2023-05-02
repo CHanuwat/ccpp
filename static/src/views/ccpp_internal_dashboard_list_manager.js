@@ -8,6 +8,7 @@ export class CCPPInternalDashBoardListManager extends Component {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
+        
 
         onWillStart(async () => {
             debugger
@@ -27,6 +28,16 @@ export class CCPPInternalDashBoardListManager extends Component {
         for (const item of searchItems){
             this.env.searchModel.toggleSearchItem(item.id);
         }
+    }
+
+    async _setMyCustomer(ev){
+        const action = await this.orm.call('ccpp.customer.information', 'set_my_customer_internal');
+        this.action.doAction(action);
+    }
+
+    async _setAllCustomer(ev) {
+        const action = await this.orm.call('ccpp.customer.information', 'set_all_customer_internal');
+        this.action.doAction(action);
     }
 }
 

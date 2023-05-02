@@ -291,9 +291,11 @@ class Project(models.Model):
         return action
 
     def unlink(self):
-        if not self._context.get('discard_create'):
-            raise UserError("ระบบไม่สามารถลบ CCPP ได้ กรุณา cancel หากไม่ได้ใช้งาน")
+        for obj in self:
+            if not obj._context.get('discard_create') and obj.state != 'open':
+                raise UserError("ระบบไม่สามารถลบ CCPP ได้ กรุณา cancel หากไม่ได้ใช้งาน")
         res = super().unlink()
+        return res
        
     @api.depends('tasks_solution',"is_income_cus", "is_effectiveness_cus", "is_repulation_cus", "is_competitive_cus", "is_critical", "is_not_critical","is_income_comp", "is_effectiveness_comp", "is_repulation_comp", "is_competitive_comp", "is_short_time", "is_long_time")   
     def _compute_ready_create_solution(self):
@@ -1328,11 +1330,13 @@ class Task(models.Model):
         return action
  
     def unlink(self):
-        if self.is_solution:
-            raise UserError("ระบบไม่สามารถลบ Solution ได้ กรุณา cancel หากไม่ได้ใช้งาน")
-        if self.is_strategy:
-            raise UserError("ระบบไม่สามารถลบ Strategy ได้ กรุณา cancel หากไม่ได้ใช้งาน")
+        for obj in self:
+            if obj.is_solution and obj.state != 'open':
+                raise UserError("ระบบไม่สามารถลบ Solution ได้ กรุณา cancel หากไม่ได้ใช้งาน")
+            if obj.is_strategy and obj.state != 'open':
+                raise UserError("ระบบไม่สามารถลบ Strategy ได้ กรุณา cancel หากไม่ได้ใช้งาน")
         res = super().unlink()
+        return res
     
     @api.depends("parent_id","is_solution","project_id.state","is_strategy","parent_id.project_id.state","parent_id.state")
     def _compute_rec_name(self):

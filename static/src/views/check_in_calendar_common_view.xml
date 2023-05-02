@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    
+	<t t-name="check_in_calendar" t-inherit="web.CalendarCommonPopover.footer" t-inherit-mode="primary" owl="1" >
+		<xpath expr="//t[@t-if='isEventDeletable']" position="after">
+			<t t-if="isNotDone">
+				<button class="btn btn-success me-1" t-on-click="openCheckIn" icon="fa-sign-in">
+					<span class="align-middle me-2 text-white">Check IN</span>
+					<i t-attf-class="fa fa-1x fa-sign-in align-middle"/>
+				</button>
+			</t>
+		</xpath>
+	</t>
+    
+</templates>

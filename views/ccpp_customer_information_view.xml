@@ -190,7 +190,8 @@
                                   <label for="is_potential" string="Potential"/>     
                             </div>
                             <field name="domain_partner_ids" invisible="True"/>
-                            <field name="partner_ids" context="{'show_title_position':True, 'create_customer_contact':True, 'customer_parent': customer_id}" 
+                            <field name="partner_ids" context="{'show_title_position':True, 'create_customer_contact':True, 'customer_parent': customer_id}"
+                            string="Contact Person" 
                             domain="[('id','in',domain_partner_ids)]" 
                             required="True" 
                             options="{'no_quick_create': True}">
@@ -301,7 +302,7 @@
         <field name="name">ccpp.internal.information.view.tree</field>
         <field name="model">ccpp.customer.information</field>
         <field name="arch" type="xml">
-            <tree string="Customer Information" expand="1" default_order="potential_ranking" multi_edit="1" sample="1" class="customer_information_tree">
+            <tree string="Customer Information" expand="1" default_order="potential_ranking" multi_edit="1" sample="1" class="customer_information_tree" js_class="ccpp_internal_dashboard_list_manager">
                 <field name="year_selection" string="Year"/>
                 <field name="date_from" string="Create Date" optional="hide"/>
                 <field name="customer_id"/>
@@ -416,6 +417,7 @@
         <field name="view_id" ref="ccpp_internal_information_view_tree"/>
         <field name="domain">[('type','=','internal'),('user_id', '=', uid)]</field>
         <field name="context">{'default_type': 'internal', 'search_default_groupby_year': 1, 'default_my_company': True}</field>
+        <field name="target">main</field>
     </record>
 
     <record id="ccpp_internal_information_action_view_tree" model="ir.actions.act_window.view">
@@ -437,7 +439,7 @@
         <field name="name">ccpp.external.information.view.tree</field>
         <field name="model">ccpp.customer.information</field>
         <field name="arch" type="xml">
-            <tree string="External Information" expand="1" default_order="potential_ranking" multi_edit="1" sample="1" class="customer_information_tree">
+            <tree string="External Information" expand="1" default_order="potential_ranking" multi_edit="1" sample="1" class="customer_information_tree" js_class="ccpp_external_dashboard_list_manager">
                 <field name="year_selection" string="Year"/>
                 <field name="date_from" string="Create Date" optional="hide"/>
                 <!--<field name="date_to"/>-->
@@ -582,6 +584,7 @@
         <field name="view_id" ref="ccpp_external_information_view_tree"/>
         <field name="domain">[('type','=','external'),('user_id', '=', uid)]</field>
         <field name="context">{'default_type': 'external', 'search_default_groupby_year': 1}</field>
+        <field name="target">main</field>
     </record>
 
     <record id="ccpp_external_information_action_view_tree" model="ir.actions.act_window.view">
@@ -624,6 +627,14 @@
         <field name="code">action = model.action_customer_information_ceo()</field>
     </record>
 
+    <record id="ccpp_internal_information_action_user" model="ir.actions.server">
+        <field name="name">Internal Information</field>
+        <field name="model_id" ref="model_ccpp_customer_information"/>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="code">action = model.action_internal_information_user()</field>
+    </record>
+
     <record id="ccpp_internal_information_action_manager" model="ir.actions.server">
         <field name="name">Internal Information</field>
         <field name="model_id" ref="model_ccpp_customer_information"/>
@@ -646,6 +657,14 @@
         <field name="type">ir.actions.server</field>
         <field name="state">code</field>
         <field name="code">action = model.action_internal_information_ceo()</field>
+    </record>
+
+    <record id="ccpp_external_information_action_user" model="ir.actions.server">
+        <field name="name">Internal Information</field>
+        <field name="model_id" ref="model_ccpp_customer_information"/>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="code">action = model.action_external_information_user()</field>
     </record>
 
     <record id="ccpp_external_information_action_manager" model="ir.actions.server">

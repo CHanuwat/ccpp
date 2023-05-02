@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates>
-    <t t-name="ccpp.CCPPInternalDashboardListManager" owl="1">
+    <t t-name="ccpp.CCPPExternalDashboardListManager" owl="1">
         <div class="o_ccpp_dashboard_list container-fluid py-4 border-bottom bg-white">
             <div class="row justify-content-between gap-3 gap-lg-0">
                 <div class="col-12 col-lg-12 col-xl-12 col-xxl-12 flex-grow-1 flex-lg-grow-0 flex-shrink-0">
@@ -9,11 +9,11 @@
                         <div class="grid gap-2">
                             <div class="g-col-2 p-0" t-on-click="_setMyCustomer" title="My Customer">
                                 <a href="#" class="btn btn-primary w-100 h-100 border-0 rounded-0 text-capitalize fw-normal">
-                                    <div class="fs-2" t-out="internalData['my_customer']"/>My Customer
+                                    <div class="fs-2" t-out="externalData['my_customer']"/>My Customer
                                 </a>
                             </div><div class="g-col-2 p-0" t-on-click="_setAllCustomer" title="All Customer">
                                 <a href="#" class="btn btn-primary w-100 h-100 border-0 rounded-0 text-capitalize fw-normal">
-                                    <div class="fs-2" t-out="internalData['all_customer']"/>All Customer
+                                    <div class="fs-2" t-out="externalData['all_customer']"/>All Customer
                                 </a>
                             </div>
                         </div>

@@ -67,11 +67,11 @@
         </field>
     </record>
 
-    <menuitem name="Asset"
+    <!--<menuitem name="Asset"
             id="menu_main_assets"
             web_icon="ccpp,static/description/asset.png"
             sequence="5"/>
 
-    <menuitem name="Asset" id="menu_asset" parent="menu_main_assets" action="asset_action" sequence="1"/>
+    <menuitem name="Asset" id="menu_asset" parent="menu_main_assets" action="asset_action" sequence="1"/>-->
 
 </odoo>

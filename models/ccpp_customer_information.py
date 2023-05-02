@@ -382,8 +382,8 @@ class CCPPCustomerInformation(models.Model):
         return action
     
     def open_current_situation(self):
-        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_project_update_action')
-        update_ids = self.env['project.update'].search([('job_id','=',self.job_id.id),('customer_id','=',self.customer_id.id)])
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.act_rocker_timesheet_tree')
+        update_ids = self.env['account.analytic.line'].search([('job_id','=',self.job_id.id),('customer_id','=',self.customer_id.id)])
         action['domain'] = [('id', 'in', update_ids.ids)]
         return action
     
@@ -429,6 +429,18 @@ class CCPPCustomerInformation(models.Model):
         action['domain'] = [('id','in',information_ids.ids)]
         return action
     
+    def action_external_information_user(self):
+        self = self.sudo()
+        company_ids = self._context.get('allowed_company_ids')
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_internal_information_action')
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        information_ids = self.env['ccpp.customer.information'].search([('type','=','external'),
+                                                                ('job_id', '=', employee_id.job_id.id),
+                                                                ('company_id','in', company_ids),
+                                                                ])
+        action['domain'] = [('id','in',information_ids.ids)]
+        return action
+    
     def action_external_information_manager(self):
         self = self.sudo()
         company_ids = self._context.get('allowed_company_ids')
@@ -460,6 +472,18 @@ class CCPPCustomerInformation(models.Model):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_external_information_action')
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
         information_ids = self.env['ccpp.customer.information'].search([('type','=','external'),
+                                                                ('company_id','in', company_ids),
+                                                                ])
+        action['domain'] = [('id','in',information_ids.ids)]
+        return action
+    
+    def action_internal_information_user(self):
+        self = self.sudo()
+        company_ids = self._context.get('allowed_company_ids')
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_internal_information_action')
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        information_ids = self.env['ccpp.customer.information'].search([('type','=','internal'),
+                                                                ('job_id', '=', employee_id.job_id.id),
                                                                 ('company_id','in', company_ids),
                                                                 ])
         action['domain'] = [('id','in',information_ids.ids)]
@@ -516,4 +540,176 @@ class CCPPCustomerInformation(models.Model):
             'all_customer': 0,
         }
         
+        self = self.sudo()
+        company_ids = self._context.get('allowed_company_ids')
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        customer_information = self.env['ccpp.customer.information']
+        job_ids = self.get_child_job(employee_id.job_lines)
+        if self.env.user.has_group('ccpp.group_ccpp_backoffice_user') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_user'):
+            result['my_customer'] = customer_information.search_count([('type','=','internal'),
+                                                                       ('job_id', '=', employee_id.job_id.id),
+                                                                       ('company_id','in', company_ids)])
+            result['all_customer'] = customer_information.search_count([('type','=','internal'),
+                                                                        ('job_id', '=', employee_id.job_id.id),
+                                                                        ('company_id','in', company_ids)])
+        
+        if self.env.user.has_group('ccpp.group_ccpp_backoffice_manager') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_manager'):
+            result['my_customer'] = customer_information.search_count([('type','=','internal'),
+                                                                       ('job_id', '=', employee_id.job_id.id),
+                                                                       ('company_id','in', company_ids)])
+            result['all_customer'] = customer_information.search_count([('type','=','internal'),
+                                                                        ('job_id', 'in', job_ids.ids),
+                                                                        ('company_id','in', company_ids),
+                                                                            ])
+        if self.env.user.has_group('ccpp.group_ccpp_backoffice_manager_all_department') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_manager_all_department'):
+            result['my_customer'] = customer_information.search_count([('type','=','internal'),
+                                                                       ('job_id', '=', employee_id.job_id.id),
+                                                                       ('company_id','in', company_ids)])
+            result['all_customer'] = customer_information.search_count([('type','=','internal'),
+                                                                        ('department_id', '=', employee_id.department_id.id),
+                                                                        ('company_id','in', company_ids),
+                                                                            ])
+        if self.env.user.has_group('ccpp.group_ccpp_ceo'):
+            result['my_customer'] = customer_information.search_count([('type','=','internal'),
+                                                                       ('job_id', '=', employee_id.job_id.id),
+                                                                       ('company_id','in', company_ids)])
+            result['all_customer'] = customer_information.search_count([('type','=','internal'),
+                                                                        ('company_id','in', company_ids),
+                                                                            ])
+        
         return result
+    
+    @api.model
+    def retrieve_dashboard_external(self,context={}):
+        result = {
+            'my_customer': 0,
+            'all_customer': 0,
+        }
+        
+        self = self.sudo()
+        company_ids = self._context.get('allowed_company_ids')
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        customer_information = self.env['ccpp.customer.information']
+        job_ids = self.get_child_job(employee_id.job_lines)
+        if self.env.user.has_group('ccpp.group_ccpp_backoffice_user') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_user'):
+            result['my_customer'] = customer_information.search_count([('type','=','external'),
+                                                                       ('job_id', '=', employee_id.job_id.id),
+                                                                       ('company_id','in', company_ids)])
+            result['all_customer'] = customer_information.search_count([('type','=','external'),
+                                                                        ('job_id', '=', employee_id.job_id.id),
+                                                                        ('company_id','in', company_ids)])
+        
+        if self.env.user.has_group('ccpp.group_ccpp_backoffice_manager') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_manager'):
+            result['my_customer'] = customer_information.search_count([('type','=','external'),
+                                                                       ('job_id', '=', employee_id.job_id.id),
+                                                                       ('company_id','in', company_ids)])
+            result['all_customer'] = customer_information.search_count([('type','=','external'),
+                                                                        ('job_id', 'in', job_ids.ids),
+                                                                        ('company_id','in', company_ids),
+                                                                            ])
+        if self.env.user.has_group('ccpp.group_ccpp_backoffice_manager_all_department') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_manager_all_department'):
+            result['my_customer'] = customer_information.search_count([('type','=','external'),
+                                                                       ('job_id', '=', employee_id.job_id.id),
+                                                                       ('company_id','in', company_ids)])
+            result['all_customer'] = customer_information.search_count([('type','=','external'),
+                                                                        ('department_id', '=', employee_id.department_id.id),
+                                                                        ('company_id','in', company_ids),
+                                                                            ])
+        if self.env.user.has_group('ccpp.group_ccpp_ceo'):
+            result['my_customer'] = customer_information.search_count([('type','=','external'),
+                                                                       ('job_id', '=', employee_id.job_id.id),
+                                                                       ('company_id','in', company_ids)])
+            result['all_customer'] = customer_information.search_count([('type','=','external'),
+                                                                        ('company_id','in', company_ids),
+                                                                            ])
+        
+        return result
+    
+    
+    @api.model
+    def set_my_customer_internal(self):
+        self = self.sudo()
+        company_ids = self._context.get('allowed_company_ids')
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_internal_information_action')
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        information_ids = self.env['ccpp.customer.information'].search([('type','=','internal'),
+                                                                ('job_id', '=', employee_id.job_id.id),
+                                                                ('company_id','in', company_ids),
+                                                                ])
+        action['domain'] = [('id','in',information_ids.ids)]
+        return action
+    
+    @api.model
+    def set_all_customer_internal(self):
+        self = self.sudo()
+        company_ids = self._context.get('allowed_company_ids')
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_internal_information_action')
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        information_ids = customer_information = self.env['ccpp.customer.information']
+        job_ids = self.get_child_job(employee_id.job_lines)
+        if self.env.user.has_group('ccpp.group_ccpp_backoffice_user') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_user'):
+            information_ids= customer_information.search([('type','=','internal'),
+                                                        ('job_id', '=', employee_id.job_id.id),
+                                                        ('company_id','in', company_ids)])
+        
+        if self.env.user.has_group('ccpp.group_ccpp_backoffice_manager') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_manager'):
+            information_ids = customer_information.search([('type','=','internal'),
+                                                            ('job_id', 'in', job_ids.ids),
+                                                            ('company_id','in', company_ids),
+                                                        ])
+        if self.env.user.has_group('ccpp.group_ccpp_backoffice_manager_all_department') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_manager_all_department'):
+            information_ids = customer_information.search([('type','=','internal'),
+                                                            ('department_id', '=', employee_id.department_id.id),
+                                                            ('company_id','in', company_ids),
+                                                            ])
+        if self.env.user.has_group('ccpp.group_ccpp_ceo'):
+            information_ids = customer_information.search([('type','=','internal'),
+                                                            ('company_id','in', company_ids),
+                                                        ])
+
+        action['domain'] = [('id','in',information_ids.ids)]
+        return action
+    
+    @api.model
+    def set_my_customer_external(self):
+        self = self.sudo()
+        company_ids = self._context.get('allowed_company_ids')
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_external_information_action')
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        information_ids = self.env['ccpp.customer.information'].search([('type','=','external'),
+                                                                ('job_id', '=', employee_id.job_id.id),
+                                                                ('company_id','in', company_ids),
+                                                                ])
+        action['domain'] = [('id','in',information_ids.ids)]
+        return action
+    
+    @api.model
+    def set_all_customer_external(self):
+        self = self.sudo()
+        company_ids = self._context.get('allowed_company_ids')
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_external_information_action')
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        information_ids = customer_information = self.env['ccpp.customer.information']
+        job_ids = self.get_child_job(employee_id.job_lines)
+        if self.env.user.has_group('ccpp.group_ccpp_backoffice_user') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_user'):
+            information_ids= customer_information.search([('type','=','external'),
+                                                        ('job_id', '=', employee_id.job_id.id),
+                                                        ('company_id','in', company_ids)])
+        
+        if self.env.user.has_group('ccpp.group_ccpp_backoffice_manager') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_manager'):
+            information_ids = customer_information.search([('type','=','external'),
+                                                            ('job_id', 'in', job_ids.ids),
+                                                            ('company_id','in', company_ids),
+                                                        ])
+        if self.env.user.has_group('ccpp.group_ccpp_backoffice_manager_all_department') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_manager_all_department'):
+            information_ids = customer_information.search([('type','=','external'),
+                                                            ('department_id', '=', employee_id.department_id.id),
+                                                            ('company_id','in', company_ids),
+                                                            ])
+        if self.env.user.has_group('ccpp.group_ccpp_ceo'):
+            information_ids = customer_information.search([('type','=','external'),
+                                                            ('company_id','in', company_ids),
+                                                        ])
+
+        action['domain'] = [('id','in',information_ids.ids)]
+        return action

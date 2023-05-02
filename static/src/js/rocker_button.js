@@ -9,7 +9,7 @@ odoo.define('rocker_timesheet.button', function(require) {
     var viewRegistry = require('web.view_registry');
     var ListController = require('web.ListController');
     var ListView = require("web.ListView");
-
+    var CCPPCalendarRenderer = require("ccpp.CCPPCalendarRenderer")
     var _t = core._t;
     var QWeb = core.qweb;
 
@@ -104,11 +104,17 @@ odoo.define('rocker_timesheet.button', function(require) {
                 }
             });
         },
+
+        openCheckIn: function () {
+            var self = this;
+            this.do_action('ccpp.action_check_in');
+        },
     });
 
     var RockerCalendarView = CalendarView.extend({
         config: _.extend({}, CalendarView.prototype.config, {
             Controller: RockerCalendarController,
+            Renderer: CCPPCalendarRenderer,
         }),
     });
 
