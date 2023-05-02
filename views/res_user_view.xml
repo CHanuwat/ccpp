@@ -46,9 +46,11 @@
 
             <xpath expr="//field[@name='department_id']" position='attributes'>
                 <attribute name="readonly">True</attribute>
+                <attribute name="options">{'no_open': True}</attribute>
             </xpath>
             <xpath expr="//field[@name='address_id']" position='attributes'>
                 <attribute name="readonly">True</attribute>
+                <attribute name="options">{'no_open': True}</attribute>
             </xpath>
             <xpath expr="//field[@name='expense_manager_id']" position='attributes'>
                 <attribute name="readonly">True</attribute>

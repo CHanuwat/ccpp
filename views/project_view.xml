@@ -2063,6 +2063,11 @@
         <field name="code">action = model.action_ccpp_department_group_by_customer_manager()</field>
     </record>
 
+    <record id="action_ccpp_dashboard" model="ir.actions.client">
+        <field name="name">CCPP Dashboard</field>
+        <field name="tag">ccpp_dashboard</field>
+    </record>
+
     <record id="solution_strategy_tree" model="ir.ui.view">
         <field name="name">solution.strategy.tree</field>
         <field name="model">project.task</field>
@@ -2298,6 +2303,8 @@
     <menuitem name="All CCPP" id="menu_all_ccpp_manager_all_department" groups="ccpp.group_ccpp_backoffice_manager_all_department,ccpp.group_ccpp_frontoffice_manager_all_department" action="action_all_ccpp_group_by_priority_manager_all_department_code" parent="project.menu_main_pm" sequence="3"/>
 
     <menuitem name="All CCPP" id="menu_all_ccpp_manager_ceo" groups="ccpp.group_ccpp_ceo" action="action_all_ccpp_group_by_priority_ceo_code" parent="project.menu_main_pm" sequence="4"/>
+
+    <!--<menuitem name="CCPP Dashboard" id="menu_ccpp_dashboard" action="action_ccpp_dashboard" parent="project.menu_main_pm" sequence="5"/>-->
 
 
         <!--<menuitem name="All CCPP Group by Priority" id="menu_all_ccpp_group_by_priority_manager" parent="menu_all_ccpp_manager" action="action_all_ccpp_group_by_priority_manager" sequence="1"/>
