@@ -281,6 +281,9 @@
         <field name="view_mode">tree,form</field>
         <field name="domain">[('type','=','customer'),('user_id', '=', uid)]</field>
         <field name="context">{'default_type': 'customer', 'seasrch_default_groupby_year': 1}</field>
+        <field name="help" type="html">
+            <p></p>
+        </field>
     </record>
 
     <record id="ccpp_customer_information_action_view_tree" model="ir.actions.act_window.view">
@@ -418,6 +421,9 @@
         <field name="domain">[('type','=','internal'),('user_id', '=', uid)]</field>
         <field name="context">{'default_type': 'internal', 'search_default_groupby_year': 1, 'default_my_company': True}</field>
         <field name="target">main</field>
+        <field name="help" type="html">
+            <p></p>
+        </field>
     </record>
 
     <record id="ccpp_internal_information_action_view_tree" model="ir.actions.act_window.view">
@@ -585,6 +591,9 @@
         <field name="domain">[('type','=','external'),('user_id', '=', uid)]</field>
         <field name="context">{'default_type': 'external', 'search_default_groupby_year': 1}</field>
         <field name="target">main</field>
+        <field name="help" type="html">
+            <p></p>
+        </field>
     </record>
 
     <record id="ccpp_external_information_action_view_tree" model="ir.actions.act_window.view">

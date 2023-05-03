@@ -22,12 +22,12 @@ export class CCPPExternalDashBoardListManager extends Component {
 
     async _setMyCustomer(ev){
         const action = await this.orm.call('ccpp.customer.information', 'set_my_customer_external');
-        this.action.doAction(action);
+        this.action.doAction(action,{additionalContext: this.props.context});
     }
 
     async _setAllCustomer(ev) {
         const action = await this.orm.call('ccpp.customer.information', 'set_all_customer_external');
-        this.action.doAction(action);
+        this.action.doAction(action,{additionalContext: this.props.context});
     }
 }
 

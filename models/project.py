@@ -241,8 +241,8 @@ class Project(models.Model):
                 raise UserError("กรุณาเลือกผลกระทบต่อลูกค้าอย่างน้อย 1 ข้อ")
             if not self.is_critical and not self.is_not_critical:
                 raise UserError("กรุณาเลือกความเร่งด่วนของลูกค้าที่ต้องการความช่วยเหลือ")
-            if not self.is_critical:
-                raise UserError("Customer Impact must be Critical")
+            #if not self.is_critical:
+                #raise UserError("Customer Impact must be Critical")
             self.check_step = '2'
             action = self.env['ir.actions.act_window'].with_context({'active_id': self.id})._for_xml_id('ccpp.open_view_ccpp_step2')
             action['res_id'] = self.id
@@ -426,6 +426,13 @@ class Project(models.Model):
             #raise UserError("กรุณาเลือกความเร่งด่วนอย่างใดอย่างหนึ่ง")
         #if self.is_short_time and self.is_long_time:
             #raise UserError("กรุณาเลือกระยะเวลาในการแก้ปัญหาใดอย่างหนึ่ง")
+            
+    @api.onchange("is_multi_host")       
+    def onchange_multi_host(self):
+        if self.is_multi_host:
+            self.partner_contact_id = False
+        if not self.is_multi_host:
+            self.department_ids = False
             
     @api.onchange("partner_id")
     def _compute_customer_company(self):
@@ -734,11 +741,11 @@ class Project(models.Model):
             if not obj.priority_id:
                 raise UserError("กรุณาเลือกผลกระทบต่อบริษัทอย่างน้อย 1 ข้อ และเลือกระยะเวลาการแก้ไขปัญหา")
             if obj.priority_id.point > 2:
-                raise UserError("Please send only CCPP 1st and 2nd priority")
+                raise UserError("Please send approve only CCPP 1st or 2nd priority")
             if not obj.partner_id:
                 raise UserError("Please select Customer")
-            if not obj.partner_contact_id:
-                raise UserError("Please select Host of CCPP")
+            if not obj.partner_contact_id and not obj.department_ids:
+                raise UserError("Please select Host of CCPP or select department")
             for solution_id in obj.tasks_solution:
                 if not solution_id.start_date:
                     raise UserError("Please select solution start date")
@@ -1150,7 +1157,78 @@ class Project(models.Model):
         #action['target'] = 'new'
         return action
         
+    @api.model
+    def get_first_priority(self,context):
+        self = self.sudo()
+        company_ids = self._context.get('allowed_company_ids')
+        print(company_ids)
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        job_ids = self.get_child_job(employee_id.job_lines)
+        ccpp = self.env['project.project']
+        starting_day_of_current_year = datetime.now().date().replace(month=1, day=1)
+        ending_day_of_current_year = datetime.now().date().replace(month=12, day=31)
+        if self.env.user.has_group('ccpp.group_ccpp_backoffice_user') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_user'):
+            this_year_success = ccpp.search_count([('job_id', '=', employee_id.job_id.id),
+                                                   #('company_id','in', company_ids),
+                                                   ('state','=','done'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',1)])
+            this_year_all = ccpp.search_count([('job_id', '=', employee_id.job_id.id),
+                                                   #('company_id','in', company_ids),
+                                                   ('state','!=','cancel'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',1)])
         
+        if self.env.user.has_group('ccpp.group_ccpp_backoffice_manager') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_manager'):
+            this_year_success = ccpp.search_count([('job_id', 'in', job_ids.ids),
+                                                   #('company_id','in', company_ids),
+                                                   ('state','=','done'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',1)])
+            this_year_all = ccpp.search_count([('job_id', '=', job_ids.ids),
+                                                   #('company_id','in', company_ids),
+                                                   ('state','!=','cancel'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',1)])
+        if self.env.user.has_group('ccpp.group_ccpp_backoffice_manager_all_department') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_manager_all_department'):
+            this_year_success = ccpp.search_count([('department_id', 'in', employee_id.department_id.id),
+                                                   #('company_id','in', company_ids),
+                                                   ('state','=','done'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',1)])
+            this_year_all = ccpp.search_count([('department_id', 'in', employee_id.department_id.id),
+                                                   #('company_id','in', company_ids),
+                                                   ('state','!=','cancel'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',1)])
+        if self.env.user.has_group('ccpp.group_ccpp_ceo'):
+            this_year_success = ccpp.search_count([#('company_id','in', company_ids),
+                                                   ('state','=','done'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',1)])
+            this_year_all = ccpp.search_count([#('company_id','in', company_ids),
+                                                   ('state','!=','cancel'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',1)])
+
+        result = {}
+        first_priority_year = str(this_year_success) + ' / ' + str(this_year_all)
+        result.update({'first_priority_year':first_priority_year})
+        if this_year_all:
+            first_priority_year_success = str("{:.2f}".format(this_year_success/this_year_all*100)) + ' %'
+        else:
+            first_priority_year_success = '0 %'
+        result.update({'first_priority_year_success':first_priority_year_success})
+        pprint(result)
+        return result
         
 class Task(models.Model):
     _inherit = "project.task" 

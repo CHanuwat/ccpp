@@ -202,6 +202,7 @@
         <field name="arch" type="xml">
             <form>
                 <sheet>
+
                     <div style="padding-bottom:10px; word-break: break-word;">
                         <label for="name" string="Title"/>
                         <h3 class="d-flex flex-row">
@@ -214,7 +215,11 @@
                             <field name="domain_partner_ids" invisible="True"/>
                             <field name="partner_id" domain="[('id', 'in', domain_partner_ids)]" options="{'no_create':True}" string="Customer (Company)"/>
                             <field name="domain_partner_contact_ids" invisible="True"/>
-                            <field name="partner_contact_id" domain="[('id','in',domain_partner_contact_ids)]" context="{'show_title_position':True}" options="{'no_create':True}"  string="Host of CCPP (Contact)"/>
+                            <field name="partner_contact_id" domain="[('id','in',domain_partner_contact_ids)]" context="{'show_title_position':True}" options="{'no_create':True}"  attrs="{'invisible':[('is_multi_host','=',True)]}" string="Host of CCPP (Contact)"/>
+                            <field name="customer_company_id" invisible="True"/>
+                            <field name="is_show_multi_host" invisible="True"/>
+                            <field name="is_multi_host" attrs="{'invisible': [('is_show_multi_host','=',False)]}"/>
+                            <field name="department_ids" widget="many2many_tags" attrs="{'invisible': [('is_multi_host','=',False)]}" options="{'no_create':True}" domain="[('company_id','=',customer_company_id)]"/>
                             <field name="department_id" invisible="True"/> 
                             <field name="division_id" invisible="True"/>
                             <field name="domain_job_ids" invisible="True"/>
@@ -309,7 +314,7 @@
                 <field name="check_step" invisible="True"/>
                 <div style="padding: 10px;margin-top: 30px;">
                     <button name="button_back_step" type="object" class="btn-primary m-1 btn-width-create-ccpp" string="Back" attrs="{'invisible': [('check_step', 'not in', ['2','3'])]}"/>
-                    <button name="button_next_step" type="object" class="btn-primary m-1 btn-width-create-ccpp" string="Next" attrs="{'invisible': [('is_critical', '=', False)]}"/>
+                    <button name="button_next_step" type="object" class="btn-primary m-1 btn-width-create-ccpp" string="Next" attrs="{'invisible': [('is_critical', '=', False),('is_not_critical', '=', False)]}"/>
                     <button name="button_back_to_list" type="object" class="btn-outline-primary m-1" string="Back To List" attrs="{'invisible': [('check_step', 'in', ['1']),('name','=',False)]}"/> 
                 </div>
                 </sheet>
@@ -336,7 +341,11 @@
                             <field name="domain_partner_ids" invisible="True"/>
                             <field name="partner_id" domain="[('id', 'in', domain_partner_ids)]" options="{'no_create':True}" string="Customer (Company)"/>
                             <field name="domain_partner_contact_ids" invisible="True"/>
-                            <field name="partner_contact_id" domain="[('id','in',domain_partner_contact_ids)]" context="{'show_title_position':True}" options="{'no_create':True}" string="Host of CCPP (Contact)"/>
+                            <field name="partner_contact_id" domain="[('id','in',domain_partner_contact_ids)]" context="{'show_title_position':True}" options="{'no_create':True}" attrs="{'invisible':[('is_multi_host','=',True)]}" string="Host of CCPP (Contact)"/>
+                            <field name="customer_company_id" invisible="True"/>
+                            <field name="is_show_multi_host" invisible="True"/>
+                            <field name="is_multi_host" attrs="{'invisible': [('is_show_multi_host','=',False)]}"/>
+                            <field name="department_ids" widget="many2many_tags" attrs="{'invisible': [('is_multi_host','=',False)]}" options="{'no_create':True}" domain="[('company_id','=',customer_company_id)]"/>
                             <field name="department_id" invisible="True"/> 
                             <field name="division_id" invisible="True"/>
                             <field name="domain_job_ids" invisible="True"/>
@@ -434,7 +443,7 @@
                     <field name="check_step" invisible="True"/>
                     <field name="priority_select" invisible="True"/>
                     <button name="button_back_step" type="object" class="btn-primary m-1 btn-width-create-ccpp" string="Back" attrs="{'invisible': [('check_step', 'not in', ['2','3'])]}"/>
-                    <button name="button_next_step" type="object" class="btn-primary m-1 btn-width-create-ccpp" string="Next" attrs="{'invisible': [('priority_select', 'not in', ['1','2'])]}"/>
+                    <button name="button_next_step" type="object" class="btn-primary m-1 btn-width-create-ccpp" string="Next" attrs="{'invisible': [('priority_select', '=', 'to_define')]}"/><!--attrs="{'invisible': [('priority_select', 'not in', ['1','2'])]}"-->
                     <button name="button_back_to_list" type="object" class="btn-outline-primary m-1" string="Back To List" attrs="{'invisible': [('check_step', 'in', ['1']),('name','=',False)]}"/>
                 </div>
                 </sheet>
@@ -2250,6 +2259,11 @@
         <field name="search_view_id" ref="ccpp_search_form"/>
         <field name="domain">[('user_id','=',uid)]</field>
         <field name="target">main</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No CCPP found.
+            </p>
+        </field>
     </record>
 
     <record id="action_all_ccpp_group_by_priority_manager_all_department" model="ir.actions.act_window">
@@ -2261,6 +2275,11 @@
         <field name="search_view_id" ref="ccpp_search_form"/>
         <field name="domain">[('user_id','=',uid)]</field>
         <field name="target">main</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No CCPP found.
+            </p>
+        </field>
     </record>
 
     <record id="action_all_ccpp_group_by_priority_ceo" model="ir.actions.act_window">
@@ -2272,6 +2291,11 @@
         <field name="search_view_id" ref="ccpp_search_form"/>
         <field name="domain">[('user_id','=',uid)]</field>
         <field name="target">main</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No CCPP found.
+            </p>
+        </field>
     </record>
 
     <record id="action_all_ccpp_group_by_customer" model="ir.actions.act_window">
@@ -2283,6 +2307,11 @@
         <field name="domain">[]</field>
         <field name="context">{'search_default_groupby_customer': 1, 'show_create': '0'}</field>
         <field name="target">main</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No CCPP found.
+            </p>
+        </field>
     </record>
 
     <menuitem name="My CCPP" id="menu_my_ccpp" parent="project.menu_main_pm" action="action_my_ccpp_group_by_priority_user" sequence="1"/>
