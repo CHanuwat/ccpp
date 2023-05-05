@@ -470,7 +470,13 @@ body {
 .accounts-dashboard-wrap span#net_profit_current_months span,
 .accounts-dashboard-wrap span#net_profit_current_year span,
 .accounts-dashboard-wrap span#first_priority_year span,
-.accounts-dashboard-wrap span#first_priority_year_success span{
+.accounts-dashboard-wrap span#first_priority_year_success span,
+.accounts-dashboard-wrap span#second_priority_year span,
+.accounts-dashboard-wrap span#second_priority_year_success span,
+.accounts-dashboard-wrap span#third_priority_year span,
+.accounts-dashboard-wrap span#third_priority_year_success span,
+.accounts-dashboard-wrap span#fourth_priority_year span,
+.accounts-dashboard-wrap span#fourth_priority_year_success span {
     padding-right: 8px;
     font-size: 16px;
     font-weight: 600;
@@ -496,7 +502,13 @@ body {
 .accounts-dashboard-wrap span#net_profit_current_months,
 .accounts-dashboard-wrap span#net_profit_current_year,
 .accounts-dashboard-wrap span#first_priority_year,
-.accounts-dashboard-wrap span#first_priority_year_successs {
+.accounts-dashboard-wrap span#first_priority_year_successs,
+.accounts-dashboard-wrap span#second_priority_year,
+.accounts-dashboard-wrap span#second_priority_year_successs,
+.accounts-dashboard-wrap span#third_priority_year,
+.accounts-dashboard-wrap span#third_priority_year_successs,
+.accounts-dashboard-wrap span#fourth_priority_year,
+.accounts-dashboard-wrap span#fourth_priority_year_successs {
     display: -webkit-box;
     display: -webkit-flex;
     display: flex;

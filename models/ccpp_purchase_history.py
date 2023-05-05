@@ -261,47 +261,47 @@ class CCPPPurchaseHistory(models.Model):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_purchase_history_action')
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
         history_ids = self.env['ccpp.purchase.history'].search([
-                                                                ('job_id', '=', employee_id.job_id.id),
+                                                                ('job_id', 'in', employee_id.job_lines.ids),
                                                                 ('company_id', 'in', company_ids),
                                                                 ])
         action['domain'] = [('id','in',history_ids.ids)]
         return action
 
-    def action_purchase_history_manager(self):
-        self = self.sudo()
-        company_ids = self._context.get('allowed_company_ids')
-        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_purchase_history_action')
-        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-        job_ids = self.get_child_job(employee_id.job_lines)
-        history_ids = self.env['ccpp.purchase.history'].search([
-                                                                ('job_id', 'in', job_ids.ids),
-                                                                ('company_id', 'in', company_ids),
-                                                                ])
-        action['domain'] = [('id','in',history_ids.ids)]
-        return action
+    # def action_purchase_history_manager(self):
+    #     self = self.sudo()
+    #     company_ids = self._context.get('allowed_company_ids')
+    #     action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_purchase_history_action')
+    #     employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+    #     job_ids = self.get_child_job(employee_id.job_lines)
+    #     history_ids = self.env['ccpp.purchase.history'].search([
+    #                                                             ('job_id', 'in', job_ids.ids),
+    #                                                             ('company_id', 'in', company_ids),
+    #                                                             ])
+    #     action['domain'] = [('id','in',history_ids.ids)]
+    #     return action
     
-    def action_purchase_history_manager_all_department(self):
-        self = self.sudo()
-        company_ids = self._context.get('allowed_company_ids')
-        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_purchase_history_action')
-        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-        history_ids = self.env['ccpp.purchase.history'].search([
-                                                                ('department_id', '=', employee_id.department_id.id),
-                                                                ('company_id', 'in', company_ids),
-                                                                ])
-        action['domain'] = [('id','in',history_ids.ids)]
-        return action
+    # def action_purchase_history_manager_all_department(self):
+    #     self = self.sudo()
+    #     company_ids = self._context.get('allowed_company_ids')
+    #     action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_purchase_history_action')
+    #     employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+    #     history_ids = self.env['ccpp.purchase.history'].search([
+    #                                                             ('department_id', '=', employee_id.department_id.id),
+    #                                                             ('company_id', 'in', company_ids),
+    #                                                             ])
+    #     action['domain'] = [('id','in',history_ids.ids)]
+    #     return action
     
-    def action_purchase_history_ceo(self):
-        self = self.sudo()
-        company_ids = self._context.get('allowed_company_ids')
-        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_purchase_history_action')
-        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-        history_ids = self.env['ccpp.purchase.history'].search([
-                                                                ('company_id', 'in', company_ids),
-                                                                ])
-        action['domain'] = [('id','in',history_ids.ids)]
-        return action
+    # def action_purchase_history_ceo(self):
+    #     self = self.sudo()
+    #     company_ids = self._context.get('allowed_company_ids')
+    #     action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_purchase_history_action')
+    #     employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+    #     history_ids = self.env['ccpp.purchase.history'].search([
+    #                                                             ('company_id', 'in', company_ids),
+    #                                                             ])
+    #     action['domain'] = [('id','in',history_ids.ids)]
+    #     return action
     
     def get_child_job(self,job_lines,job_ids=False):
         if not job_ids:
@@ -444,46 +444,46 @@ class CCPPPurchaseHistoryDetailLine(models.Model):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_purchase_history_detail_line_action')
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
         history_ids = self.env['ccpp.purchase.history.detail.line'].search([
-                                                                ('job_id', '=', employee_id.job_id.id),
+                                                                ('job_id', 'in', employee_id.job_lines.ids),
                                                                 ('company_id', 'in', company_ids),
                                                                 ])
         action['domain'] = [('id','in',history_ids.ids)]
         return action
 
-    def action_purchase_history_detail_line_manager(self):
-        self = self.sudo()
-        company_ids = self._context.get('allowed_company_ids')
-        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_purchase_history_detail_line_action')
-        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-        job_ids = self.get_child_job(employee_id.job_lines)
-        history_ids = self.env['ccpp.purchase.history.detail.line'].search([
-                                                                ('job_id', 'in', job_ids.ids),
-                                                                ('company_id', 'in', company_ids),
-                                                                ])
-        action['domain'] = [('id','in',history_ids.ids)]
-        return action
+    # def action_purchase_history_detail_line_manager(self):
+    #     self = self.sudo()
+    #     company_ids = self._context.get('allowed_company_ids')
+    #     action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_purchase_history_detail_line_action')
+    #     employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+    #     job_ids = self.get_child_job(employee_id.job_lines)
+    #     history_ids = self.env['ccpp.purchase.history.detail.line'].search([
+    #                                                             ('job_id', 'in', job_ids.ids),
+    #                                                             ('company_id', 'in', company_ids),
+    #                                                             ])
+    #     action['domain'] = [('id','in',history_ids.ids)]
+    #     return action
     
-    def action_purchase_history_detail_line_manager_all_department(self):
-        self = self.sudo()
-        company_ids = self._context.get('allowed_company_ids')
-        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_purchase_history_detail_line_action')
-        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-        history_ids = self.env['ccpp.purchase.history.detail.line'].search([
-                                                                ('department_id', '=', employee_id.department_id.id),
-                                                                ('company_id', 'in', company_ids),
-                                                                ])
-        action['domain'] = [('id','in',history_ids.ids)]
-        return action
+    # def action_purchase_history_detail_line_manager_all_department(self):
+    #     self = self.sudo()
+    #     company_ids = self._context.get('allowed_company_ids')
+    #     action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_purchase_history_detail_line_action')
+    #     employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+    #     history_ids = self.env['ccpp.purchase.history.detail.line'].search([
+    #                                                             ('department_id', '=', employee_id.department_id.id),
+    #                                                             ('company_id', 'in', company_ids),
+    #                                                             ])
+    #     action['domain'] = [('id','in',history_ids.ids)]
+    #     return action
     
-    def action_purchase_history_detail_line_ceo(self):
-        self = self.sudo()
-        company_ids = self._context.get('allowed_company_ids')
-        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_purchase_history_detail_line_action')
-        history_ids = self.env['ccpp.purchase.history.detail.line'].search([
-                                                                ('company_id', 'in', company_ids),
-                                                                ])
-        action['domain'] = [('id','in',history_ids.ids)]
-        return action
+    # def action_purchase_history_detail_line_ceo(self):
+    #     self = self.sudo()
+    #     company_ids = self._context.get('allowed_company_ids')
+    #     action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_purchase_history_detail_line_action')
+    #     history_ids = self.env['ccpp.purchase.history.detail.line'].search([
+    #                                                             ('company_id', 'in', company_ids),
+    #                                                             ])
+    #     action['domain'] = [('id','in',history_ids.ids)]
+    #     return action
     
     def get_child_job(self,job_lines,job_ids=False):
         if not job_ids:

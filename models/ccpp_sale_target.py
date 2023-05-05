@@ -259,43 +259,43 @@ class CCPPSaleTarget(models.Model):
                                                             ('company_id', 'in', company_ids),
                                                             ])
         action['domain'] = [('id','in',sale_target_ids.ids)]
-        return action   
+        return action
          
-    def action_sale_target_manager(self):
-        self = self.sudo()
-        company_ids = self._context.get('allowed_company_ids')
-        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_sale_target_action')
-        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-        job_ids = self.get_child_job(employee_id.job_lines)
-        sale_target_ids = self.env['ccpp.sale.target'].search([
-                                                            ('job_id', 'in', job_ids.ids),
-                                                            ('company_id', 'in', company_ids),
-                                                            ])
-        action['domain'] = [('id','in',sale_target_ids.ids)]
-        return action
+    # def action_sale_target_manager(self):
+    #     self = self.sudo()
+    #     company_ids = self._context.get('allowed_company_ids')
+    #     action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_sale_target_action')
+    #     employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+    #     job_ids = self.get_child_job(employee_id.job_lines)
+    #     sale_target_ids = self.env['ccpp.sale.target'].search([
+    #                                                         ('job_id', 'in', job_ids.ids),
+    #                                                         ('company_id', 'in', company_ids),
+    #                                                         ])
+    #     action['domain'] = [('id','in',sale_target_ids.ids)]
+    #     return action
     
-    def action_sale_target_manager_all_department(self):
-        self = self.sudo()
-        company_ids = self._context.get('allowed_company_ids')
-        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_sale_target_action')
-        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-        sale_target_ids = self.env['ccpp.sale.target'].search([
-                                                            ('department_id', '=', employee_id.department_id.id),
-                                                            ('company_id', 'in', company_ids),
-                                                            ])
-        action['domain'] = [('id','in',sale_target_ids.ids)]
-        return action
+    # def action_sale_target_manager_all_department(self):
+    #     self = self.sudo()
+    #     company_ids = self._context.get('allowed_company_ids')
+    #     action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_sale_target_action')
+    #     employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+    #     sale_target_ids = self.env['ccpp.sale.target'].search([
+    #                                                         ('department_id', '=', employee_id.department_id.id),
+    #                                                         ('company_id', 'in', company_ids),
+    #                                                         ])
+    #     action['domain'] = [('id','in',sale_target_ids.ids)]
+    #     return action
     
-    def action_sale_target_ceo(self):
-        self = self.sudo()
-        company_ids = self._context.get('allowed_company_ids')
-        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_sale_target_action')
-        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-        sale_target_ids = self.env['ccpp.sale.target'].search([
-                                                            ('company_id', 'in', company_ids),
-                                                            ])
-        action['domain'] = [('id','in',sale_target_ids.ids)]
-        return action
+    # def action_sale_target_ceo(self):
+    #     self = self.sudo()
+    #     company_ids = self._context.get('allowed_company_ids')
+    #     action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_sale_target_action')
+    #     employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+    #     sale_target_ids = self.env['ccpp.sale.target'].search([
+    #                                                         ('company_id', 'in', company_ids),
+    #                                                         ])
+    #     action['domain'] = [('id','in',sale_target_ids.ids)]
+    #     return action
     
     def get_child_job(self,job_lines,job_ids=False):
         if not job_ids:

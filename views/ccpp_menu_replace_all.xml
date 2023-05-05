@@ -92,8 +92,8 @@
     </record>
 
     <!-- Sales -->
-    <record model="ir.ui.menu" id="sale.sale_menu_root">
+    <!--<record model="ir.ui.menu" id="sale.sale_menu_root">
         <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
-    </record>
+    </record>-->
 
 </odoo>

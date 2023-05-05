@@ -543,8 +543,9 @@ class RockerTimesheet(models.Model):
         for obj in self:           
             domain = []
             ccpp_ids = self.env['project.project']
+            employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
             if obj.customer_id:
-                domain = [('user_id','=',self.env.user.id),('state','=','process')]
+                domain = [('job_ids','in',[job.id for job in employee_id.job_lines]),('state','=','process')]
                 domain.append(('partner_id','=',obj.customer_id.id))
                 if obj.priority_id:
                     domain.append(('priority_id','=',obj.priority_id.id))
@@ -580,16 +581,16 @@ class RockerTimesheet(models.Model):
             #    customer_ids = self.env['project.project'].search([('user_id','=',self.env.user.id),
             #                                                       ('state','=','process')]).mapped('partner_id')
             if obj.is_go_ccpp_customer and obj.priority_id:
-                customer_ids = self.env['project.project'].search([('job_id','=',employee_id.job_id.id),
+                customer_ids = self.env['project.project'].search([('job_ids','in', [job.id for job in employee_id.job_lines]),
                                                                    ('state','=','process'),
                                                                    ('priority_id','=',obj.priority_id.id)]).mapped('partner_id')
             if obj.is_go_potential:
                 year = str(datetime.now().year)
-                customer_ids = self.env['ccpp.customer.information'].search([('job_id','=',employee_id.job_id.id),
+                customer_ids = self.env['ccpp.customer.information'].search([('job_id','in', employee_id.job_lines.ids),
                                                                              ('active','=',True),
                                                                              ('year_selection','=',year),
                                                                              ('type','in',['customer','external'])], order="potential_ranking").mapped('customer_id')
-                customer_ids |= self.env['ccpp.customer.information'].search([('job_id','=',employee_id.job_id.id),
+                customer_ids |= self.env['ccpp.customer.information'].search([('job_id','in', employee_id.job_lines.ids),
                                                                              ('active','=',True),
                                                                              ('year_selection','=',year),
                                                                              ('type','in',['internal'])], order="potential_ranking").mapped('partner_id')
@@ -869,7 +870,11 @@ class RockerTimesheet(models.Model):
                 
             if 'start' in vals and vals['start'] != str(self.start):
                 start = vals['start']
-                start_show = datetime.strptime(start,"%Y-%m-%d %H:%M:%S") + timedelta(hours=7)
+                try:
+                    start_show = datetime.strptime(start,"%Y-%m-%d %H:%M:%S") + timedelta(hours=7)
+                except:
+                    start = start + ' 00:00:00'
+                    start_show = datetime.strptime(start,"%Y-%m-%d %H:%M:%S") + timedelta(hours=7)
                 start_show = start_show.strftime("%d-%m-%Y %H:%M:%S")
                 log_text += 'From From : %s \n'%((self.start + timedelta(hours=7)).strftime("%d-%m-%Y %H:%M:%S"))
                 log_text += 'To From      : %s \n'%(start_show)
@@ -878,7 +883,11 @@ class RockerTimesheet(models.Model):
                 
             if 'stop' in vals and vals['stop'] != str(self.stop):
                 stop = vals['stop']
-                stop_show = datetime.strptime(stop,"%Y-%m-%d %H:%M:%S") + timedelta(hours=7)
+                try:
+                    stop_show = datetime.strptime(stop,"%Y-%m-%d %H:%M:%S") + timedelta(hours=7)
+                except:
+                    stop = stop + ' 00:00:00'
+                    stop_show = datetime.strptime(stop,"%Y-%m-%d %H:%M:%S") + timedelta(hours=7)
                 stop_show = stop_show.strftime("%d-%m-%Y %H:%M:%S")
                 log_text += 'From To : %s \n'%((self.stop + timedelta(hours=7)).strftime("%d-%m-%Y %H:%M:%S"))
                 log_text += 'To To      : %s \n'%(stop_show)
@@ -1291,11 +1300,11 @@ class RockerTimesheet(models.Model):
         
         task = self.env['account.analytic.line']
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-        if employee_id.job_id:
-            result['today'] = task.search_count([('stop', '>=', today_start),('stop', '<=', today_stop),('job_id', '=', employee_id.job_id.id)])
-            result['this_week'] = task.search_count([('stop', '>=', week_start),('stop', '<=', week_stop),('job_id', '=', employee_id.job_id.id)])
-            result['this_month'] = task.search_count([('stop', '>=', month_start),('stop', '<', month_stop),('job_id', '=', employee_id.job_id.id)])
-            result['all'] = task.search_count([('job_id', '=', employee_id.job_id.id)])
+        if employee_id.job_lines:
+            result['today'] = task.search_count([('stop', '>=', today_start),('stop', '<=', today_stop),('job_id', 'in', employee_id.job_lines.ids)])
+            result['this_week'] = task.search_count([('stop', '>=', week_start),('stop', '<=', week_stop),('job_id', 'in', employee_id.job_lines.ids)])
+            result['this_month'] = task.search_count([('stop', '>=', month_start),('stop', '<', month_stop),('job_id', 'in', employee_id.job_lines.ids)])
+            result['all'] = task.search_count([('job_id', 'in', employee_id.job_lines.ids)])
         return result
     
     @api.depends('state')

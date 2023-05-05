@@ -22,6 +22,7 @@ class Approval(models.Model):
     domain_job_request_ids = fields.Many2many("hr.job", "hr_job_request_approval_rel", "apporve_id", "job_request_id", string="Doamin Job Request", compute="_compute_domain_job_request_ids")
     all_approve_ids = fields.Many2many("hr.job", "hr_job_approver_approval_rel", "apporve_line_id", "job_approve_id", string="All Approve", compute="_compute_all_approve", store="True")
     lines = fields.One2many("approval.line", "approve_id", string="Lines")
+    active = fields.Boolean('Active', default=True)
     
     _sql_constraints = [
         ('model_department_job_uniq', 'unique(model_id, department_id, job_request_id)', 'The code of the job position must be unique in company!'),
@@ -83,5 +84,11 @@ class ApprovalLine(models.Model):
             if obj.job_approve_ids:
                 user_approve_ids = self.env['hr.job'].browse(obj.job_approve_ids.ids).mapped('employee_id')
             obj.user_approve_ids = user_approve_ids
-    
-    
+            
+    def unlink(self):
+        for obj in self:
+            ccpp_approve_line = self.env['ccpp.approve.line'].search([('approve_line_id','=',obj.id)])
+            if ccpp_approve_line:
+                raise UserError("ไม่สามารถลบ line นี้ได้เนื่องจากมีการนำไปใช้งานแล้ว กรุณา achieved แทน")
+        res = super().unlink()
+        return res

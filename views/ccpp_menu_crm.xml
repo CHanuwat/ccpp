@@ -65,7 +65,7 @@
         id="ccpp_crm_sale_target_manager"
         name="Sales Target"
         parent="crm.crm_menu_root"
-        action="ccpp_sale_target_action_manager"
+        action="ccpp_sale_target_action"
         sequence="2"
         groups="ccpp.group_ccpp_frontoffice_manager"
     />
@@ -74,7 +74,7 @@
         id="ccpp_crm_sale_target_manager_all_department"
         name="Sales Target"
         parent="crm.crm_menu_root"
-        action="ccpp_sale_target_action_manager_all_department"
+        action="ccpp_sale_target_action"
         sequence="2"
         groups="ccpp.group_ccpp_frontoffice_manager_all_department"
     />
@@ -83,7 +83,7 @@
         id="ccpp_crm_sale_target_ceo"
         name="Sales Target"
         parent="crm.crm_menu_root"
-        action="ccpp_sale_target_action_ceo"
+        action="ccpp_sale_target_action"
         sequence="2"
         groups="ccpp.group_ccpp_ceo"
     />
@@ -110,7 +110,7 @@
         id="ccpp_crm_purchase_history_manager"
         name="Customer Purchase History"
         parent="ccpp_purchase_history"
-        action="ccpp_purchase_history_action_manager"
+        action="ccpp_purchase_history_action"
         sequence="1"
         groups="ccpp.group_ccpp_frontoffice_manager"
     />
@@ -119,7 +119,7 @@
         id="ccpp_crm_purchase_history_manager_all_department"
         name="Customer Purchase History"
         parent="ccpp_purchase_history"
-        action="ccpp_purchase_history_action_manager_all_department"
+        action="ccpp_purchase_history_action"
         sequence="1"
         groups="ccpp.group_ccpp_frontoffice_manager_all_department"
     />
@@ -128,7 +128,7 @@
         id="ccpp_crm_purchase_history_ceo"
         name="Customer Purchase History"
         parent="ccpp_purchase_history"
-        action="ccpp_purchase_history_action_ceo"
+        action="ccpp_purchase_history_action"
         sequence="1"
         groups="ccpp.group_ccpp_ceo"
     />
@@ -146,7 +146,7 @@
         id="ccpp_crm_purchase_history_detail_line_manager"
         name="Purchase History Detail"
         parent="ccpp_purchase_history"
-        action="ccpp_purchase_history_detail_line_action_manager"
+        action="ccpp_purchase_history_detail_line_action"
         sequence="2"
         groups="ccpp.group_ccpp_frontoffice_manager"
     />
@@ -155,7 +155,7 @@
         id="ccpp_crm_purchase_history_detail_line_manager_all_department"
         name="Purchase History Detail"
         parent="ccpp_purchase_history"
-        action="ccpp_purchase_history_detail_line_action_manager_all_department"
+        action="ccpp_purchase_history_detail_line_action"
         sequence="2"
         groups="ccpp.group_ccpp_frontoffice_manager_all_department"
     />
@@ -164,7 +164,7 @@
         id="ccpp_crm_purchase_history_detail_line_ceo"
         name="Purchase History Detail"
         parent="ccpp_purchase_history"
-        action="ccpp_purchase_history_detail_line_action_ceo"
+        action="ccpp_purchase_history_detail_line_action"
         sequence="2"
         groups="ccpp.group_ccpp_ceo"
     />

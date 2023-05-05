@@ -52,9 +52,9 @@
                 <attribute name="readonly">True</attribute>
                 <attribute name="options">{'no_open': True}</attribute>
             </xpath>
-            <xpath expr="//field[@name='expense_manager_id']" position='attributes'>
+            <!--<xpath expr="//field[@name='expense_manager_id']" position='attributes'>
                 <attribute name="readonly">True</attribute>
-            </xpath>
+            </xpath>-->
             <xpath expr="//field[@name='leave_manager_id']" position='attributes'>
                 <attribute name="readonly">True</attribute>
             </xpath>

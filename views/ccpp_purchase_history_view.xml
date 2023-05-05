@@ -181,7 +181,7 @@
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">ccpp.purchase.history</field>
         <field name="context">{'search_default_customer': 1}</field>
-        <!--<field name="domain">[('user_id', '=', uid)]</field>-->
+        <field name="domain"></field>
         <field name="view_mode">tree,form</field>
     </record>
 
@@ -249,7 +249,7 @@
         <field name="code">action = model.action_purchase_history_user()</field>
     </record>
 
-    <record id="ccpp_purchase_history_action_manager" model="ir.actions.server">
+    <!--<record id="ccpp_purchase_history_action_manager" model="ir.actions.server">
         <field name="name">Purchase History</field>
         <field name="model_id" ref="model_ccpp_purchase_history"/>
         <field name="type">ir.actions.server</field>
@@ -271,7 +271,7 @@
         <field name="type">ir.actions.server</field>
         <field name="state">code</field>
         <field name="code">action = model.action_purchase_history_ceo()</field>
-    </record>
+    </record>-->
 
     <!--<menuitem id="menu_ccpp_purchase_history" name="Customer Purchase History" parent="crm.crm_menu_sales" action="ccpp_purchase_history_action" sequence="103"/>-->
     <!--<menuitem id="menu_ccpp_purchase_history_by_prodecy" name="Customer Purchase History 2" parent="crm.crm_menu_sales" action="ccpp_purchase_history_action_by_product" sequence="103"/>-->
@@ -354,7 +354,7 @@
         <field name="code">action = model.action_purchase_history_detail_line_user()</field>
     </record>
 
-    <record id="ccpp_purchase_history_detail_line_action_manager" model="ir.actions.server">
+    <!--<record id="ccpp_purchase_history_detail_line_action_manager" model="ir.actions.server">
         <field name="name">Purchase History Detail</field>
         <field name="model_id" ref="model_ccpp_purchase_history_detail_line"/>
         <field name="type">ir.actions.server</field>
@@ -376,6 +376,6 @@
         <field name="type">ir.actions.server</field>
         <field name="state">code</field>
         <field name="code">action = model.action_purchase_history_detail_line_ceo()</field>
-    </record>
+    </record>-->
 
 </odoo>

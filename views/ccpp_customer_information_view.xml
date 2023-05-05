@@ -279,7 +279,7 @@
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">ccpp.customer.information</field>
         <field name="view_mode">tree,form</field>
-        <field name="domain">[('type','=','customer'),('user_id', '=', uid)]</field>
+        <field name="domain">[('type','=','customer')]</field>
         <field name="context">{'default_type': 'customer', 'seasrch_default_groupby_year': 1}</field>
         <field name="help" type="html">
             <p></p>
@@ -418,7 +418,7 @@
         <field name="view_mode">tree,form</field>
         <field name="search_view_id" ref="ccpp_internal_information_search"/>
         <field name="view_id" ref="ccpp_internal_information_view_tree"/>
-        <field name="domain">[('type','=','internal'),('user_id', '=', uid)]</field>
+        <field name="domain">[('type','=','internal')]</field>
         <field name="context">{'default_type': 'internal', 'search_default_groupby_year': 1, 'default_my_company': True}</field>
         <field name="target">main</field>
         <field name="help" type="html">
@@ -588,7 +588,7 @@
         <field name="view_mode">tree,form</field>
         <field name="search_view_id" ref="ccpp_external_information_search"/>
         <field name="view_id" ref="ccpp_external_information_view_tree"/>
-        <field name="domain">[('type','=','external'),('user_id', '=', uid)]</field>
+        <field name="domain">[('type','=','external')]</field>
         <field name="context">{'default_type': 'external', 'search_default_groupby_year': 1}</field>
         <field name="target">main</field>
         <field name="help" type="html">
@@ -612,7 +612,15 @@
 
     <!--<menuitem id="menu_ccpp_customer_information" name="Customer Information" parent="crm.crm_menu_sales" action="ccpp_customer_information_action" sequence="101"/>-->
     
-    <record id="ccpp_customer_information_action_manager" model="ir.actions.server">
+    <record id="ccpp_customer_information_action_user" model="ir.actions.server">
+        <field name="name">Internal Information</field>
+        <field name="model_id" ref="model_ccpp_customer_information"/>
+        <field name="type">ir.actions.server</field>
+        <field name="state">code</field>
+        <field name="code">action = model.action_customer_information_user()</field>
+    </record>
+
+    <!--<record id="ccpp_customer_information_action_manager" model="ir.actions.server">
         <field name="name">Internal Information</field>
         <field name="model_id" ref="model_ccpp_customer_information"/>
         <field name="type">ir.actions.server</field>
@@ -634,7 +642,7 @@
         <field name="type">ir.actions.server</field>
         <field name="state">code</field>
         <field name="code">action = model.action_customer_information_ceo()</field>
-    </record>
+    </record>-->
 
     <record id="ccpp_internal_information_action_user" model="ir.actions.server">
         <field name="name">Internal Information</field>
@@ -644,7 +652,7 @@
         <field name="code">action = model.action_internal_information_user()</field>
     </record>
 
-    <record id="ccpp_internal_information_action_manager" model="ir.actions.server">
+    <!--<record id="ccpp_internal_information_action_manager" model="ir.actions.server">
         <field name="name">Internal Information</field>
         <field name="model_id" ref="model_ccpp_customer_information"/>
         <field name="type">ir.actions.server</field>
@@ -666,7 +674,7 @@
         <field name="type">ir.actions.server</field>
         <field name="state">code</field>
         <field name="code">action = model.action_internal_information_ceo()</field>
-    </record>
+    </record>-->
 
     <record id="ccpp_external_information_action_user" model="ir.actions.server">
         <field name="name">Internal Information</field>
@@ -676,7 +684,7 @@
         <field name="code">action = model.action_external_information_user()</field>
     </record>
 
-    <record id="ccpp_external_information_action_manager" model="ir.actions.server">
+    <!--<record id="ccpp_external_information_action_manager" model="ir.actions.server">
         <field name="name">External Information</field>
         <field name="model_id" ref="model_ccpp_customer_information"/>
         <field name="type">ir.actions.server</field>
@@ -698,6 +706,6 @@
         <field name="type">ir.actions.server</field>
         <field name="state">code</field>
         <field name="code">action = model.action_external_information_ceo()</field>
-    </record>
+    </record>-->
 
 </odoo>

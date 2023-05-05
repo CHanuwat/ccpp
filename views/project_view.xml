@@ -828,6 +828,14 @@
                         </tree>
                     </field>
                 </page>
+                <page name="ccpp_team" string="CCPP Team">
+                    <field name="job_ids" options="{'no_create_edit':True}">
+                        <tree>
+                            <field name="employee_id" string="User" widget="many2one_avatar_user"/>
+                            <field name="name" string="Job Position"/>
+                        </tree>
+                    </field>
+                </page>
             </xpath>
 
             <xpath expr="//form[1]/sheet[1]/notebook[1]/page[1]" position="before">
@@ -2032,7 +2040,7 @@
         </field>
     </record>
 
-    <record id="action_all_ccpp_group_by_priority_manager" model="ir.actions.server">
+    <!--<record id="action_all_ccpp_group_by_priority_manager" model="ir.actions.server">
         <field name="name">All CCPP</field>
         <field name="model_id" ref="model_project_project"/>
         <field name="type">ir.actions.server</field>
@@ -2054,7 +2062,7 @@
         <field name="type">ir.actions.server</field>
         <field name="state">code</field>
         <field name="code">action = model.action_ccpp_department_group_by_priority_ceo()</field>
-    </record>
+    </record>-->
 
     <record id="action_my_ccpp_group_by_priority_user" model="ir.actions.server">
         <field name="name">My CCPP</field>
@@ -2257,7 +2265,7 @@
         <field name="context">{'search_default_groupby_priority': 0, 'show_create': '0', 'all_ccpp': True, }</field>
         <field name="view_id" ref="ccpp.ccpp_report_tree_hide_create_view"/>
         <field name="search_view_id" ref="ccpp_search_form"/>
-        <field name="domain">[('user_id','=',uid)]</field>
+        <field name="domain"></field>
         <field name="target">main</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
@@ -2273,7 +2281,7 @@
         <field name="context">{'search_default_groupby_priority': 0, 'show_create': '0', 'all_ccpp': True, }</field>
         <field name="view_id" ref="ccpp.ccpp_report_tree_hide_create_view_manager_all_department"/>
         <field name="search_view_id" ref="ccpp_search_form"/>
-        <field name="domain">[('user_id','=',uid)]</field>
+        <field name="domain"></field>
         <field name="target">main</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
@@ -2289,7 +2297,7 @@
         <field name="context">{'search_default_groupby_priority': 0, 'show_create': '0', 'all_ccpp': True, }</field>
         <field name="view_id" ref="ccpp.ccpp_report_tree_hide_create_view_ceo"/>
         <field name="search_view_id" ref="ccpp_search_form"/>
-        <field name="domain">[('user_id','=',uid)]</field>
+        <field name="domain"></field>
         <field name="target">main</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
@@ -2327,13 +2335,13 @@
 
         <menuitem name="All CCPP Group by Customer" id="menu_all_ccpp_group_by_customer_user" parent="menu_all_ccpp_user" action="action_all_ccpp_group_by_customer_user" sequence="2" />-->
 
-    <menuitem name="All CCPP" id="menu_all_ccpp_manager" groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager" action="action_all_ccpp_group_by_priority_manager" parent="project.menu_main_pm" sequence="2"/>
+    <menuitem name="All CCPP" id="menu_all_ccpp_manager" groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager" action="action_all_ccpp_group_by_priority" parent="project.menu_main_pm" sequence="2"/>
 
-    <menuitem name="All CCPP" id="menu_all_ccpp_manager_all_department" groups="ccpp.group_ccpp_backoffice_manager_all_department,ccpp.group_ccpp_frontoffice_manager_all_department" action="action_all_ccpp_group_by_priority_manager_all_department_code" parent="project.menu_main_pm" sequence="3"/>
+    <menuitem name="All CCPP" id="menu_all_ccpp_manager_all_department" groups="ccpp.group_ccpp_backoffice_manager_all_department,ccpp.group_ccpp_frontoffice_manager_all_department" action="action_all_ccpp_group_by_priority_manager_all_department" parent="project.menu_main_pm" sequence="3"/>
 
-    <menuitem name="All CCPP" id="menu_all_ccpp_manager_ceo" groups="ccpp.group_ccpp_ceo" action="action_all_ccpp_group_by_priority_ceo_code" parent="project.menu_main_pm" sequence="4"/>
+    <menuitem name="All CCPP" id="menu_all_ccpp_manager_ceo" groups="ccpp.group_ccpp_ceo" action="action_all_ccpp_group_by_priority_ceo" parent="project.menu_main_pm" sequence="4"/>
 
-    <!--<menuitem name="CCPP Dashboard" id="menu_ccpp_dashboard" action="action_ccpp_dashboard" parent="project.menu_main_pm" sequence="5"/>-->
+    <!--<menuitem name="CCPP Dashboard" id="menu_ccpp_dashboard" action="action_my_ccpp_group_by_priority" parent="project.menu_main_pm" sequence="5"/>-->
 
 
         <!--<menuitem name="All CCPP Group by Priority" id="menu_all_ccpp_group_by_priority_manager" parent="menu_all_ccpp_manager" action="action_all_ccpp_group_by_priority_manager" sequence="1"/>

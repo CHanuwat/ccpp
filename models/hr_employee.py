@@ -78,3 +78,12 @@ class HrEmployeePrivate(models.Model):
         res = super(HrEmployeePrivate, self).write(vals)
         return res
 
+# class HrExpense(models.Model):
+#     _inherit = "hr.expense"
+    
+#     @api.model
+#     def _default_employee_id(self):
+#         employee = self.env.user.employee_id
+#         #if not employee and not self.env.user.has_group('hr_expense.group_hr_expense_team_approver'):
+#             #raise ValidationError(_('The current user has no related employee. Please, create one.'))
+#         return employee

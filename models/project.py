@@ -56,6 +56,10 @@ class Project(models.Model):
         #    print(self.env.user.name)
         #    raise UserError("Not recognize the Employee. Please Configure User to Employee to get the job")
         return employee_id.job_id
+    
+    def _get_default_job_ids(self):
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        return employee_id.job_id
 
     # def _get_default_sale_team(self):
     #     print("x*50"+"pass pass pass")
@@ -71,7 +75,8 @@ class Project(models.Model):
     department_id = fields.Many2one("hr.department",string="Department", related="employee_id.department_id", store=True, track_visibility="onchange")
     division_id = fields.Many2one("hr.department",string="Division", related="employee_id.division_id", store=True, track_visibility="onchange")
     employee_id = fields.Many2one("hr.employee", string="User", related="job_id.employee_id", store=True, track_visibility="onchange")
-    job_id = fields.Many2one("hr.job", string="Job Position", default=_get_default_job, required=True, track_visibility="onchange")#default=_get_default_job,     
+    job_id = fields.Many2one("hr.job", string="Job Position", default=_get_default_job, required=True, track_visibility="onchange")#default=_get_default_job, 
+    job_ids = fields.Many2many("hr.job", "ccpp_hr_job_rel", "ccpp_id", "job_id", string="CCPP Team", default=_get_default_job_ids, track_visibility="onchange", required=True)
     domain_job_ids = fields.Many2many("hr.job", string="Domain Job", compute="_compute_domain_job_ids")
     priority_id = fields.Many2one("ccpp.priority", string="CCPP Priority", compute="_get_priority", store=True, track_visibility="onchange")
     priority_select = fields.Selection([
@@ -903,10 +908,15 @@ class Project(models.Model):
                     strategy_id.delay_date = date_today
                         
     def run_script_update(self):
-        approve_ids = self.env['approval'].search([])
-        for approve_id in approve_ids:
-            if approve_id.job_request_id:
-                approve_id.write({'job_request_ids': [approve_id.job_request_id.id] })
+        ccpp_ids = self.env['project.project'].search([])
+        print(ccpp_ids)
+        for ccpp_id in ccpp_ids:
+            ccpp_id.write({'job_ids': [ccpp_id.job_id.id] })
+        
+        # approve_ids = self.env['approval'].search([])
+        # for approve_id in approve_ids:
+        #     if approve_id.job_request_id:
+        #         approve_id.write({'job_request_ids': [approve_id.job_request_id.id] })
         
         #employee_ids = self.env['hr.employee'].search([])
         #for employee_id in employee_ids:
@@ -1026,6 +1036,8 @@ class Project(models.Model):
                                                         ('company_id', 'in', company_ids)
                                                        ])
         action['domain'] = [('id','in',ccpp_ids.ids)]
+        print("X*"*100)
+        print(self.env.user.employee_id)
         return action
         
     def action_ccpp_department_group_by_customer_manager(self):
@@ -1041,7 +1053,6 @@ class Project(models.Model):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.action_my_ccpp_group_by_priority')
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
         ccpp_ids = self.env['project.project'].search([('job_id', 'in', employee_id.job_lines.ids),
-                                                       ('job_id','!=',False),
                                                        ('company_id', 'in', company_ids)])
         action['domain'] = [('id','in',ccpp_ids.ids)]
         return action
@@ -1061,12 +1072,12 @@ class Project(models.Model):
         ccpp = self.env['project.project']
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
         if employee_id.job_id:
-            result['priority_1'] = ccpp.search_count([('priority_id.point','=',1),('job_id', '=', employee_id.job_id.id)])
-            result['priority_2'] = ccpp.search_count([('priority_id.point','=',2),('job_id', '=', employee_id.job_id.id)])
-            result['priority_3'] = ccpp.search_count([('priority_id.point','=',3),('job_id', '=', employee_id.job_id.id)])
-            result['priority_4'] = ccpp.search_count([('priority_id.point','=',4),('job_id', '=', employee_id.job_id.id)])
-            result['delay'] = ccpp.search_count([('is_delay','=',True),('job_id', '=', employee_id.job_id.id)])
-            result['undefine'] = ccpp.search_count([('priority_select','=','to_define'),('job_id', '=', employee_id.job_id.id)])
+            result['priority_1'] = ccpp.search_count([('priority_id.point','=',1),('job_id', 'in', employee_id.job_lines.ids)])
+            result['priority_2'] = ccpp.search_count([('priority_id.point','=',2),('job_id', 'in', employee_id.job_lines.ids)])
+            result['priority_3'] = ccpp.search_count([('priority_id.point','=',3),('job_id', 'in', employee_id.job_lines.ids)])
+            result['priority_4'] = ccpp.search_count([('priority_id.point','=',4),('job_id', 'in', employee_id.job_lines.ids)])
+            result['delay'] = ccpp.search_count([('is_delay','=',True),('job_id', 'in', employee_id.job_lines.ids)])
+            result['undefine'] = ccpp.search_count([('priority_select','=','to_define'),('job_id', 'in', employee_id.job_lines.ids)])
         return result
         
     @api.model
@@ -1090,7 +1101,7 @@ class Project(models.Model):
         result['priority_4'] = ccpp.search_count([('priority_id.point','=',4),('job_id', 'in', job_ids.ids),('company_id','in',company_ids)])
         result['delay'] = ccpp.search_count([('is_delay','=',True),('job_id', 'in', job_ids.ids),('company_id','in',company_ids)])
         result['undefine'] = ccpp.search_count([('priority_select','=','to_define'),('job_id', 'in', job_ids.ids),('company_id','in',company_ids)])
-        
+        print(result)
         return result       
     
     @api.model
@@ -1158,7 +1169,7 @@ class Project(models.Model):
         return action
         
     @api.model
-    def get_first_priority(self,context):
+    def get_ccpp_by_priority(self,context):
         self = self.sudo()
         company_ids = self._context.get('allowed_company_ids')
         print(company_ids)
@@ -1168,65 +1179,239 @@ class Project(models.Model):
         starting_day_of_current_year = datetime.now().date().replace(month=1, day=1)
         ending_day_of_current_year = datetime.now().date().replace(month=12, day=31)
         if self.env.user.has_group('ccpp.group_ccpp_backoffice_user') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_user'):
-            this_year_success = ccpp.search_count([('job_id', '=', employee_id.job_id.id),
+            first_this_year_success = ccpp.search_count([('job_id', 'in', employee_id.job_lines.ids),
                                                    #('company_id','in', company_ids),
                                                    ('state','=','done'),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',1)])
-            this_year_all = ccpp.search_count([('job_id', '=', employee_id.job_id.id),
+            first_this_year_all = ccpp.search_count([('job_id', 'in', employee_id.job_lines.ids),
                                                    #('company_id','in', company_ids),
                                                    ('state','!=','cancel'),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',1)])
+            second_this_year_success = ccpp.search_count([('job_id', 'in', employee_id.job_lines.ids),
+                                                   #('company_id','in', company_ids),
+                                                   ('state','=','done'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',2)])
+            second_this_year_all = ccpp.search_count([('job_id', 'in', employee_id.job_lines.ids),
+                                                   #('company_id','in', company_ids),
+                                                   ('state','!=','cancel'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',2)])
+            third_this_year_success = ccpp.search_count([('job_id', 'in', employee_id.job_lines.ids),
+                                                   #('company_id','in', company_ids),
+                                                   ('state','=','done'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',3)])
+            third_this_year_all = ccpp.search_count([('job_id', 'in', employee_id.job_lines.ids),
+                                                   #('company_id','in', company_ids),
+                                                   ('state','!=','cancel'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',3)])
+            fourth_this_year_success = ccpp.search_count([('job_id', 'in', employee_id.job_lines.ids),
+                                                   #('company_id','in', company_ids),
+                                                   ('state','=','done'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',4)])
+            fourth_this_year_all = ccpp.search_count([('job_id', 'in', employee_id.job_lines.ids),
+                                                   #('company_id','in', company_ids),
+                                                   ('state','!=','cancel'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',4)])
         
         if self.env.user.has_group('ccpp.group_ccpp_backoffice_manager') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_manager'):
-            this_year_success = ccpp.search_count([('job_id', 'in', job_ids.ids),
+            first_this_year_success = ccpp.search_count([('job_id', 'in', job_ids.ids),
                                                    #('company_id','in', company_ids),
                                                    ('state','=','done'),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',1)])
-            this_year_all = ccpp.search_count([('job_id', '=', job_ids.ids),
+            first_this_year_all = ccpp.search_count([('job_id', 'in', job_ids.ids),
                                                    #('company_id','in', company_ids),
                                                    ('state','!=','cancel'),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',1)])
+            second_this_year_success = ccpp.search_count([('job_id', 'in', job_ids.ids),
+                                                   #('company_id','in', company_ids),
+                                                   ('state','=','done'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',2)])
+            second_this_year_all = ccpp.search_count([('job_id', 'in', job_ids.ids),
+                                                   #('company_id','in', company_ids),
+                                                   ('state','!=','cancel'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',2)])
+            third_this_year_success = ccpp.search_count([('job_id', 'in', job_ids.ids),
+                                                   #('company_id','in', company_ids),
+                                                   ('state','=','done'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',3)])
+            third_this_year_all = ccpp.search_count([('job_id', 'in', job_ids.ids),
+                                                   #('company_id','in', company_ids),
+                                                   ('state','!=','cancel'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',3)])
+            fourth_this_year_success = ccpp.search_count([('job_id', 'in', job_ids.ids),
+                                                   #('company_id','in', company_ids),
+                                                   ('state','=','done'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',4)])
+            fourth_this_year_all = ccpp.search_count([('job_id', 'in', job_ids.ids),
+                                                   #('company_id','in', company_ids),
+                                                   ('state','!=','cancel'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',4)])
         if self.env.user.has_group('ccpp.group_ccpp_backoffice_manager_all_department') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_manager_all_department'):
-            this_year_success = ccpp.search_count([('department_id', 'in', employee_id.department_id.id),
+            first_this_year_success = ccpp.search_count([('department_id', 'in', employee_id.department_id.id),
                                                    #('company_id','in', company_ids),
                                                    ('state','=','done'),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',1)])
-            this_year_all = ccpp.search_count([('department_id', 'in', employee_id.department_id.id),
+            first_this_year_all = ccpp.search_count([('department_id', 'in', employee_id.department_id.id),
                                                    #('company_id','in', company_ids),
                                                    ('state','!=','cancel'),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',1)])
+            second_this_year_success = ccpp.search_count([('department_id', 'in', employee_id.department_id.id),
+                                                   #('company_id','in', company_ids),
+                                                   ('state','=','done'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',2)])
+            second_this_year_all = ccpp.search_count([('department_id', 'in', employee_id.department_id.id),
+                                                   #('company_id','in', company_ids),
+                                                   ('state','!=','cancel'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',2)])
+            third_this_year_success = ccpp.search_count([('department_id', 'in', employee_id.department_id.id),
+                                                   #('company_id','in', company_ids),
+                                                   ('state','=','done'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',3)])
+            third_this_year_all = ccpp.search_count([('department_id', 'in', employee_id.department_id.id),
+                                                   #('company_id','in', company_ids),
+                                                   ('state','!=','cancel'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',3)])
+            fourth_this_year_success = ccpp.search_count([('department_id', 'in', employee_id.department_id.id),
+                                                   #('company_id','in', company_ids),
+                                                   ('state','=','done'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',4)])
+            fourth_this_year_all = ccpp.search_count([('department_id', 'in', employee_id.department_id.id),
+                                                   #('company_id','in', company_ids),
+                                                   ('state','!=','cancel'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',4)])
         if self.env.user.has_group('ccpp.group_ccpp_ceo'):
-            this_year_success = ccpp.search_count([#('company_id','in', company_ids),
+            first_this_year_success = ccpp.search_count([#('company_id','in', company_ids),
                                                    ('state','=','done'),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',1)])
-            this_year_all = ccpp.search_count([#('company_id','in', company_ids),
+            first_this_year_all = ccpp.search_count([#('company_id','in', company_ids),
                                                    ('state','!=','cancel'),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',1)])
+            second_this_year_success = ccpp.search_count([#('company_id','in', company_ids),
+                                                   ('state','=','done'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',2)])
+            second_this_year_all = ccpp.search_count([#('company_id','in', company_ids),
+                                                   ('state','!=','cancel'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',2)])
+            third_this_year_success = ccpp.search_count([#('company_id','in', company_ids),
+                                                   ('state','=','done'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',3)])
+            third_this_year_all = ccpp.search_count([#('company_id','in', company_ids),
+                                                   ('state','!=','cancel'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',3)])
+            fourth_this_year_success = ccpp.search_count([#('company_id','in', company_ids),
+                                                   ('state','=','done'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',4)])
+            fourth_this_year_all = ccpp.search_count([#('company_id','in', company_ids),
+                                                   ('state','!=','cancel'),
+                                                   ('deadline_date','>=',starting_day_of_current_year),
+                                                   ('deadline_date','<=',ending_day_of_current_year),
+                                                   ('priority_id.point','=',4)])
 
         result = {}
-        first_priority_year = str(this_year_success) + ' / ' + str(this_year_all)
-        result.update({'first_priority_year':first_priority_year})
-        if this_year_all:
-            first_priority_year_success = str("{:.2f}".format(this_year_success/this_year_all*100)) + ' %'
+        first_priority_year_success = ''
+        first_priority_year = ''
+        second_priority_year_success = ''
+        second_priority_year = ''
+        third_priority_year_success = ''
+        third_priority_year = ''
+        fourth_priority_year_success = ''
+        fourth_priority_year = ''
+        
+        first_priority_year = str(first_this_year_success) + ' / ' + str(first_this_year_all)
+        if first_this_year_all:
+            first_priority_year_success = str("{:.2f}".format(first_this_year_success/first_this_year_all*100)) + ' %'
         else:
-            first_priority_year_success = '0 %'
-        result.update({'first_priority_year_success':first_priority_year_success})
+            first_priority_year_success = '0.00 %'
+            
+        second_priority_year = str(second_this_year_success) + ' / ' + str(second_this_year_all)
+        if second_this_year_all:
+            second_priority_year_success = str("{:.2f}".format(second_this_year_success/second_this_year_all*100)) + ' %'
+        else:
+            second_priority_year_success = '0.00 %'
+            
+        third_priority_year = str(third_this_year_success) + ' / ' + str(third_this_year_all)
+        if third_this_year_all:
+            third_priority_year_success = str("{:.2f}".format(third_this_year_success/third_this_year_all*100)) + ' %'
+        else:
+            third_priority_year_success = '0.00 %'
+            
+        fourth_priority_year = str(fourth_this_year_success) + ' / ' + str(fourth_this_year_all)
+        if fourth_this_year_all:
+            fourth_priority_year_success = str("{:.2f}".format(fourth_this_year_success/fourth_this_year_all*100)) + ' %'
+        else:
+            fourth_priority_year_success = '0.00 %'
+   
+        result.update({
+                        'first_priority_year_success':first_priority_year_success,
+                        'first_priority_year':first_priority_year,
+                        'second_priority_year_success':second_priority_year_success,
+                        'second_priority_year':second_priority_year,
+                        'third_priority_year_success':third_priority_year_success,
+                        'third_priority_year':third_priority_year,
+                        'fourth_priority_year_success':fourth_priority_year_success,
+                        'fourth_priority_year':fourth_priority_year,
+                       })
         pprint(result)
         return result
         
@@ -1259,6 +1444,7 @@ class Task(models.Model):
     partner_id = fields.Many2one(related="project_id.partner_id", store=True)
     job_position_id = fields.Many2one("res.partner.position", string="Contact Job Position",related="project_id.job_position_id", store=True)
     job_id = fields.Many2one("hr.job", string="Job Position", related="project_id.job_id", store=True)
+    job_ids = fields.Many2many("hr.job", string="CCPP Team", related="project_id.job_ids")
     department_id = fields.Many2one(related="project_id.department_id", store=True)
     division_id = fields.Many2one(related="project_id.division_id", store=True)
     priority_id = fields.Many2one("ccpp.priority", string="Priority", related="project_id.priority_id", store=True)
@@ -2301,7 +2487,7 @@ class ProjectApprovelines(models.Model):
     ccpp_id = fields.Many2one("project.project", string="CCPP", ondelete="cascade")
     solution_id = fields.Many2one("project.task", string="Solution", ondelete="cascade")
     strategy_id = fields.Many2one("project.task", string="Strategy", ondelete="cascade")
-    approve_line_id = fields.Many2one("approval.line", string="Approval Lines")
+    approve_line_id = fields.Many2one("approval.line", string="Approval Lines", required="True")
     sequence = fields.Integer(related="approve_line_id.sequence", string="Sequence")
     job_approve_ids = fields.Many2many(related="approve_line_id.job_approve_ids", string="Approver")
     is_approve = fields.Boolean(string="Approved", default=False)   

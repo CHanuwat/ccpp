@@ -12,7 +12,7 @@
             id="ccpp_crm_customer_customer_user"
             name="Customer Information"
             parent="menu_main_customer"
-            action="ccpp_internal_information_action_user"
+            action="ccpp_customer_information_action_user"
             sequence="3"
             groups="ccpp.group_ccpp_frontoffice_user"
             />
@@ -21,7 +21,7 @@
             id="ccpp_crm_customer_customer_manager"
             name="Customer Information"
             parent="menu_main_customer"
-            action="ccpp_customer_information_action_manager"
+            action="ccpp_customer_information_action"
             sequence="3"
             groups="ccpp.group_ccpp_frontoffice_manager"
             />
@@ -30,7 +30,7 @@
             id="ccpp_crm_customer_customer_manager_all_department"
             name="Customer Information"
             parent="menu_main_customer"
-            action="ccpp_customer_information_action_manager_all_department"
+            action="ccpp_customer_information_action"
             sequence="3"
             groups="ccpp.group_ccpp_frontoffice_manager_all_department"
             />
@@ -39,7 +39,7 @@
             id="ccpp_crm_customer_customer_ceo"
             name="Customer Information"
             parent="menu_main_customer"
-            action="ccpp_customer_information_action_ceo"
+            action="ccpp_customer_information_action"
             sequence="3"
             groups="ccpp.group_ccpp_ceo"
             />
@@ -60,7 +60,7 @@
             id="ccpp_crm_customer_internal_manager"
             name="Internal Customer"
             parent="menu_main_customer"
-            action="ccpp_internal_information_action_user"
+            action="ccpp_internal_information_action"
             sequence="1"
             groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager"
             />
@@ -70,7 +70,7 @@
             id="ccpp_crm_customer_internal_manager_all_department"
             name="Internal Customer"
             parent="menu_main_customer"
-            action="ccpp_internal_information_action_user"
+            action="ccpp_internal_information_action"
             sequence="1"
             groups="ccpp.group_ccpp_frontoffice_manager_all_department,ccpp.group_ccpp_backoffice_manager_all_department"
             />
@@ -81,7 +81,7 @@
             id="ccpp_crm_customer_internal_ceo"
             name="Internal Customer"
             parent="menu_main_customer"
-            action="ccpp_internal_information_action_user"
+            action="ccpp_internal_information_action"
             sequence="1"
             groups="ccpp.group_ccpp_ceo"
             />
@@ -106,7 +106,7 @@
             id="ccpp_crm_customer_external_manager"
             name="External Customer"
             parent="menu_main_customer"
-            action="ccpp_external_information_action_user"
+            action="ccpp_external_information_action"
             sequence="2"
             groups="ccpp.group_ccpp_backoffice_manager"
             />
@@ -116,7 +116,7 @@
             id="ccpp_crm_customer_external_manager_all_department"
             name="External Customer"
             parent="menu_main_customer"
-            action="ccpp_external_information_action_user"
+            action="ccpp_external_information_action"
             sequence="2"
             groups="ccpp.group_ccpp_backoffice_manager_all_department"
             />
@@ -126,7 +126,7 @@
             id="ccpp_crm_customer_external_ceo"
             name="External Customer"
             parent="menu_main_customer"
-            action="ccpp_external_information_action_user"
+            action="ccpp_external_information_action"
             sequence="2"
             groups="ccpp.group_ccpp_ceo"
             />

@@ -44,18 +44,18 @@
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="tile wide invoice box-1">
+                                        <div class="tile wide invoice box-2">
                                             <div class="headers">
                                                 <div class="main-title">2nd Priority</div>
                                                 <div id="monthly_invoice">
                                                     <div class="left">
                                                         <div class="count">
-                                                            <span id="net_profit_current_year"/>
+                                                            <span id="second_priority_year"/>
                                                         </div>
                                                     </div>
                                                     <div class="right">
                                                         <div class="count">
-                                                            <span id="net_profit_current_months"/>
+                                                            <span id="second_priority_year_success"/>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -65,18 +65,18 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <div class="tile wide invoice box-1">
+                                        <div class="tile wide invoice box-3">
                                             <div class="headers">
                                                 <div class="main-title">3rd Priority</div>
                                                 <div id="monthly_invoice">
                                                     <div class="left">
                                                         <div class="count">
-                                                            <span id="net_profit_current_year"/>
+                                                            <span id="third_priority_year"/>
                                                         </div>
                                                     </div>
                                                     <div class="right">
                                                         <div class="count">
-                                                            <span id="net_profit_current_months"/>
+                                                            <span id="third_priority_year_success"/>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -84,18 +84,18 @@
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="tile wide invoice box-1">
+                                        <div class="tile wide invoice box-4">
                                             <div class="headers">
                                                 <div class="main-title">4th Priority</div>
                                                 <div id="monthly_invoice">
                                                     <div class="left">
                                                         <div class="count">
-                                                            <span id="net_profit_current_year"/>
+                                                            <span id="fourth_priority_year"/>
                                                         </div>
                                                     </div>
                                                     <div class="right">
                                                         <div class="count">
-                                                            <span id="net_profit_current_months"/>
+                                                            <span id="fourth_priority_year_success"/>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -155,7 +155,7 @@
                             <div class="card-header">
                                 <div class="card-title">
                                     <b>
-                                        <h3 class="custom-h3">Income/Expense</h3>
+                                        <h3 class="custom-h3">CCPP</h3>
                                     </b>
                                 </div>
                                 <!--<div class="card-tools">

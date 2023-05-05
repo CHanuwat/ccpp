@@ -436,6 +436,7 @@
                     <field name="project_id" required="1" string="CCPP"/>
                     <field name="task_id" required="1" string="Solution"/>
                     <field name="task_strategy_id" required="1" string="Strategy"/>
+                    <field name="job_id" string="Job Position"/>
                     
                     <field name="unit_amount" required="1" invisible="1"/>
                     <field name="rocker_type" filters="1" invisible="1"/>
@@ -544,7 +545,7 @@
         <record id="act_rocker_timesheet_tree" model="ir.actions.act_window">
             <field name="name">Check In</field>
             <field name="res_model">account.analytic.line</field>
-            <field name="domain">[('user_id', '=', uid)]</field>
+            <field name="domain"></field>
             <field name="view_mode">tree,form</field>
             <field name="view_id" ref="rocker_timesheet_tree"/>
             <field name="search_view_id" ref="rocker_timesheet_search"/>
@@ -636,7 +637,7 @@
             <field name="search_view_id" ref="rocker_timesheet_search"/>
 
             <field name="target">main</field>
-            <field name="domain">[('user_id', '=', uid)]</field>
+            <field name="domain"></field>
             <field name="context"></field>
         </record>
 

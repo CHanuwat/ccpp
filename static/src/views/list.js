@@ -67,7 +67,7 @@ export class CCPPListController extends ListController {
     }
 
 }
-patch(CCPPListController.prototype, 'expense_list_controller_upload', ExpenseDocumentUpload);
+patch(CCPPListController.prototype, 'expense_list_controller_uploadxx', ExpenseDocumentUpload);
 
 export class CCPPListRenderer extends ListRenderer {}
 CCPPListRenderer.template = 'ccpp.ListRenderer';

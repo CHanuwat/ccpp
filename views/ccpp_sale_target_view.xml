@@ -5,7 +5,7 @@
         <field name="name">Sales Target</field>
         <field name="type">ir.actions.act_window</field>
         <field name="context">{'search_default_groupby_year': 0}</field>
-        <field name="domain">[('user_id', '=', uid)]</field>
+        <field name="domain"></field>
         <field name="res_model">ccpp.sale.target</field>
         <field name="view_mode">tree,form</field>
         <field name="target">main</field>
@@ -93,7 +93,7 @@
         <field name="code">action = model.action_sale_target_user()</field>
     </record>
 
-    <record id="ccpp_sale_target_action_manager" model="ir.actions.server">
+    <!--<record id="ccpp_sale_target_action_manager" model="ir.actions.server">
         <field name="name">Sales Target</field>
         <field name="model_id" ref="model_ccpp_sale_target"/>
         <field name="type">ir.actions.server</field>
@@ -115,6 +115,6 @@
         <field name="type">ir.actions.server</field>
         <field name="state">code</field>
         <field name="code">action = model.action_sale_target_ceo()</field>
-    </record>
+    </record>-->
 
 </odoo>

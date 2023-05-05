@@ -1131,16 +1131,34 @@ odoo.define('ccpp.CCPPDashboard', function(require) {
                 var ctx = {};
                 rpc.query({
                     model: "project.project",
-                    method: "get_first_priority",
+                    method: "get_ccpp_by_priority",
                     args: [ctx],
                 }).then(function(result) {
                     debugger
                     var first_priority_year = result.first_priority_year;
+                    var first_priority_year_success = result.first_priority_year_success;
+                    var second_priority_year = result.second_priority_year;
+                    var second_priority_year_success = result.second_priority_year_success;
+                    var third_priority_year = result.third_priority_year;
+                    var third_priority_year_success = result.third_priority_year_success;
+                    var fourth_priority_year = result.fourth_priority_year;
+                    var fourth_priority_year_success = result.fourth_priority_year_success;
                     $('#first_priority_year').empty();
                     $('#first_priority_year').append('<span>' + first_priority_year + '</span> <div class="title">This Year</div>')
-                    var first_priority_year_success = result.first_priority_year_success;
                     $('#first_priority_year_success').empty();
                     $('#first_priority_year_success').append('<span>' + first_priority_year_success + '</span> <div class="title">Success</div>')
+                    $('#second_priority_year').empty();
+                    $('#second_priority_year').append('<span>' + second_priority_year + '</span> <div class="title">This Year</div>')
+                    $('#second_priority_year_success').empty();
+                    $('#second_priority_year_success').append('<span>' + second_priority_year_success + '</span> <div class="title">Success</div>')
+                    $('#third_priority_year').empty();
+                    $('#third_priority_year').append('<span>' + third_priority_year + '</span> <div class="title">This Year</div>')
+                    $('#third_priority_year_success').empty();
+                    $('#third_priority_year_success').append('<span>' + third_priority_year_success + '</span> <div class="title">Success</div>')
+                    $('#fourth_priority_year').empty();
+                    $('#fourth_priority_year').append('<span>' + fourth_priority_year + '</span> <div class="title">This Year</div>')
+                    $('#fourth_priority_year_success').empty();
+                    $('#fourth_priority_year_success').append('<span>' + fourth_priority_year_success + '</span> <div class="title">Success</div>')
                 });
 
 

@@ -21,6 +21,7 @@
     'data': [
         "data/ir_sequence.xml",
         "data/groups.xml",
+        "data/rules.xml",
         "security/ir.model.access.csv",
         "views/ccpp_department_view.xml",
         "views/ccpp_priority_view.xml",
