@@ -472,7 +472,8 @@ class RockerTimesheet(models.Model):
     state = fields.Selection(selection=[
         ('open', 'Open'),
         ('done', 'Done'),
-    ], default='open', string="Status") 
+    ], default='open', string="Status")
+    state_char = fields.Char(string="State", compute="_compute_state_char", store=True)
     account_id = fields.Many2one(required=False)
     is_go_ccpp_customer = fields.Boolean("CCPP Customer")
     is_go_potential = fields.Boolean("Potential")
@@ -507,6 +508,13 @@ class RockerTimesheet(models.Model):
                 for job_id in obj.sale_person_id.job_lines:
                     job_ids |= job_id
             obj.domain_job_ids = job_ids.ids
+            
+    @api.depends("state")
+    def _compute_state_char(self):
+        for obj in self:
+            states = {'open': 'Open',
+                      'done': 'Done'}
+            obj.state_char = states[obj.state]
 
     def duplicate_task(self):
         for obj in self:

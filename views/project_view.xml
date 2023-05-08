@@ -2335,13 +2335,13 @@
 
         <menuitem name="All CCPP Group by Customer" id="menu_all_ccpp_group_by_customer_user" parent="menu_all_ccpp_user" action="action_all_ccpp_group_by_customer_user" sequence="2" />-->
 
-    <menuitem name="All CCPP" id="menu_all_ccpp_manager" groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager" action="action_all_ccpp_group_by_priority" parent="project.menu_main_pm" sequence="2"/>
+    <menuitem name="All CCPP" id="menu_all_ccpp_manager" groups="ccpp.group_ccpp_frontoffice_manager,ccpp.group_ccpp_backoffice_manager,ccpp.group_ccpp_frontoffice_user,ccpp.group_ccpp_backoffice_user" action="action_all_ccpp_group_by_priority" parent="project.menu_main_pm" sequence="2"/>
 
     <menuitem name="All CCPP" id="menu_all_ccpp_manager_all_department" groups="ccpp.group_ccpp_backoffice_manager_all_department,ccpp.group_ccpp_frontoffice_manager_all_department" action="action_all_ccpp_group_by_priority_manager_all_department" parent="project.menu_main_pm" sequence="3"/>
 
     <menuitem name="All CCPP" id="menu_all_ccpp_manager_ceo" groups="ccpp.group_ccpp_ceo" action="action_all_ccpp_group_by_priority_ceo" parent="project.menu_main_pm" sequence="4"/>
 
-    <!--<menuitem name="CCPP Dashboard" id="menu_ccpp_dashboard" action="action_my_ccpp_group_by_priority" parent="project.menu_main_pm" sequence="5"/>-->
+    <menuitem name="CCPP Dashboard" id="menu_ccpp_dashboard" action="action_my_ccpp_group_by_priority" parent="project.menu_main_pm" sequence="5"/>
 
 
         <!--<menuitem name="All CCPP Group by Priority" id="menu_all_ccpp_group_by_priority_manager" parent="menu_all_ccpp_manager" action="action_all_ccpp_group_by_priority_manager" sequence="1"/>

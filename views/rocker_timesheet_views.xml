@@ -425,7 +425,7 @@
                           form_view_id="%(ccpp.rocker_timesheet_form)d"
                           date_start="start" date_stop="stop" date_delay="duration"
                           all_day="allday" color="state"
-                          mode="week"
+                          mode="month"
                           quick_add="false"
                           delete="false"
                           event_open_popup = "%(ccpp.rocker_timesheet_form)s"
@@ -436,10 +436,12 @@
                     <field name="project_id" required="1" string="CCPP"/>
                     <field name="task_id" required="1" string="Solution"/>
                     <field name="task_strategy_id" required="1" string="Strategy"/>
-                    <field name="job_id" string="Job Position"/>
+                    <field name="employee_id" string="User"/>
+                    <field name="job_id" string="Job Position" filters="1"/>
+                    <field name="state_char" filters="1" string="State"/>
                     
                     <field name="unit_amount" required="1" invisible="1"/>
-                    <field name="rocker_type" filters="1" invisible="1"/>
+                    <field name="rocker_type" invisible="1"/>
                    
                     
 <!--                    <field name="company_id" required="1" readonly="1" optional="show" groups="base.group_multi_company"/>-->
