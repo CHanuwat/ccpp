@@ -445,7 +445,7 @@ class CCPPCustomerInformation(models.Model):
     def action_external_information_user(self):
         self = self.sudo()
         company_ids = self._context.get('allowed_company_ids')
-        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_internal_information_action')
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_external_information_action')
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
         information_ids = self.env['ccpp.customer.information'].search([('type','=','external'),
                                                                 ('job_id', 'in', employee_id.job_lines.ids),
