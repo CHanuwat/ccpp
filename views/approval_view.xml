@@ -15,12 +15,13 @@
             <search string="Search Solution">
                 <field name="name" string="Name" filter_domain="['|', ('name', 'ilike', self), ('id', 'ilike', self)]"/>
                 <field name="department_id" string="Department" filter_domain="[('department_id.name', 'ilike', self)]"/>
-                <field name="model_id" string="Document" filter_domain="[('model_id.name', 'ilike', self)]"/>
+                <!-- <field name="model_id" string="Document" filter_domain="[('model_id.name', 'ilike', self)]"/> -->
+                <field name="model_ids" string="Documents" filter_domain="[('model_ids.name', 'ilike', self)]"/>
                 <field name="job_request_ids" string="Request By" filter_domain="[('job_request_ids.name', 'ilike', self)]"/>
                 <field name="all_approve_ids" string="Approvers" filter_domain="[('all_approve_ids.name', 'ilike', self)]"/>
                 <separator/>
                 <group expand="1" string="Group By">
-                    <filter string="Document" name="groupby_state" context="{'group_by': 'model_id'}"/>
+                    <filter string="Documents" name="groupby_state" context="{'group_by': 'model_ids'}"/>
                     <filter string="Department" name="groupby_department" context="{'group_by': 'department_id'}"/>
                     <filter string="Employee Type" name="groupby_employee_type" context="{'group_by': 'contract_type_id'}"/>
                 </group>
@@ -34,7 +35,7 @@
         <field name="arch" type="xml">
             <tree default_order="name">
                 <!--<field name="name"/>-->
-                <field name="model_id"/>
+                <field name="model_ids" widget="many2many_tags"/>
                 <field name="department_id"/>
                 <field name="job_request_ids" widget="many2many_tags" string="Request By"/>
                 <field name="contract_type_id" string="Employee Type"/>
@@ -51,7 +52,8 @@
                 <sheet>
                     <group>
                         <group>
-                            <field name="model_id" options="{'no_create': True}"/>
+                            <!-- <field name="model_id" options="{'no_create': True}"/> -->
+                            <field name="model_ids" widget="many2many_tags" options="{'no_create': True}"/>
                             <field name="department_id" options="{'no_create': True}"/>
                             <field name="domain_contract_type_ids" invisible="True"/>
                             <field name="contract_type_id" domain="[('id', 'in', domain_contract_type_ids)]" options="{'no_create': True}"/>

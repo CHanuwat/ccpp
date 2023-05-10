@@ -54,4 +54,15 @@
         </field>
     </record>
 
+    <record id="view_job_filter_inherit_ccpp" model="ir.ui.view">
+        <field name="name">view.job.tree.inherit.ccpp</field>
+        <field name="model">hr.job</field>
+        <field name="inherit_id" ref="hr.view_job_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search[1]/field[@name='name']" position="after">
+                <field name="employee_id"/>
+            </xpath>
+        </field>
+    </record>
+
 </odoo>

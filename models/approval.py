@@ -14,8 +14,9 @@ class Approval(models.Model):
 
     name = fields.Char(string="Name", compute="_compute_name")
     model_id = fields.Many2one("ir.model", string="Document")
+    model_ids = fields.Many2many("ir.model","approval_model_rel", "approve_id", "model_id", string="Documents")
     department_id = fields.Many2one("hr.department", string="Department", required="True")
-    contract_type_id = fields.Many2one("hr.contract.type", string="Request By Employee Type", required=True)
+    contract_type_id = fields.Many2one("hr.contract.type", string="Request By Employee Type")
     domain_contract_type_ids = fields.Many2many("hr.contract.type", string="Domain Employee_ Type", compute="_compute_domain_contract_type")
     job_request_ids = fields.Many2many("hr.job", string="Request Approval By", required="True")
     job_request_id = fields.Many2one("hr.job", string="Request Approval By")
@@ -25,7 +26,7 @@ class Approval(models.Model):
     active = fields.Boolean('Active', default=True)
     
     _sql_constraints = [
-        ('model_department_job_uniq', 'unique(model_id, department_id, job_request_id)', 'The code of the job position must be unique in company!'),
+        ('model_department_job_uniq', 'unique(model_ids, department_id, job_request_id)', 'The code of the job position must be unique in company!'),
     ]
     
     @api.depends("lines", "lines.job_approve_ids")
@@ -60,8 +61,9 @@ class Approval(models.Model):
         for obj in self:
             name = ''
             name_list = []
-            if obj.model_id:
-                name_list.append(obj.model_id.name)
+            if obj.model_ids:
+                for model_id in obj.model_ids:
+                    name_list.append(model_id.name)
             if obj.department_id:
                 name_list.append(obj.department_id.name)
             if obj.contract_type_id:

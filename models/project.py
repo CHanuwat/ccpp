@@ -332,7 +332,7 @@ class Project(models.Model):
             #is_approve = obj.ccpp_approve_lines.filtered(lambda o:o.state == 'approve')
             is_waiting = obj.ccpp_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
             model_id = self.env['ir.model'].sudo().search([('model','=',obj._name)])
-            approve_id = self.env['approval'].search([('model_id','=', model_id.id),
+            approve_id = self.env['approval'].search([('model_ids','in', model_id.ids),
                                                       ('department_id','=', obj.department_id.id),
                                                       ('job_request_ids','in', obj.job_id.id)])
             
@@ -586,7 +586,7 @@ class Project(models.Model):
     def create_approve_lines(self):
         for obj in self:
             model_id = self.env['ir.model'].sudo().search([('model','=',obj._name)])
-            approve_id = self.env['approval'].search([('model_id','=', model_id.id),
+            approve_id = self.env['approval'].search([('model_ids','in', model_id.ids),
                                                       ('department_id','=', obj.department_id.id),
                                                       ('job_request_ids','in', obj.job_id.id)])
             vals_list = []
@@ -927,10 +927,13 @@ class Project(models.Model):
                     strategy_id.delay_date = date_today
                         
     def run_script_update(self):
-        ccpp_ids = self.env['project.project'].search([])
-        print(ccpp_ids)
-        for ccpp_id in ccpp_ids:
-            ccpp_id.write({'job_ids': [ccpp_id.job_id.id] })
+        approval_ids = self.env['approval'].search([])
+        for approve_id in approval_ids:
+            approve_id.write({'model_ids': [approve_id.model_id.id]})
+        # ccpp_ids = self.env['project.project'].search([])
+        # print(ccpp_ids)
+        # for ccpp_id in ccpp_ids:
+        #     ccpp_id.write({'job_ids': [ccpp_id.job_id.id] })
         
         # approve_ids = self.env['approval'].search([])
         # for approve_id in approve_ids:
@@ -1752,7 +1755,7 @@ class Task(models.Model):
             #is_approve = obj.solution_approve_lines.filtered(lambda o:o.state == 'approve')
             is_waiting = obj.solution_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
             model_id = self.env['ir.model'].sudo().search([('model','=',obj.project_id._name)])
-            approve_id = self.env['approval'].search([('model_id','=', model_id.id),
+            approve_id = self.env['approval'].search([('model_ids','in', model_id.ids),
                                                       ('department_id','=', obj.project_id.department_id.id),
                                                       ('job_request_ids','in', obj.project_id.job_id.id)])
             
@@ -1769,7 +1772,7 @@ class Task(models.Model):
             #is_approve = obj.strategy_approve_lines.filtered(lambda o:o.state == 'approve')
             is_waiting = obj.strategy_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
             model_id = self.env['ir.model'].sudo().search([('model','=',obj.project_id._name)])
-            approve_id = self.env['approval'].search([('model_id','=', model_id.id),
+            approve_id = self.env['approval'].search([('model_ids','in', model_id.ids),
                                                       ('department_id','=', obj.project_id.department_id.id),
                                                       ('job_request_ids','in', obj.project_id.job_id.id)])
             
@@ -1912,7 +1915,7 @@ class Task(models.Model):
     def create_approve_lines(self):
         for obj in self:
             model_id = self.env['ir.model'].sudo().search([('model','=',self.project_id._name)])
-            approve_id = self.env['approval'].search([('model_id','=', model_id.id),
+            approve_id = self.env['approval'].search([('model_ids','in', model_id.ids),
                                                       ('department_id','=', obj.department_id.id),
                                                       ('job_request_ids','in', obj.job_id.id)
                                                     ])
