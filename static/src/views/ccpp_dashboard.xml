@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <template id="template" xml:space="preserve">
     <t t-name="CCPPdashboard">
+        <iframe title="test" width="1140" height="541.25" src="https://app.powerbi.com/reportEmbed?reportId=f19d5873-9f18-4586-96a7-a4f39ea2113c&autoAuth=true&ctid=0b28f4e4-d8b3-48c4-bf63-b0359277a329" frameborder="0" allowFullScreen="true"></iframe>
         <div class="accounts-dashboard-wrap" style="padding-left: 30px !important;">
             <div class="o_dashboards col-xs-12 col-sm-12 col-lg-12 col-md-12" style="background-color: #e1e1e1;overflow: scroll; !important; ">
                 <div class="content-header">

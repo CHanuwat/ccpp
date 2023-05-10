@@ -50,7 +50,7 @@
             <field name="model">account.analytic.line</field>
             <field name="arch" type="xml">
                 <!--<tree js_class="rocker_tree" string="Timesheets" editable="top" create="true" delete="true" edit="true">-->
-                <tree js_class="task_dashboard_list" string="Timesheets" create="false" delete="false" edit="true" class="task_list" expand="1">
+                <tree js_class="task_dashboard_list" string="Timesheets" create="false" delete="false" edit="true" class="task_list" expand="0">
                     <!-- <button name="update_situation" type="object" string="Check In" class="btn btn-success" icon="fa-sign-in" attrs="{'invisible': [('state','not in',['open'])]}"/> -->
                     <button name="ccpp.action_check_in" type="action" string="Check In" class="btn btn-success" icon="fa-sign-in" attrs="{'invisible': [('state','not in',['open'])]}"/>
                     <field name="name" string="Task" />
@@ -69,6 +69,7 @@
                     <field name="company_id" required="1" readonly="1" optional="hide" invisible="1"/>
                     <field name="user_id"  invisible="1" required="1" readonly="1"/>
                     <field name="allday" invisible="1" />
+                    <field name="employee_id" string="User"/>
                     <field name="state_color" invisible="1"/>
                     <field name="state" string="State" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'state_color'}"/>
                 </tree>
@@ -86,6 +87,7 @@
                             <!--<button name="update_situation" string="Update Situation" type="object" class="btn-primary" states="open"/>-->
                             <!--<button name="button_done_wizard" string="Check In" type="object" class="btn-success" states="open"/>-->
                             <!--<button name="button_to_open" string="To Open" type="object" class="btn-primary" states="done"/>-->
+                            <button name="button_cancel" string="To Open" type="object"/>
                             <field name="state" widget="statusbar"/>
                         </header>
                         <sheet>

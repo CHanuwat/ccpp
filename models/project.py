@@ -38,6 +38,7 @@ STATE_COLOR = {
     'process': 3,  # orangeq
     'done': 20,  # red / danger
     'cancel': 23,  # light blue
+    'void': 23,
     '1': 9,
     '2': 2,
     '3': 3,
@@ -136,6 +137,7 @@ class Project(models.Model):
         ('process', 'On Process'),
         ('done', 'Done'),
         ('cancel', 'Cancelled'),
+        ('void','Void'),
         #('delay', 'delayed'),
     ], default='open', index=True, string="State", track_visibility="onchange", tracking=True)
     state_color = fields.Integer(compute='_compute_state_color')
@@ -147,6 +149,7 @@ class Project(models.Model):
     is_ready_create_solution = fields.Boolean(string="Is Ready Create Solution", compute="_compute_ready_create_solution")
     reason_reject = fields.Text(string="Comment Rejection",track_visibility="onchange")
     reason_cancel = fields.Text(string="Comment Cancellation",track_visibility="onchange")
+    reason_void = fields.Text(string="Comment Voidation",track_visibility="onchange")
     task_last_update_id = fields.Many2one("account.analytic.line", string="Task Last Update Situation")
     task_current_action = fields.Char(related="task_last_update_id.current_action", string="Task Current Situation")
     task_next_action = fields.Char(related="task_last_update_id.next_action", string="Task Next Action")
@@ -298,7 +301,7 @@ class Project(models.Model):
     def unlink(self):
         for obj in self:
             if not obj._context.get('discard_create') and obj.state != 'open':
-                raise UserError("ระบบไม่สามารถลบ CCPP ได้ กรุณา cancel หากไม่ได้ใช้งาน")
+                raise UserError("ระบบไม่สามารถลบ CCPP ได้ กรุณา cancel หรือ void หากไม่ได้ใช้งาน")
         res = super().unlink()
         return res
        
@@ -745,8 +748,8 @@ class Project(models.Model):
         for obj in self:
             if not obj.priority_id:
                 raise UserError("กรุณาเลือกผลกระทบต่อบริษัทอย่างน้อย 1 ข้อ และเลือกระยะเวลาการแก้ไขปัญหา")
-            if obj.priority_id.point > 2:
-                raise UserError("Please send approve only CCPP 1st or 2nd priority")
+            #if obj.priority_id.point > 2:
+            #    raise UserError("Please send approve only CCPP 1st or 2nd priority")
             if not obj.partner_id:
                 raise UserError("Please select Customer")
             if not obj.partner_contact_id and not obj.department_ids:
@@ -771,9 +774,7 @@ class Project(models.Model):
                     approve_line.state = 'approve'
                     break
                     
-            waiting_another_level = obj.ccpp_approve_lines.filtered(lambda o:not o.state != 'waiting_approve')
-            if not waiting_another_level:
-                obj.button_approve_final()
+            
                 
             for solution_id in obj.tasks_solution:
                 if solution_id.state == 'waiting_approve':
@@ -781,6 +782,11 @@ class Project(models.Model):
                     #for strategy_id in solution_id.child_ids:
                     #    if strategy_id.state == 'waiting_approve':
                     #        strategy_id.button_approve_strategy()
+                    
+            waiting_another_level = obj.ccpp_approve_lines.filtered(lambda o:not o.state != 'waiting_approve')
+            if not waiting_another_level:
+                obj.button_approve_final()
+                obj.check_ccpp_delayed()
 
     def button_approve_final(self):
         for obj in self:
@@ -854,6 +860,19 @@ class Project(models.Model):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_wizard_cancel_action')
         action['context'] = {'default_ccpp': self.id}
         return action
+    
+    def button_void_wizard(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_wizard_void_action')
+        action['context'] = {'default_ccpp': self.id}
+        return action
+    
+    def button_void(self):
+        for obj in self:
+            obj.state = 'void'
+            for solution_id in obj.tasks_solution:
+                solution_id.state = 'void'
+                for strategy_id in solution_id.child_ids:
+                    strategy_id.state = 'void'
     
     def button_cancel(self):
         for obj in self:
@@ -1187,7 +1206,7 @@ class Project(models.Model):
                                                    ('priority_id.point','=',1)])
             first_this_year_all = ccpp.search_count([('job_id', 'in', employee_id.job_lines.ids),
                                                    #('company_id','in', company_ids),
-                                                   ('state','!=','cancel'),
+                                                   ('state','not in',['cancel','void']),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',1)])
@@ -1199,7 +1218,7 @@ class Project(models.Model):
                                                    ('priority_id.point','=',2)])
             second_this_year_all = ccpp.search_count([('job_id', 'in', employee_id.job_lines.ids),
                                                    #('company_id','in', company_ids),
-                                                   ('state','!=','cancel'),
+                                                   ('state','not in',['cancel','void']),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',2)])
@@ -1211,7 +1230,7 @@ class Project(models.Model):
                                                    ('priority_id.point','=',3)])
             third_this_year_all = ccpp.search_count([('job_id', 'in', employee_id.job_lines.ids),
                                                    #('company_id','in', company_ids),
-                                                   ('state','!=','cancel'),
+                                                   ('state','not in',['cancel','void']),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',3)])
@@ -1223,7 +1242,7 @@ class Project(models.Model):
                                                    ('priority_id.point','=',4)])
             fourth_this_year_all = ccpp.search_count([('job_id', 'in', employee_id.job_lines.ids),
                                                    #('company_id','in', company_ids),
-                                                   ('state','!=','cancel'),
+                                                   ('state','not in',['cancel','void']),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',4)])
@@ -1237,19 +1256,19 @@ class Project(models.Model):
                                                    ('priority_id.point','=',1)])
             first_this_year_all = ccpp.search_count([('job_id', 'in', job_ids.ids),
                                                    #('company_id','in', company_ids),
-                                                   ('state','!=','cancel'),
+                                                   ('state','not in',['cancel','void']),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',1)])
             second_this_year_success = ccpp.search_count([('job_id', 'in', job_ids.ids),
                                                    #('company_id','in', company_ids),
-                                                   ('state','=','done'),
+                                                   ('state','not in',['cancel','void']),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',2)])
             second_this_year_all = ccpp.search_count([('job_id', 'in', job_ids.ids),
                                                    #('company_id','in', company_ids),
-                                                   ('state','!=','cancel'),
+                                                   ('state','not in',['cancel','void']),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',2)])
@@ -1261,7 +1280,7 @@ class Project(models.Model):
                                                    ('priority_id.point','=',3)])
             third_this_year_all = ccpp.search_count([('job_id', 'in', job_ids.ids),
                                                    #('company_id','in', company_ids),
-                                                   ('state','!=','cancel'),
+                                                   ('state','not in',['cancel','void']),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',3)])
@@ -1273,7 +1292,7 @@ class Project(models.Model):
                                                    ('priority_id.point','=',4)])
             fourth_this_year_all = ccpp.search_count([('job_id', 'in', job_ids.ids),
                                                    #('company_id','in', company_ids),
-                                                   ('state','!=','cancel'),
+                                                   ('state','not in',['cancel','void']),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',4)])
@@ -1286,7 +1305,7 @@ class Project(models.Model):
                                                    ('priority_id.point','=',1)])
             first_this_year_all = ccpp.search_count([('department_id', 'in', employee_id.department_id.id),
                                                    #('company_id','in', company_ids),
-                                                   ('state','!=','cancel'),
+                                                   ('state','not in',['cancel','void']),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',1)])
@@ -1298,7 +1317,7 @@ class Project(models.Model):
                                                    ('priority_id.point','=',2)])
             second_this_year_all = ccpp.search_count([('department_id', 'in', employee_id.department_id.id),
                                                    #('company_id','in', company_ids),
-                                                   ('state','!=','cancel'),
+                                                   ('state','not in',['cancel','void']),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',2)])
@@ -1310,7 +1329,7 @@ class Project(models.Model):
                                                    ('priority_id.point','=',3)])
             third_this_year_all = ccpp.search_count([('department_id', 'in', employee_id.department_id.id),
                                                    #('company_id','in', company_ids),
-                                                   ('state','!=','cancel'),
+                                                   ('state','not in',['cancel','void']),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',3)])
@@ -1322,7 +1341,7 @@ class Project(models.Model):
                                                    ('priority_id.point','=',4)])
             fourth_this_year_all = ccpp.search_count([('department_id', 'in', employee_id.department_id.id),
                                                    #('company_id','in', company_ids),
-                                                   ('state','!=','cancel'),
+                                                   ('state','not in',['cancel','void']),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',4)])
@@ -1333,7 +1352,7 @@ class Project(models.Model):
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',1)])
             first_this_year_all = ccpp.search_count([#('company_id','in', company_ids),
-                                                   ('state','!=','cancel'),
+                                                   ('state','not in',['cancel','void']),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',1)])
@@ -1343,7 +1362,7 @@ class Project(models.Model):
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',2)])
             second_this_year_all = ccpp.search_count([#('company_id','in', company_ids),
-                                                   ('state','!=','cancel'),
+                                                   ('state','not in',['cancel','void']),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',2)])
@@ -1353,7 +1372,7 @@ class Project(models.Model):
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',3)])
             third_this_year_all = ccpp.search_count([#('company_id','in', company_ids),
-                                                   ('state','!=','cancel'),
+                                                   ('state','not in',['cancel','void']),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',3)])
@@ -1363,7 +1382,7 @@ class Project(models.Model):
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',4)])
             fourth_this_year_all = ccpp.search_count([#('company_id','in', company_ids),
-                                                   ('state','!=','cancel'),
+                                                   ('state','not in',['cancel','void']),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',4)])
@@ -1460,6 +1479,7 @@ class Task(models.Model):
         ('process', 'On Process'),
         ('done', 'Done'),
         ('cancel', 'Cancelled'),
+        ('void', 'Void'),
         #('delay', 'Delayed'),
     ], default='open', index=True, string="State", track_visibility="onchange", tracking=True)
     last_update_status_strategy = fields.Selection(selection=[
@@ -1596,9 +1616,9 @@ class Task(models.Model):
     def unlink(self):
         for obj in self:
             if obj.is_solution and obj.state != 'open':
-                raise UserError("ระบบไม่สามารถลบ Solution ได้ กรุณา cancel หากไม่ได้ใช้งาน")
+                raise UserError("ระบบไม่สามารถลบ Solution ได้ กรุณา cancel หรือ void CCPP หากไม่ได้ใช้งาน")
             if obj.is_strategy and obj.state != 'open':
-                raise UserError("ระบบไม่สามารถลบ Strategy ได้ กรุณา cancel หากไม่ได้ใช้งาน")
+                raise UserError("ระบบไม่สามารถลบ Strategy ได้ กรุณา cancel หรือ void CCPP หากไม่ได้ใช้งาน")
         res = super().unlink()
         return res
     

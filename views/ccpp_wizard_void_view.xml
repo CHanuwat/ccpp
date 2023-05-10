@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="ccpp_wizard_void_action" model="ir.actions.act_window">
+        <field name="name">Void</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">ccpp.wizard.void</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="ccpp_wizard_void_view_form" model="ir.ui.view">
+        <field name="name">ccpp.wizard.void.view.form</field>
+        <field name="model">ccpp.wizard.void</field>
+        <field name="arch" type="xml">
+            <form string="Void">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="ccpp_id" attrs="{'invisible': [('ccpp_id','=',False)]}" readonly="True" force_save="True"/>
+                            <!-- <field name="solution_id" attrs="{'invisible': [('solution_id','=',False)]}" readonly="True" force_save="True"/> -->
+                            <!-- <field name="strategy_id" attrs="{'invisible': [('strategy_id','=',False)]}" readonly="True" force_save="True"/> -->
+                            <field name="reason_void" required="True"/>
+                            
+                        </group>
+                    </group>
+                    <footer>
+                        <button name="button_confirm" string="Confirm" type="object" class="btn-danger"/>
+                        <button special="cancel" data-hotkey="z" string="Close" />
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+</odoo>

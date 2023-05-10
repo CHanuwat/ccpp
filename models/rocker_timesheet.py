@@ -55,7 +55,8 @@ prev_company = -1
 
 STATE_COLOR = {
     'open': 0,
-    'done': 20, 
+    'done': 20,
+    'cancel': 23,
 }
 
 class RockerTimesheet(models.Model):
@@ -472,6 +473,7 @@ class RockerTimesheet(models.Model):
     state = fields.Selection(selection=[
         ('open', 'Open'),
         ('done', 'Done'),
+        ('cancel', 'Cancelled'),
     ], default='open', string="Status")
     state_char = fields.Char(string="State", compute="_compute_state_char", store=True)
     account_id = fields.Many2one(required=False)
@@ -513,7 +515,8 @@ class RockerTimesheet(models.Model):
     def _compute_state_char(self):
         for obj in self:
             states = {'open': 'Open',
-                      'done': 'Done'}
+                      'done': 'Done',
+                      'cancel': 'Cancelld',}
             obj.state_char = states[obj.state]
 
     def duplicate_task(self):
@@ -836,8 +839,8 @@ class RockerTimesheet(models.Model):
             return False
 
     def write(self, vals):
-        if self.state == 'done' and not 'current_situation' in vals and not 'next_action' in vals:
-            raise UserError("Cannot edit task in state done.")
+        if self.state in ['done','cancel'] and not 'current_situation' in vals and not 'next_action' in vals:
+            raise UserError("Cannot edit task in state done or cancel.")
         if (('name' in vals and vals['name'] != self.name) or \
         ('priority_id' in vals and vals['priority_id'] != self.priority_id.id) or \
         ('customer_id' in vals and vals['customer_id'] != self.customer_id.id) or \
@@ -1257,6 +1260,10 @@ class RockerTimesheet(models.Model):
         for obj in self:
             obj.state = 'open'
             
+    def button_cancel(self):
+        for obj in self:
+            obj.state = 'cancel'
+            
     def update_situation(self):
         #action = self.env['ir.actions.act_window']._for_xml_id('ccpp.task_timesheet_update_all_action_form')
         #action['context'] = {'task_id': self.id, 'update_task': True, 'active_id': self.project_id.id}
@@ -1308,12 +1315,39 @@ class RockerTimesheet(models.Model):
         
         task = self.env['account.analytic.line']
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-        if employee_id.job_lines:
-            result['today'] = task.search_count([('stop', '>=', today_start),('stop', '<=', today_stop),('job_id', 'in', employee_id.job_lines.ids)])
+        job_ids = self.get_child_job(employee_id.job_lines)
+        company_ids = self._context.get('allowed_compan_ids')
+        
+        if (self.env.user.has_group('ccpp.group_ccpp_backoffice_user') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_user')) and employee_id.job_lines:
+            result['today'] = task.search_count([('stop', '>=', today_start),('stop', '<=', today_stop),('job_id', 'in', employee_id.job_lines.ids),('company_id', 'in', company_ids)])
             result['this_week'] = task.search_count([('stop', '>=', week_start),('stop', '<=', week_stop),('job_id', 'in', employee_id.job_lines.ids)])
             result['this_month'] = task.search_count([('stop', '>=', month_start),('stop', '<', month_stop),('job_id', 'in', employee_id.job_lines.ids)])
             result['all'] = task.search_count([('job_id', 'in', employee_id.job_lines.ids)])
+        elif self.env.user.has_group('ccpp.group_ccpp_backoffice_manager') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_manager'):
+            result['today'] = task.search_count([('stop', '>=', today_start),('stop', '<=', today_stop),('job_id', 'in', job_ids.ids)])
+            result['this_week'] = task.search_count([('stop', '>=', week_start),('stop', '<=', week_stop),('job_id', 'in', job_ids.ids)])
+            result['this_month'] = task.search_count([('stop', '>=', month_start),('stop', '<', month_stop),('job_id', 'in', job_ids.ids)])
+            result['all'] = task.search_count([('job_id', 'in', job_ids.ids)])
+        elif self.env.user.has_group('ccpp.group_ccpp_backoffice_manager_all_department') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_manager_all_department'):
+            result['today'] = task.search_count([('stop', '>=', today_start),('stop', '<=', today_stop),('department_id', '=', employee_id.department_id.id)])
+            result['this_week'] = task.search_count([('stop', '>=', week_start),('stop', '<=', week_stop),('department_id', '=', employee_id.department_id.id)])
+            result['this_month'] = task.search_count([('stop', '>=', month_start),('stop', '<', month_stop),('department_id', '=', employee_id.department_id.id)])
+            result['all'] = task.search_count([('department_id', '=', employee_id.department_id.id)])
+        elif self.env.user.has_group('ccpp.group_ccpp_ceo'):
+            result['today'] = task.search_count([('stop', '>=', today_start),('stop', '<=', today_stop),('department_id', '=', employee_id.department_id.id)])
+            result['this_week'] = task.search_count([('stop', '>=', week_start),('stop', '<=', week_stop),('department_id', '=', employee_id.department_id.id)])
+            result['this_month'] = task.search_count([('stop', '>=', month_start),('stop', '<', month_stop),('department_id', '=', employee_id.department_id.id)])
+            result['all'] = task.search_count([('department_id', '=', employee_id.department_id.id)])
+            
         return result
+    
+    def get_child_job(self,job_lines,job_ids=False):
+        if not job_ids:
+            job_ids = self.env['hr.job']
+        for job_id in job_lines:
+            job_ids |= job_id
+            job_ids |= self.get_child_job(job_id.child_lines, job_ids)   
+        return job_ids
     
     @api.depends('state')
     def _compute_state_color(self):
