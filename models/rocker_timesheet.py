@@ -111,7 +111,7 @@ class RockerTimesheet(models.Model):
 
     def _domain_project_id_search(self):
         company_ids = self._context.get('allowed_company_ids')
-        domain = [('company_id', '=', company_ids)]
+        domain = [('company_id', 'in', company_ids)]
         #domain = [('company_id', '=', self.env.company.id)]
         return domain
 
