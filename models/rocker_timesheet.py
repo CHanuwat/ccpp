@@ -1316,28 +1316,28 @@ class RockerTimesheet(models.Model):
         task = self.env['account.analytic.line']
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
         job_ids = self.get_child_job(employee_id.job_lines)
-        company_ids = self._context.get('allowed_compan_ids')
+        company_ids = self._context.get('allowed_company_ids')
         
         if (self.env.user.has_group('ccpp.group_ccpp_backoffice_user') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_user')) and employee_id.job_lines:
             result['today'] = task.search_count([('stop', '>=', today_start),('stop', '<=', today_stop),('job_id', 'in', employee_id.job_lines.ids),('company_id', 'in', company_ids)])
-            result['this_week'] = task.search_count([('stop', '>=', week_start),('stop', '<=', week_stop),('job_id', 'in', employee_id.job_lines.ids)])
-            result['this_month'] = task.search_count([('stop', '>=', month_start),('stop', '<', month_stop),('job_id', 'in', employee_id.job_lines.ids)])
-            result['all'] = task.search_count([('job_id', 'in', employee_id.job_lines.ids)])
+            result['this_week'] = task.search_count([('stop', '>=', week_start),('stop', '<=', week_stop),('job_id', 'in', employee_id.job_lines.ids),('company_id', 'in', company_ids)])
+            result['this_month'] = task.search_count([('stop', '>=', month_start),('stop', '<', month_stop),('job_id', 'in', employee_id.job_lines.ids),('company_id', 'in', company_ids)])
+            result['all'] = task.search_count([('job_id', 'in', employee_id.job_lines.ids),('company_id', 'in', company_ids)])
         elif self.env.user.has_group('ccpp.group_ccpp_backoffice_manager') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_manager'):
-            result['today'] = task.search_count([('stop', '>=', today_start),('stop', '<=', today_stop),('job_id', 'in', job_ids.ids)])
-            result['this_week'] = task.search_count([('stop', '>=', week_start),('stop', '<=', week_stop),('job_id', 'in', job_ids.ids)])
-            result['this_month'] = task.search_count([('stop', '>=', month_start),('stop', '<', month_stop),('job_id', 'in', job_ids.ids)])
-            result['all'] = task.search_count([('job_id', 'in', job_ids.ids)])
+            result['today'] = task.search_count([('stop', '>=', today_start),('stop', '<=', today_stop),('job_id', 'in', job_ids.ids),('company_id', 'in', company_ids)])
+            result['this_week'] = task.search_count([('stop', '>=', week_start),('stop', '<=', week_stop),('job_id', 'in', job_ids.ids),('company_id', 'in', company_ids)])
+            result['this_month'] = task.search_count([('stop', '>=', month_start),('stop', '<', month_stop),('job_id', 'in', job_ids.ids),('company_id', 'in', company_ids)])
+            result['all'] = task.search_count([('job_id', 'in', job_ids.ids),('company_id', 'in', company_ids)])
         elif self.env.user.has_group('ccpp.group_ccpp_backoffice_manager_all_department') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_manager_all_department'):
-            result['today'] = task.search_count([('stop', '>=', today_start),('stop', '<=', today_stop),('department_id', '=', employee_id.department_id.id)])
-            result['this_week'] = task.search_count([('stop', '>=', week_start),('stop', '<=', week_stop),('department_id', '=', employee_id.department_id.id)])
-            result['this_month'] = task.search_count([('stop', '>=', month_start),('stop', '<', month_stop),('department_id', '=', employee_id.department_id.id)])
-            result['all'] = task.search_count([('department_id', '=', employee_id.department_id.id)])
+            result['today'] = task.search_count([('stop', '>=', today_start),('stop', '<=', today_stop),('department_id', '=', employee_id.department_id.id),('company_id', 'in', company_ids)])
+            result['this_week'] = task.search_count([('stop', '>=', week_start),('stop', '<=', week_stop),('department_id', '=', employee_id.department_id.id),('company_id', 'in', company_ids)])
+            result['this_month'] = task.search_count([('stop', '>=', month_start),('stop', '<', month_stop),('department_id', '=', employee_id.department_id.id),('company_id', 'in', company_ids)])
+            result['all'] = task.search_count([('department_id', '=', employee_id.department_id.id),('company_id', 'in', company_ids)])
         elif self.env.user.has_group('ccpp.group_ccpp_ceo'):
-            result['today'] = task.search_count([('stop', '>=', today_start),('stop', '<=', today_stop),('department_id', '=', employee_id.department_id.id)])
-            result['this_week'] = task.search_count([('stop', '>=', week_start),('stop', '<=', week_stop),('department_id', '=', employee_id.department_id.id)])
-            result['this_month'] = task.search_count([('stop', '>=', month_start),('stop', '<', month_stop),('department_id', '=', employee_id.department_id.id)])
-            result['all'] = task.search_count([('department_id', '=', employee_id.department_id.id)])
+            result['today'] = task.search_count([('stop', '>=', today_start),('stop', '<=', today_stop),('company_id', 'in', company_ids)])
+            result['this_week'] = task.search_count([('stop', '>=', week_start),('stop', '<=', week_stop),('company_id', 'in', company_ids)])
+            result['this_month'] = task.search_count([('stop', '>=', month_start),('stop', '<', month_stop),('company_id', 'in', company_ids)])
+            result['all'] = task.search_count([('company_id', 'in', company_ids)])
             
         return result
     
