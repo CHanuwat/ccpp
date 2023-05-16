@@ -38,7 +38,7 @@ STATE_COLOR = {
     'process': 3,  # orangeq
     'done': 20,  # red / danger
     'cancel': 23,  # light blue
-    'void': 23,
+    #'void': 23,
     '1': 9,
     '2': 2,
     '3': 3,
@@ -137,7 +137,7 @@ class Project(models.Model):
         ('process', 'On Process'),
         ('done', 'Done'),
         ('cancel', 'Cancelled'),
-        ('void','Void'),
+        #('void','Void'),
         #('delay', 'delayed'),
     ], default='open', index=True, string="State", track_visibility="onchange", tracking=True)
     state_color = fields.Integer(compute='_compute_state_color')
@@ -176,6 +176,23 @@ class Project(models.Model):
     domain_department_ids = fields.Many2many("hr.department", string="Domain Department", compute="_compute_domain_department_ids")
     partner_contact_ids = fields.Many2many("res.partner", string="Host of CCPP (Contact)")
     domain_partner_contact = fields.Many2many("res.partner", string="Domain Multi Partner", compute="_compute_domain_partner_contact")
+
+    @api.model
+    def get_views(self, views, options=None):
+        res = super().get_views(views, options)
+        for view in res['views'].values():
+            #if view.get('toolbar').get('action'):
+            #install_id = self.env.ref('base.action_server_module_immediate_install').id
+            #action = [rec for rec in res['views']['form']['toolbar']['action'] if rec.get('id', False) != install_id]
+            #res['views']['form']['toolbar'] = {'action': action}
+            if view.get('toolbar'):
+                toolbar = view.get('toolbar')
+                if toolbar.get('action'):
+                    ccpp_tree_id = self.env.ref('ccpp.ccpp_approve_dashboard_tree').id
+                    if view.get('id',False) != ccpp_tree_id:
+                        action = [rec for rec in view['toolbar']['action'] if rec.get('name', False) != 'Approve CCPP']
+                        view['toolbar']['action'] = action
+        return res
 
     @api.depends("partner_id")
     def _compute_is_show_multi_host(self):
@@ -301,7 +318,7 @@ class Project(models.Model):
     def unlink(self):
         for obj in self:
             if not obj._context.get('discard_create') and obj.state != 'open':
-                raise UserError("ระบบไม่สามารถลบ CCPP ได้ กรุณา cancel หรือ void หากไม่ได้ใช้งาน")
+                raise UserError("ระบบไม่สามารถลบ CCPP ได้ กรุณา cancel หากไม่ได้ใช้งาน")
         res = super().unlink()
         return res
        
@@ -359,7 +376,7 @@ class Project(models.Model):
                         is_done = False
             obj.is_ccpp_done = is_done
     
-    @api.depends("tasks_solution.start_date")
+    @api.depends("tasks_solution","tasks_solution.start_date")
     def _compute_deadline(self):
         for obj in self:
             if len(obj.tasks_solution) < 2:
@@ -367,6 +384,10 @@ class Project(models.Model):
                     if line.state not in ['cancel']:
                         obj.show_period = line.show_period
                         obj.deadline_date = line.deadline_date
+            if not obj.tasks_solution:
+                obj.show_period = False
+                obj.deadline_date = False
+                
                         
     
     #@api.depends("tasks_solution.start_date")
@@ -722,6 +743,7 @@ class Project(models.Model):
     def ccpp_update_all_action_task(self):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.act_rocker_timesheet_tree')
         action['domain'] = [('project_id', '=', self.id)]
+        action['context'] = self._context
         #action['display_name'] = _("%(name)s's Updates", name=self.name)
         return action
     
@@ -763,6 +785,11 @@ class Project(models.Model):
                 for solution_id in obj.tasks_solution:
                     if not solution_id.child_ids:
                         raise UserError("Please set Strategy")
+                       
+    def button_approve_dashboard(self):
+        self.button_approve()
+        action = self.env['ir.actions.server']._for_xml_id('ccpp.ccpp_ccpp_approve_dashboard_action_manager')
+        return action                   
                                                
     def button_approve(self):
         for obj in self:
@@ -787,6 +814,8 @@ class Project(models.Model):
             if not waiting_another_level:
                 obj.button_approve_final()
                 obj.check_ccpp_delayed()
+            
+                
 
     def button_approve_final(self):
         for obj in self:
@@ -847,6 +876,10 @@ class Project(models.Model):
         #    'views' : [(self.env.ref('ccpp.').id, 'form')]
         #} 
         
+    def button_done_wizard(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_wizard_done_action')
+        action['context'] = {'default_ccpp': self.id}
+        return action  
         
     def button_done(self):
         for obj in self:
@@ -854,7 +887,6 @@ class Project(models.Model):
             for solution_id in obj.tasks_solution:
                 if solution_id.state == 'process':
                     solution_id.state = 'done'
-        
         
     def button_cancel_wizard(self):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_wizard_cancel_action')
@@ -927,9 +959,15 @@ class Project(models.Model):
                     strategy_id.delay_date = date_today
                         
     def run_script_update(self):
-        approval_ids = self.env['approval'].search([])
-        for approve_id in approval_ids:
-            approve_id.write({'model_ids': [approve_id.model_id.id]})
+        
+        department_ids = self.env['hr.department'].search([])
+        for department_id in department_ids:
+            department_id.complete_name = department_id.name
+        
+        # approval_ids = self.env['approval'].search([])
+        # for approve_id in approval_ids:
+        #     approve_id.write({'model_ids': [approve_id.model_id.id]})
+            
         # ccpp_ids = self.env['project.project'].search([])
         # print(ccpp_ids)
         # for ccpp_id in ccpp_ids:
@@ -1482,7 +1520,7 @@ class Task(models.Model):
         ('process', 'On Process'),
         ('done', 'Done'),
         ('cancel', 'Cancelled'),
-        ('void', 'Void'),
+        #('void', 'Void'),
         #('delay', 'Delayed'),
     ], default='open', index=True, string="State", track_visibility="onchange", tracking=True)
     last_update_status_strategy = fields.Selection(selection=[
@@ -1536,6 +1574,29 @@ class Task(models.Model):
     is_solution_already_approve = fields.Boolean(string="Is Solution Already Approve", compute="_compute_is_solution_already_approve")
     is_strategy_already_approve = fields.Boolean(string="Is Strategy Already Approve", compute="_compute_is_strategy_already_approve")
     
+    @api.model
+    def get_views(self, views, options=None):
+        res = super().get_views(views, options)
+        for view in res['views'].values():
+            #if view.get('toolbar').get('action'):
+            #install_id = self.env.ref('base.action_server_module_immediate_install').id
+            #action = [rec for rec in res['views']['form']['toolbar']['action'] if rec.get('id', False) != install_id]
+            #res['views']['form']['toolbar'] = {'action': action}
+            if view.get('toolbar'):
+                toolbar = view.get('toolbar')
+                if toolbar.get('action'):
+                    strategy_tree_id = self.env.ref('ccpp.strategy_approve_dashboard_tree').id
+                    solution_tree_id = self.env.ref('ccpp.solution_approve_dashboard_tree').id
+                    if view.get('id',False) not in [solution_tree_id,strategy_tree_id]:
+                        action = [rec for rec in view['toolbar']['action'] if rec.get('name', False) not in ['Approve Solution', 'Approve Strategy']]
+                        view['toolbar']['action'] = action
+                    elif view.get('id',False) == strategy_tree_id:
+                        action = [rec for rec in view['toolbar']['action'] if rec.get('name', False) not in ['Approve Solution']]
+                        view['toolbar']['action'] = action
+                    elif view.get('id',False) == solution_tree_id:
+                        action = [rec for rec in view['toolbar']['action'] if rec.get('name', False) not in ['Approve Strategy']]
+                        view['toolbar']['action'] = action
+        return res
     
     def button_start_next_period(self):
         for solution_id in self:
@@ -1619,9 +1680,9 @@ class Task(models.Model):
     def unlink(self):
         for obj in self:
             if obj.is_solution and obj.state != 'open':
-                raise UserError("ระบบไม่สามารถลบ Solution ได้ กรุณา cancel หรือ void CCPP หากไม่ได้ใช้งาน")
+                raise UserError("ระบบไม่สามารถลบ Solution ได้ กรุณา cancel หากไม่ได้ใช้งาน")
             if obj.is_strategy and obj.state != 'open':
-                raise UserError("ระบบไม่สามารถลบ Strategy ได้ กรุณา cancel หรือ void CCPP หากไม่ได้ใช้งาน")
+                raise UserError("ระบบไม่สามารถลบ Strategy ได้ กรุณา cancel หากไม่ได้ใช้งาน")
         res = super().unlink()
         return res
     
@@ -2142,6 +2203,14 @@ class Task(models.Model):
 
         return action
     
+    def button_done_wizard(self):
+        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_wizard_done_action')
+        if self.is_strategy:
+            action['context'] = {'default_strategy': self.id}
+        if self.is_solution:
+            action['context'] = {'default_solution': self.id}
+        return action     
+    
     def button_done(self):
         for obj in self:
             obj.state = 'done'
@@ -2167,7 +2236,12 @@ class Task(models.Model):
                     strategy_id.create_approve_lines()
                     strategy_id.state = 'waiting_approve'
             obj.create_approve_lines()
-        
+
+    def button_approve_strategy_dashboard(self):
+        self.button_approve_strategy()
+        action = self.env['ir.actions.server']._for_xml_id('ccpp.ccpp_strategy_approve_dashboard_action_manager')
+        return action  
+
     def button_approve_strategy(self):
         for obj in self:
             employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
@@ -2188,6 +2262,11 @@ class Task(models.Model):
             obj.reason_reject = False
             obj.state = 'process'
             
+    def button_approve_solution_dashboard(self):
+        self.button_approve_solution()
+        action = self.env['ir.actions.server']._for_xml_id('ccpp.ccpp_solution_approve_dashboard_action_manager')
+        return action  
+    
     def button_approve_solution(self):
         for obj in self:
             employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)

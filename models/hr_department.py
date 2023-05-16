@@ -14,3 +14,8 @@ class Department(models.Model):
     def unlink(self):
         raise UserError("ระบบไม่สามารถลบฝ่ายและแผนกได้")
         res = super().unlink()
+        
+    @api.depends('name', 'parent_id.complete_name')
+    def _compute_complete_name(self):
+        for department in self:
+            department.complete_name = department.name

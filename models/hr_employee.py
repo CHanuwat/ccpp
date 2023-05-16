@@ -77,6 +77,32 @@ class HrEmployeePrivate(models.Model):
             partner_id.is_employee = True
         res = super(HrEmployeePrivate, self).write(vals)
         return res
+    
+    @api.onchange('job_lines','job_lines.employee_id')
+    def onchange_employee(self):
+        for obj in self:
+            if obj.job_lines:
+                if obj.job_lines.ids < obj._origin.job_lines.ids:
+                    continue
+                new_line = []
+                for i in obj.job_lines.ids:
+	                if i not in obj._origin.job_lines.ids:
+		                new_line.append(i)
+                print("Max"*100)
+                print(obj.job_lines.ids)
+                print(obj._origin.job_lines.ids)
+                if not new_line:
+                    continue
+                new_line_id = self.env['hr.job'].browse(new_line[0])
+                job_position_id = self.env['res.partner.position'].search([('name','=',new_line_id.name),('type','=','internal')],limit=1)
+                if not job_position_id:
+                    job_position_id = self.env['res.partner.position'].sudo().create({
+                        'name': new_line_id.name,
+                        'type': 'internal',
+                    })
+                obj.work_contact_id.job_position_id = job_position_id
+            else:
+                obj._origin.work_contact_id.job_position_id = False
 
 # class HrExpense(models.Model):
 #     _inherit = "hr.expense"

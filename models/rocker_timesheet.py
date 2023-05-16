@@ -490,7 +490,6 @@ class RockerTimesheet(models.Model):
     note = fields.Text("Note")
     checkin_date = fields.Datetime(string="Check In Date")
     
-    
     department_id = fields.Many2one("hr.department",string="Department", related="employee_id.department_id", store=True, track_visibility="onchange")
     division_id = fields.Many2one("hr.department",string="Department", related="employee_id.division_id", store=True, track_visibility="onchange")
     job_id = fields.Many2one("hr.job", string="Job Position", default=_get_default_job, required=True, track_visibility="onchange")#default=_get_default_job, 
@@ -501,6 +500,17 @@ class RockerTimesheet(models.Model):
     longitude = fields.Float(string="Longitude")
     diff_distance = fields.Float(string="Diff.Distance(Km.)", compute="_compute_distance")
     is_diff_distance = fields.Boolean(string="Is Diff", compute="_compute_distance")
+    
+    is_owner = fields.Boolean(string="Is Owner", compute="_compute_is_owner")
+
+    @api.depends('job_id')
+    def _compute_is_owner(self):
+        for obj in self:
+            is_owner = False
+            employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+            if obj.job_id in employee_id.job_lines:
+                is_owner = True
+            obj.is_owner = is_owner
 
     @api.depends("employee_id")
     def _compute_domain_job_ids(self):
@@ -1353,6 +1363,11 @@ class RockerTimesheet(models.Model):
     def _compute_state_color(self):
         for obj in self:         
             obj.state_color = STATE_COLOR[obj.state]
+            
+    @api.model
+    def check_job_current(self):
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        return employee_id.job_lines.ids
             
     @api.model
     def get_employee(self,context):

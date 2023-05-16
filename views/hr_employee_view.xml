@@ -18,8 +18,10 @@
                 <field name="division_id" domain="[('id','in',domain_division_ids)]" options="{'no_create': True}"/>
             </xpath>
 
-            <xpath expr="//group[@name='active_group']/field[@name='user_id']" position="attributes">
-                <attribute name="options">{'no_open': True}</attribute>
+            <xpath expr="//group[@name='active_group']/field[@name='user_id']" position="replace">
+                <!-- <attribute name="options">{'no_open': True}</attribute> -->
+                <!--<attibute name="groups">"base.group_no_one"</attibute>-->
+                <field name="user_id" string="Related User" domain="[('share', '=', False)]" context="{'allow_create_employee': False, 'default_create_employee': False}" groups="base.group_no_one"/>
             </xpath>
 
         </field>

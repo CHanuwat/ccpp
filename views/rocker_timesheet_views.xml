@@ -51,8 +51,9 @@
             <field name="arch" type="xml">
                 <!--<tree js_class="rocker_tree" string="Timesheets" editable="top" create="true" delete="true" edit="true">-->
                 <tree js_class="task_dashboard_list" string="Timesheets" create="false" delete="false" edit="true" class="task_list" expand="0">
+                    <field name="is_owner" invisible="1"/>
                     <!-- <button name="update_situation" type="object" string="Check In" class="btn btn-success" icon="fa-sign-in" attrs="{'invisible': [('state','not in',['open'])]}"/> -->
-                    <button name="ccpp.action_check_in" type="action" string="Check In" class="btn btn-success" icon="fa-sign-in" attrs="{'invisible': [('state','not in',['open'])]}"/>
+                    <button name="ccpp.action_check_in" type="action" string="Check In" class="btn btn-success" icon="fa-sign-in" attrs="{'invisible': ['|',('state','not in',['open']),('is_owner','=',False)]}"/>
                     <field name="name" string="Task" />
                     <field name="start" required="1" string="From"/>
                     <field name="stop" required="1" string="To"/>
@@ -87,7 +88,7 @@
                             <!--<button name="update_situation" string="Update Situation" type="object" class="btn-primary" states="open"/>-->
                             <!--<button name="button_done_wizard" string="Check In" type="object" class="btn-success" states="open"/>-->
                             <!--<button name="button_to_open" string="To Open" type="object" class="btn-primary" states="done"/>-->
-                            <button name="button_cancel" string="To Open" type="object"/>
+                            <!--<button name="button_cancel" string="Cancel" type="object"/>-->
                             <field name="state" widget="statusbar"/>
                         </header>
                         <sheet>
@@ -109,16 +110,17 @@
                                     <field name="name" readonly="True"/>
                                 </h2>
                             </div>
+                            <field name="is_owner" invisible="1"/>
                             <div class="oe_title">
                                 <h1>
                                     <label for="current_action" string="Current Situation"/>
-                                    <field name="current_action" class="o_text_overflow" placeholder="Enter Current Situation" required="1"/>
+                                    <field name="current_action" class="o_text_overflow" placeholder="Enter Current Situation" required="1" attrs="{'readonly': [('is_owner','=',False),('id','!=',False)]}"/>
                                 </h1>
                             </div>
                             <div class="oe_title">
                                 <h1>
                                     <label for="next_action" string="Next Action"/>
-                                    <field name="next_action" class="o_text_overflow" placeholder="Enter Next Action" required="1"/>
+                                    <field name="next_action" class="o_text_overflow" placeholder="Enter Next Action" required="1" attrs="{'readonly': [('is_owner','=',False),('id','!=',False)]}"/>
                                 </h1>
                             </div>
 
@@ -318,25 +320,26 @@
             <field name="model">account.analytic.line</field>
             <field name="priority" eval="1"/>
             <field name="arch" type="xml">
-                <form string="Tasks">
+                <form string="Tasks" class="calendar_date_picker">
                     <header>
                         <button name="duplicate_task" string="Duplicate" type="object" class="btn-primary" attrs="{'invisible': [('id', '=', False)]}"/>
                     </header>
                     <sheet>
+                        <field name="is_owner" invisible="1"/>
                         <div class="oe_title">
                             <div class="oe_edit_only">
                                 <label for="name" string="Task"/>
                             </div>
                             <h1>
-                                <field name="name" placeholder="Enter Task" class="font-weight-bold" required="True"/>
+                                <field name="name" placeholder="Enter Task" class="font-weight-bold" required="True" attrs="{'readonly': [('is_owner','=',False),('id','!=',False)]}"/>
                             </h1>
                         </div>
                         <!--<label for="company_id" string="for Company: " />-->
                         <field name="company_id" required="1" readonly="1" invisible="1"/>
                         <div class="o_row">
-                            <field name="is_go_ccpp_customer"/>
+                            <field name="is_go_ccpp_customer" attrs="{'readonly': [('is_owner','=',False),('id','!=',False)]}"/>
                             <label for="is_go_ccpp_customer" string="CCPP Customer"/>   
-                            <field name="is_go_potential"/>
+                            <field name="is_go_potential" attrs="{'readonly': [('is_owner','=',False),('id','!=',False)]}"/>
                             <label for="is_go_potential" string="Potential"/>     
                         </div>
 
@@ -346,18 +349,18 @@
                                 <group>
                                     <group>
                                         <field name="id" invisible="True"/>
-                                        <field name="priority_id" attrs="{'invisible': [('is_go_ccpp_customer','=',False)]}"/>
+                                        <field name="priority_id" attrs="{'invisible': [('is_go_ccpp_customer','=',False)], 'readonly': [('is_owner','=',False),('id','!=',False)]}"/>
                                         <field name="customer_id" string="Customer" 
-                                        attrs="{'invisible': [('is_go_potential','=',False)]}"
+                                        attrs="{'invisible': [('is_go_potential','=',False)], 'readonly': [('is_owner','=',False),('id','!=',False)]}"
                                         options="{'no_create':True}"
                                         context="{'show_rank':True, 'order_display': 'potential_ranking'}"
                                         domain="[('id','in',domain_customer_ids)]"/>
                                         <field name="customer_id" string="Customer" 
-                                        attrs="{'invisible': [('is_go_ccpp_customer','=',False)]}"
+                                        attrs="{'invisible': [('is_go_ccpp_customer','=',False)], 'readonly': [('is_owner','=',False),('id','!=',False)]}"
                                         options="{'no_create':True}"
                                         domain="[('id','in',domain_customer_ids)]"/>
-                                        <field name="start" string="From" invisible="0" readonly="0" required="1" />
-                                        <field name="stop" string="To" invisible="0" readonly="0" required="1" />
+                                        <field name="start" string="From" invisible="0" required="1" attrs="{'readonly': [('is_owner','=',False),('id','!=',False)]}"/>
+                                        <field name="stop" string="To" invisible="0" required="1" attrs="{'readonly': [('is_owner','=',False),('id','!=',False)]}"/>
                                         <field name="domain_customer_ids" invisible="True"/>
                                         
                                         <!--<label for="daystocreateshow" string="Generate" attrs="{'invisible':[('daystocreateshow','&lt;',2)]}"/>
@@ -379,14 +382,14 @@
                                         <field name="domain_strategy_ids" invisible="True"/>
 
                                         <field name="temp_project_id" required="0" string="CCPP" domain="[('id','in',domain_ccpp_ids)]"
-                                        attrs="{'invisible': [('is_go_ccpp_customer','=',False)]}"
+                                        attrs="{'invisible': [('is_go_ccpp_customer','=',False)], 'readonly': [('is_owner','=',False),('id','!=',False)]}"
                                         options="{'no_create':True}"/>
                                         <field name="project_id" invisible="True"/>
                                         <field name="temp_task_id" required="0" string="Solution"
                                                 domain="[('project_id', '=', project_id), 
                                                          ('is_solution', '=', True),
                                                          ('state', '=', 'process')]"
-                                                attrs="{'invisible': [('is_go_ccpp_customer','=',False)]}"
+                                                attrs="{'invisible': [('is_go_ccpp_customer','=',False)], 'readonly': [('is_owner','=',False),('id','!=',False)]}"
                                                 options="{'no_create':True}"/>
                                         <field name="task_id" invisible="True"/>
                                         <field name="task_strategy_id" string="Strategy"
@@ -394,7 +397,7 @@
                                                          ('parent_id', '=', task_id),
                                                          ('is_strategy', '=', True),
                                                          ('state', '=', 'process')]"
-                                                attrs="{'invisible': [('is_go_ccpp_customer','=',False)]}"
+                                                attrs="{'invisible': [('is_go_ccpp_customer','=',False)], 'readonly': [('is_owner','=',False),('id','!=',False)]}"
                                                 options="{'no_create':True}"/>
                                         <!--<label for="unit_amount"  string="Actual Work" invisible="0"/>
                                         <div>
@@ -438,8 +441,8 @@
                     <field name="project_id" required="1" string="CCPP"/>
                     <field name="task_id" required="1" string="Solution"/>
                     <field name="task_strategy_id" required="1" string="Strategy"/>
-                    <field name="employee_id" string="User"/>
-                    <field name="job_id" string="Job Position" filters="1"/>
+                    <field name="employee_id" string="User" filters="1"/>
+                    <field name="job_id" string="Job Position"/>
                     <field name="state_char" filters="1" string="State"/>
                     
                     <field name="unit_amount" required="1" invisible="1"/>

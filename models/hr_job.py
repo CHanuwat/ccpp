@@ -37,4 +37,18 @@ class Job(models.Model):
                 domain_division_ids = obj.department_id.child_ids
             obj.domain_division_ids = domain_division_ids
     
-
+    @api.onchange('employee_id')
+    def onchange_employee(self):
+        for obj in self:
+            if obj.employee_id:
+                job_position_id = self.env['res.partner.position'].search([('name','=',obj.name),('type','=','internal')],limit=1)
+                if not job_position_id:
+                    job_position_id = self.env['res.partner.position'].sudo().create({
+                        'name': obj.name,
+                        'type': 'internal',
+                    })
+                obj.employee_id.work_contact_id.job_position_id = job_position_id
+            else:
+                obj._origin.employee_id.work_contact_id.job_position_id = False
+                
+        

@@ -43,6 +43,7 @@
         "views/hr_job_view.xml",
         "views/ccpp_wizard_reject_view.xml",
         "views/ccpp_wizard_cancel_view.xml",
+        "views/ccpp_wizard_done_view.xml",
         "views/ccpp_wizard_void_view.xml",
         "views/ccpp_wizard_done_task_view.xml",
         "views/hr_employee_view.xml",
