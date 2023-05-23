@@ -1292,6 +1292,11 @@ class RockerTimesheet(models.Model):
         return action
     
     @api.model
+    def get_employee_calendar(self,context={}):
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        return employee_id.id
+    
+    @api.model
     def retrieve_dashboard(self,context={}):
         
         result = {

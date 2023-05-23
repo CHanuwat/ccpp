@@ -2369,7 +2369,7 @@ class Task(models.Model):
             else:
                 if not self._context.get('approve_from_solution',False):
                     approve_activity_type_id = self.env['approve.activity.type'].search([('code','=','strategy')],limit=1)
-                    approve_line_id = obj.ccpp_approve_lines[count_approve_line]
+                    approve_line_id = obj.strategy_approve_lines[count_approve_line]
                     for approve_line in approve_line_id:
                         for job_approve_id in approve_line.job_approve_ids:
                             todos = {
@@ -2421,7 +2421,7 @@ class Task(models.Model):
             else:
                 if not self._context.get('approve_from_ccpp',False):
                     approve_activity_type_id = self.env['approve.activity.type'].search([('code','=','solution')],limit=1)
-                    approve_line_id = obj.ccpp_approve_lines[count_approve_line]
+                    approve_line_id = obj.solution_approve_lines[count_approve_line]
                     for approve_line in approve_line_id:
                         for job_approve_id in approve_line.job_approve_ids:
                             todos = {
