@@ -21,18 +21,17 @@ export class CCPPCalendarCommonPopover extends CalendarCommonPopover {
                 "check_job_current",
                 //[this.props.record.resId], // self
             );
-            debugger
         });
     }
 
     openCheckIn() {
         var context = {};
-        debugger
         context['active_id'] = this.props.record.id;
         context['is_checkin_calendar'] = true;
         this.action.doAction('ccpp.action_check_in',{
             additionalContext: context,
         });
+        this.props.close();
     }
 
     openSituation() {
@@ -41,7 +40,6 @@ export class CCPPCalendarCommonPopover extends CalendarCommonPopover {
         context['res_id'] = this.props.record.id;
 
         // context['is_checkin_calendar'] = true;
-        debugger
         this.action.doAction({type: 'ir.actions.act_window',
             res_model: 'account.analytic.line',
             res_id: this.props.record.id,
@@ -58,7 +56,6 @@ export class CCPPCalendarCommonPopover extends CalendarCommonPopover {
     }
 
     get isOwner() {
-        debugger
         if (this.job_current_ids.includes(this.props.record.rawRecord.job_id[0])){
             return true
         } else {

@@ -31,7 +31,7 @@
                         </group>
                     </group>
                     <footer>
-                        <button name="button_done_and_skip" string="Check In" type="object" class="btn-primary"/>
+                        <!--<button name="button_done_and_skip" string="Check In" type="object" class="btn-primary"/>-->
                         <button name="button_done" string="Check In &amp; Done Strategy" type="object" class="btn-success" attrs="{'invisible': [('strategy_id','=',False)]}"/>
                         <button special="cancel" data-hotkey="z" string="Cancel" />
                     </footer>

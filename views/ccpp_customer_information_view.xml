@@ -206,7 +206,7 @@
                             <field name="job_id" domain="[('id', 'in', domain_job_ids)]" options="{'no_open': True}"/>
                         </group>
                         <group>
-                            <field name="customer_category_id"/>
+                            <field name="customer_category_id" options="{'no_open':True}"/>
                             <label for="hospital_size"/>
                             <div class="o_row" name="div_size">  
                                 <field name="hospital_size" class="o_customer_information_narrow_field"/>
@@ -390,7 +390,7 @@
                             <field name="job_id" domain="[('id', 'in', domain_job_ids)]" options="{'no_open': True}"/>
                         </group>
                         <group>
-                            <field name="customer_category_id"/>
+                            <field name="customer_category_id" options="{'no_open':True}"/>
                             <field name="active" widget="boolean_toggle"/>
                         </group>
                     </group>
@@ -560,7 +560,7 @@
                             <field name="job_id" domain="[('id', 'in', domain_job_ids)]" options="{'no_open': True}"/>
                         </group>
                         <group>
-                            <field name="customer_category_id"/>
+                            <field name="customer_category_id" options="{'no_open':True}"/>
                             <field name="active" widget="boolean_toggle"/>
                         </group>
                     </group>

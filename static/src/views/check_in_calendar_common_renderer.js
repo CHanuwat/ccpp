@@ -11,14 +11,13 @@ export class CCPPCalendarCommonRenderer extends CalendarCommonRenderer {
         const record = this.props.model.records[event.id];
         el.classList.remove('o_calendar_color_6');
         el.classList.remove('o_calendar_color_11');
-        if (record.rawRecord.state == 'open'){
+        if (record && record.rawRecord.state == 'open'){
             el.classList.add("o_calendar_color_6");
 
         }
-        if (record.rawRecord.state == 'done'){
+        if (record && record.rawRecord.state == 'done'){
             el.classList.add("o_calendar_color_11");
         }
-        debugger
         
     }
 }

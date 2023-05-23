@@ -32,5 +32,4 @@ access_approval,access_approval,model_approval,base.group_user,1,1,1,1
 access_approval_line,access_approval_line,model_approval_line,base.group_user,1,1,1,1
 access_ccpp_approve_line,access_ccpp_approve_line,model_ccpp_approve_line,base.group_user,1,1,1,1
 access_asset,access_asset,model_asset,base.group_user,1,1,1,1
-
-
+access_approve_activity_type,access_approve_activity_type,model_approve_activity_type,base.group_user,1,1,1,1

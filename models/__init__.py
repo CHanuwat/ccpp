@@ -30,3 +30,6 @@ from . import asset
 from . import ccpp_wizard_fill_history
 from . import ccpp_wizard_void
 from . import ccpp_wizard_done
+from . import mail_activity
+from . import approve_activity_type
+from . import mail_thread

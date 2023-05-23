@@ -91,11 +91,12 @@
         </field>
     </record>
 
-    <menuitem name="Approval"
-            id="menu_main_approval"
+    <menuitem name="Approval Workflow"
+            id="menu_main_approval_workflow"
             web_icon="ccpp,static/description/approve_icon.png"
+            groups="base.group_system"
             sequence="502"/>
 
-    <menuitem name="Approval" id="menu_approval" parent="menu_main_approval" action="approval_action" sequence="1"/>
+    <menuitem name="Approval Workflow" id="menu_approval_workflow" parent="menu_main_approval_workflow" action="approval_action" sequence="1"/>
 
 </odoo>

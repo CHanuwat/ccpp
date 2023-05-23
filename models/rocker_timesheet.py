@@ -110,9 +110,13 @@ class RockerTimesheet(models.Model):
         return domain
 
     def _domain_project_id_search(self):
-        company_ids = self._context.get('allowed_company_ids')
-        domain = [('company_id', 'in', company_ids)]
-        #domain = [('company_id', '=', self.env.company.id)]
+        # company_ids = self._context.get('allowed_company_ids')
+        # domain = [('company_id', 'in', company_ids)]
+        # print("True"*100)
+        print("False"*100)
+        print(self._context)
+        domain = [('company_id', 'in', self.env.user.company_ids.ids)]
+        #domain = []
         return domain
 
     def _set_rolling(self, bset):
@@ -203,6 +207,7 @@ class RockerTimesheet(models.Model):
     def _domain_get_search_domain(self, filt):
         # default = all
         _search_panel_domain = [('company_id', '=', self.env.company.id)]  # ok
+        print("True"*100)
         if filt == 'all':
             _search_panel_domain = _search_panel_domain + []
         elif filt == 'member':
@@ -1244,12 +1249,13 @@ class RockerTimesheet(models.Model):
 
         return dt - offset.total_seconds() / 3600
     
-    def button_done_wizard(self):
+    def button_done_wizard(self,context):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_wizard_done_task_action')
         action['context'] = {'default_task': self.id,
                             'default_ccpp': self.project_id.id,
                             'default_solution': self.task_id.id,
-                            'default_strategy': self.task_strategy_id.id}
+                            'default_strategy': self.task_strategy_id.id,
+                            'context': context}
         return action
     
     def button_done(self):
@@ -1466,9 +1472,20 @@ class RockerTimesheet(models.Model):
         
     @api.model
     def update_check_in(self,context):
+        
         obj=self.browse(context[0])
         if not context[1] or not context[2]:
             raise UserError("Not found location !!. Please check network or refresh browser")
+        
+        # if 'done_strategy' in context[5]:
+            # obj.task_strategy_id.button_done()
+        print("max1"*100)
+        print(context[5])
+        if 'done_strategy' in context[5]:
+            print("max"*100)
+            context[5] = ''
+            obj.button_done_wizard(context)
+        
         checkin_date = datetime.now()
         obj.write({'latitude': context[1],
                    'longitude': context[2],
@@ -1477,8 +1494,6 @@ class RockerTimesheet(models.Model):
                    'checkin_date': checkin_date,
                    
         })
-        if 'done_strategy' in context[5]:
-            obj.task_strategy_id.button_done()
 
         current_year = str(datetime.now().year)
         purchase_history_id = self.env['ccpp.purchase.history'].search([('customer_id','=',obj.customer_id.id),

@@ -43,6 +43,7 @@
             <field name="name">Check In</field>
             <field name="tag">check_in_view</field>
             <field name="context">{'active_id': active_id}</field>
+            <field name="target">main</field>
         </record>
 
         <record id="rocker_timesheet_tree" model="ir.ui.view">
@@ -129,8 +130,8 @@
 
                             <group>
                                 <group>
-                                    <field name="priority_id" readonly="True"/>
-                                    <field name="customer_id" domain="[('is_customer','=',True)]" string="Customer" readonly="True"/>
+                                    <field name="priority_id" readonly="True" options="{'no_open':True}"/>
+                                    <field name="customer_id" domain="[('is_customer','=',True)]" string="Customer" readonly="True" options="{'no_open':True}"/>
                                     <field name="start" required="1" string="From" readonly="True"/>
                                     <field name="stop" required="1" string="To" readonly="True"/>
                                     <field name="employee_id" readonly="True" invisible="True"/>
@@ -140,9 +141,9 @@
                                     <field name="diff_distance" readonly="True" invisible="True" />
                                 </group>
                                 <group>
-                                    <field name="project_id" string="CCPP" readonly="True"/>
-                                    <field name="task_id" string="Solution" readonly="True"/>
-                                    <field name="task_strategy_id" string="Strategy" readonly="True"/>
+                                    <field name="project_id" string="CCPP" readonly="True" options="{'no_open':True}"/>
+                                    <field name="task_id" string="Solution" readonly="True" options="{'no_open':True}"/>
+                                    <field name="task_strategy_id" string="Strategy" readonly="True" options="{'no_open':True}"/>
                                     <field name="checkin_date" string="Check In Date" readonly="True"/>
                                 </group>
                                 
@@ -349,15 +350,15 @@
                                 <group>
                                     <group>
                                         <field name="id" invisible="True"/>
-                                        <field name="priority_id" attrs="{'invisible': [('is_go_ccpp_customer','=',False)], 'readonly': [('is_owner','=',False),('id','!=',False)]}"/>
+                                        <field name="priority_id" attrs="{'invisible': [('is_go_ccpp_customer','=',False)], 'readonly': [('is_owner','=',False),('id','!=',False)]}" options="{'no_open':True, 'no_create':True}"/>
                                         <field name="customer_id" string="Customer" 
                                         attrs="{'invisible': [('is_go_potential','=',False)], 'readonly': [('is_owner','=',False),('id','!=',False)]}"
-                                        options="{'no_create':True}"
+                                        options="{'no_create':True, 'no_open':True}"
                                         context="{'show_rank':True, 'order_display': 'potential_ranking'}"
                                         domain="[('id','in',domain_customer_ids)]"/>
                                         <field name="customer_id" string="Customer" 
                                         attrs="{'invisible': [('is_go_ccpp_customer','=',False)], 'readonly': [('is_owner','=',False),('id','!=',False)]}"
-                                        options="{'no_create':True}"
+                                        options="{'no_create':True, 'no_open':True}"
                                         domain="[('id','in',domain_customer_ids)]"/>
                                         <field name="start" string="From" invisible="0" required="1" attrs="{'readonly': [('is_owner','=',False),('id','!=',False)]}"/>
                                         <field name="stop" string="To" invisible="0" required="1" attrs="{'readonly': [('is_owner','=',False),('id','!=',False)]}"/>
@@ -383,21 +384,21 @@
 
                                         <field name="temp_project_id" required="0" string="CCPP" domain="[('id','in',domain_ccpp_ids)]"
                                         attrs="{'invisible': [('is_go_ccpp_customer','=',False)], 'readonly': [('is_owner','=',False),('id','!=',False)]}"
-                                        options="{'no_create':True}"/>
+                                        options="{'no_create':True, 'no_open':True}"/>
                                         <field name="project_id" invisible="True"/>
                                         <field name="temp_task_id" required="0" string="Solution"
                                                 domain="[('project_id', '=', project_id), 
                                                          ('is_solution', '=', True),
                                                          ('state', '=', 'process')]"
                                                 attrs="{'invisible': [('is_go_ccpp_customer','=',False)], 'readonly': [('is_owner','=',False),('id','!=',False)]}"
-                                                options="{'no_create':True}"/>
+                                                options="{'no_create':True, 'no_open':True}"/>
                                         <field name="task_id" invisible="True"/>
                                         <field name="task_strategy_id" string="Strategy"
                                                 domain="[('project_id', '=', project_id),
                                                          ('parent_id', '=', task_id),
                                                          ('is_strategy', '=', True),
                                                          ('state', '=', 'process')]"
-                                                attrs="{'invisible': [('is_go_ccpp_customer','=',False)], 'readonly': [('is_owner','=',False),('id','!=',False)]}"
+                                                attrs="{'invisible': [('is_go_ccpp_customer','=',False)], 'readonly': [('is_owner','=',False),('id','!=',False)], 'no_open':True}"
                                                 options="{'no_create':True}"/>
                                         <!--<label for="unit_amount"  string="Actual Work" invisible="0"/>
                                         <div>
@@ -437,13 +438,13 @@
                           show_unusual_days="true"
                           hide_time="false">
                     <!--<field name="display_name"/>-->
-                    <field name="customer_id"/>
-                    <field name="project_id" required="1" string="CCPP"/>
-                    <field name="task_id" required="1" string="Solution"/>
-                    <field name="task_strategy_id" required="1" string="Strategy"/>
-                    <field name="employee_id" string="User" filters="1"/>
-                    <field name="job_id" string="Job Position"/>
-                    <field name="state_char" filters="1" string="State"/>
+                    <field name="customer_id" options="{'no_open':True}"/>
+                    <field name="project_id" required="1" string="CCPP" options="{'no_open':True}"/>
+                    <field name="task_id" required="1" string="Solution" options="{'no_open':True}"/>
+                    <field name="task_strategy_id" required="1" string="Strategy" options="{'no_open':True}"/>
+                    <field name="employee_id" string="User" filters="1" options="{'no_open':True}"/>
+                    <field name="job_id" string="Job Position" options="{'no_open':True}"/>
+                    <field name="state_char" filters="1" string="State" options="{'no_open':True}"/>
                     
                     <field name="unit_amount" required="1" invisible="1"/>
                     <field name="rocker_type" invisible="1"/>

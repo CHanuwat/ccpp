@@ -26,3 +26,33 @@
 .ccpp_kanban_text{
   color: var(--biz-theme-primary-color) !important;
 }
+
+.o_priority_narrow_field {
+  width: 16rem!important;
+  max-width: 16rem!important;
+  * {
+      max-width: 100%;
+  }
+}
+
+.ccpp_dot {
+  height: 30px;
+  width: 30px;
+  background-color: red;
+  border-radius: 50%;
+  display: inline-block;
+  padding: 5px;
+  text-align: center;
+  font-weight:700;
+  color: white;
+  margin-left: 10px;
+  margin-top: 5px;
+  font-size: 14px;
+}
+
+.no_waiting_approve {
+    font-weight: 200;
+    color: grey;
+    opacity: 0.5;
+    font-size: 15px;
+}
