@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <template id="template" xml:space="preserve">
     <t t-name="CCPPdashboard">
-        <iframe title="CCPP Dashbaord" width="1200" height="768" src="https://app.powerbi.com/view?r=eyJrIjoiMDU0MzI4MzUtZTBmZS00ZGZiLTk0MTUtYTNmYzY0ZWE2NjRjIiwidCI6IjM0MjA4ZjM5LThjZjctNDdhYy04NWEwLTQ2NGRlNjhlZGNlOCIsImMiOjEwfQ%3D%3D" frameborder="0" allowfullscreen="true"></iframe>
-        <div class="accounts-dashboard-wrap" style="padding-left: 30px !important;">
+    <iframe title="CCPP Dashbaord" width="1366" height="768" src="https://app.powerbi.com/view?r=eyJrIjoiMDU0MzI4MzUtZTBmZS00ZGZiLTk0MTUtYTNmYzY0ZWE2NjRjIiwidCI6IjM0MjA4ZjM5LThjZjctNDdhYy04NWEwLTQ2NGRlNjhlZGNlOCIsImMiOjEwfQ%3D%3D" frameborder="0" allowfullscreen="true"></iframe>
+        <!--<div class="accounts-dashboard-wrap" style="padding-left: 30px !important;">
             <div class="o_dashboards col-xs-12 col-sm-12 col-lg-12 col-md-12" style="background-color: #e1e1e1;overflow: scroll; !important; ">
                 <div class="content-header">
                     <div class="container-fluid">
@@ -10,9 +10,6 @@
                             <div class="col-sm-12">
                                 <div class="dash-header">
                                     <h1 class="custom-h1 dashboard-h1">CCPP Dashboard</h1>
-                                    <!--<input type="checkbox" style="display:none" data-toggle="toggle" data-on="" data-off="">
-                                        <input type="checkbox" id="toggle-two"/>
-                                    </input>-->
                                 </div>
                             </div>
                         </div>
@@ -105,7 +102,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!--Total Income-->
                             <div class="col-md-3">
                                 <div class="tile wide invoice box-2">
                                     <div class="header">
@@ -125,7 +121,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!--Total Expense-->
                             <div class="col-md-3">
                                 <div class="tile wide invoice box-3">
                                     <div class="header">
@@ -159,7 +154,7 @@
                                         <h3 class="custom-h3">CCPP</h3>
                                     </b>
                                 </div>
-                                <!--<div class="card-tools">
+                                <div class="card-tools">
                                     <select id="income_expense_values" class="btn btn-primary">
                                         <option id="income_this_year" value="income_this_year">This Year</option>
                                         <option id="income_this_month" value="income_this_month" selected="">
@@ -168,7 +163,7 @@
                                         <option id="income_last_month" value="income_last_month">Last Month</option>
                                         <option id="income_last_year" value="income_last_year">Last Year</option>
                                     </select>
-                                </div>-->   
+                                </div>
                             </div>
                             <div class="card-body mt-3" id="in_ex_body_hide">
                                 <div class="row">
@@ -182,7 +177,7 @@
                             </div>
                         </div>
                     </div>
-                    <!--<div class="col-md-4" id="col-graph">
+                    <div class="col-md-4" id="col-graph">
                         <div class="card">
                             <div class="card-header">
                                 <div class="card-title">
@@ -271,7 +266,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>-->
+                    </div>
                     <div class="col-md-4" id="col-graph">
                         <div class="card">
                             <div class="card-header">
@@ -287,7 +282,6 @@
                                     </select>
                                 </div>
                             </div>
-                            <!--card-header-->
                             <div class="card-body" id="ex_body">
                                 <div class="row">
                                     <div class="col-md-12">
@@ -314,7 +308,6 @@
                                     </select>
                                 </div>
                             </div>
-                            <!--card-header-->
                             <div class="card-body" id="aged_payable_body_hide">
                                 <div class="row">
                                     <div class="col-md-12">
@@ -355,6 +348,6 @@
                 </div>
             </div>
             <div id="chart-container"/>
-        </div>
+        </div>-->
     </t>
 </template>
