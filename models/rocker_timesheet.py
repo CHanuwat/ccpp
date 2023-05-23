@@ -110,9 +110,10 @@ class RockerTimesheet(models.Model):
         return domain
 
     def _domain_project_id_search(self):
-        company_ids = self._context.get('allowed_company_ids')
-        domain = [('company_id', 'in', company_ids)]
+        #company_ids = self._context.get('allowed_company_ids')
+        #domain = [('company_id', 'in', company_ids)]
         #domain = [('company_id', '=', self.env.company.id)]
+        domain = [('company_id', 'in', self.env.user.company_ids.ids)]
         return domain
 
     def _set_rolling(self, bset):
