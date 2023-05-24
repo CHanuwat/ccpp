@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <template id="template" xml:space="preserve">
     <t t-name="CCPPdashboard">
-    <iframe title="CCPP Dashbaord" width="1366" height="768" src="https://app.powerbi.com/view?r=eyJrIjoiMDU0MzI4MzUtZTBmZS00ZGZiLTk0MTUtYTNmYzY0ZWE2NjRjIiwidCI6IjM0MjA4ZjM5LThjZjctNDdhYy04NWEwLTQ2NGRlNjhlZGNlOCIsImMiOjEwfQ%3D%3D" frameborder="0" allowfullscreen="true"></iframe>
+    <!--<iframe title="CCPP Dashbaord" width="1366" height="768" src="https://app.powerbi.com/view?r=eyJrIjoiMDU0MzI4MzUtZTBmZS00ZGZiLTk0MTUtYTNmYzY0ZWE2NjRjIiwidCI6IjM0MjA4ZjM5LThjZjctNDdhYy04NWEwLTQ2NGRlNjhlZGNlOCIsImMiOjEwfQ%3D%3D" frameborder="0" allowfullscreen="true"></iframe>-->
+    <iframe title="CCPP Dashbaord" width="100%" height="100%" style="padding-right: 30px; margin-left: -20px;" src="https://app.powerbi.com/view?r=eyJrIjoiMDU0MzI4MzUtZTBmZS00ZGZiLTk0MTUtYTNmYzY0ZWE2NjRjIiwidCI6IjM0MjA4ZjM5LThjZjctNDdhYy04NWEwLTQ2NGRlNjhlZGNlOCIsImMiOjEwfQ%3D%3D" frameborder="0" allowfullscreen="true"></iframe>
         <!--<div class="accounts-dashboard-wrap" style="padding-left: 30px !important;">
             <div class="o_dashboards col-xs-12 col-sm-12 col-lg-12 col-md-12" style="background-color: #e1e1e1;overflow: scroll; !important; ">
                 <div class="content-header">

@@ -44,6 +44,7 @@ export class CCPPCalendarCommonPopover extends CalendarCommonPopover {
             res_model: 'account.analytic.line',
             res_id: this.props.record.id,
             views: [[false, 'form']],});
+        this.props.close();
     }
 
     get isNotDone() {

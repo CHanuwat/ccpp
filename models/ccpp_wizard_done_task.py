@@ -61,6 +61,7 @@ class WizardRejectDoneTask(models.TransientModel):
             if obj.strategy_id:
                 obj.strategy_id.button_done()
             context = self._context.get("context")
+            print(self._context)
             obj.task_id.update_check_in(context)
                 
     # def button_done_and_skip(self):

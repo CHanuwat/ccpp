@@ -1252,6 +1252,7 @@ class RockerTimesheet(models.Model):
                             'default_ccpp': self.project_id.id,
                             'default_solution': self.task_id.id,
                             'default_strategy': self.task_strategy_id.id,
+                            'open_wizard': True,
                             'context': context}
         return action
     
@@ -1479,14 +1480,16 @@ class RockerTimesheet(models.Model):
         if not context[1] or not context[2]:
             raise UserError("Not found location !!. Please check network or refresh browser")
         
-        # if 'done_strategy' in context[5]:
+        # if 'need_done_strategy' in context[5]:
             # obj.task_strategy_id.button_done()
         print("max1"*100)
         print(context[5])
-        if 'done_strategy' in context[5]:
+        need_done_strategy = False
+        if 'need_done_strategy' in context[5]:
             print("max"*100)
-            context[5] = ''
-            obj.button_done_wizard(context)
+            need_done_strategy = True
+            # context[5] = ''
+            # return obj.button_done_wizard(context)
         
         checkin_date = datetime.now()
         obj.write({'latitude': context[1],
@@ -1520,9 +1523,12 @@ class RockerTimesheet(models.Model):
         else:
             obj.state = 'done'
         
+        print("max2"*100)
+        
         return {'purchase_history': is_purchase_history,
                 'order_lines': order_line_list,
                 'borrow_lines': borrow_line_list,
+                'need_done_strategy': need_done_strategy,
                 }
         
     @api.model
@@ -1548,6 +1554,12 @@ class RockerTimesheet(models.Model):
                     }
                 detail_line.create(vals)
         obj.state = 'done'
+
+    @api.model
+    def done_strategy(self,analytic_line):
+        obj = self.browse(analytic_line)  
+        obj.task_strategy_id.button_done()
+        return True
                 
     @api.model
     def skip(self,analytic_line):
