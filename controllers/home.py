@@ -35,30 +35,30 @@ class Home(Website):
             return request.redirect_query('/web/login_successful', query=request.params)
         return request.redirect_query('/web', query=request.params)
     
-    @http.route('/web', type='http', auth="none")
-    def web_client(self, s_action=None, **kw):
+    # @http.route('/web', type='http', auth="none")
+    # def web_client(self, s_action=None, **kw):
 
-        # Ensure we have both a database and a user
-        ensure_db()
-        if not request.session.uid:
-            return request.redirect('/web/login', 303)
-        if kw.get('redirect'):
-            return request.redirect(kw.get('redirect'), 303)
-        if not security.check_session(request.session, request.env):
-            raise http.SessionExpiredException("Session expired")
-        if not is_user_internal(request.session.uid):
-            return request.redirect('/web/login_successful', 303)
+    #     # Ensure we have both a database and a user
+    #     ensure_db()
+    #     if not request.session.uid:
+    #         return request.redirect('/web/login', 303)
+    #     if kw.get('redirect'):
+    #         return request.redirect(kw.get('redirect'), 303)
+    #     if not security.check_session(request.session, request.env):
+    #         raise http.SessionExpiredException("Session expired")
+    #     if not is_user_internal(request.session.uid):
+    #         return request.redirect('/web/login_successful', 303)
 
-        # Side-effect, refresh the session lifetime
-        request.session.touch()
+    #     # Side-effect, refresh the session lifetime
+    #     request.session.touch()
 
-        # Restore the user on the environment, it was lost due to auth="none"
-        request.update_env(user=request.session.uid)
-        try:
-            context = request.env['ir.http'].webclient_rendering_context()
-            response = request.render('web.webclient_bootstrap', qcontext=context)
-            #response.headers['X-Frame-Options'] = 'DENY'
-            response.headers['X-Frame-Options'] = 'DENY'
-            return response
-        except AccessError:
-            return request.redirect('/web/login?error=access')
+    #     # Restore the user on the environment, it was lost due to auth="none"
+    #     request.update_env(user=request.session.uid)
+    #     try:
+    #         context = request.env['ir.http'].webclient_rendering_context()
+    #         response = request.render('web.webclient_bootstrap', qcontext=context)
+    #         #response.headers['X-Frame-Options'] = 'DENY'
+    #         response.headers['X-Frame-Options'] = 'DENY'
+    #         return response
+    #     except AccessError:
+    #         return request.redirect('/web/login?error=access')

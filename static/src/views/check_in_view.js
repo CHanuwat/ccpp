@@ -18,6 +18,8 @@ odoo.define('ccpp.check_in_view', function (require) {
             'click .update_check_in': '_update_check_in',
             'click .skip_done': '_skip_done',
             'click .done': '_done',
+            'click .skip_done_strategy': '_skip_done_strategy',
+            'click .done_strategy': '_done_strategy',
             'change .input_value': '_input_value',
         },
 
@@ -113,7 +115,7 @@ odoo.define('ccpp.check_in_view', function (require) {
             //_.each(templates, function(template) {
             //    self.$('.o_ccpp_check_in1').append(QWeb.render(template, {widget: self}));
             //});
-   
+
 
         },
 
@@ -132,23 +134,41 @@ odoo.define('ccpp.check_in_view', function (require) {
                 method: 'update_check_in',
                 args: [ctx],
             }).then(function(result) {
-                if (result.purchase_history == true){
-                    self.step = '2'
-                    
-                    self.order_lines = result.order_lines;
-                    self.borrow_lines = result.borrow_lines;
-                    //self.$('.o_ccpp_check_in').append(QWeb.render('CheckInTemplate2', {widget: self}));
+                if (result.need_done_strategy == true){
+                    // self.do_action({type: 'ir.actions.act_window',
+                    // res_model: 'ccpp.wizard.done.task',
+                    // view_mode: 'form',
+                    // view_type: 'form',
+                    // views: [[false, 'form']],
+                    // target: 'new',
+                    // context: result.context});
                     self.$('.o_ccpp_check_in1').remove();
-                    self.$('.o_ccpp_check_in2').append(QWeb.render('CheckInTemplate2', {widget: self}));
-                    //self.$('.o_ccpp_check_in') = QWeb.render('CheckInTemplate2', {widget: self})
-                }
-                else{
-                    
-                    if (self.is_checkin_calendar == true){
-                        self.do_action('ccpp.act_rocker_timesheet_calendar');
-                    } else {
-                        self.do_action('ccpp.act_rocker_timesheet_tree');
-                }
+                    self.$('.o_ccpp_check_in3').append(QWeb.render('CheckInTemplate3', {widget: self}));
+                    if (result.purchase_history == true){
+                        self.need_purchase_history = true
+                        self.order_lines = result.order_lines;
+                        self.borrow_lines = result.borrow_lines;
+                    }
+                } else {
+                    debugger
+                    if (result.purchase_history == true){
+                        self.step = '2'
+                        self.need_purchase_history = true
+                        self.order_lines = result.order_lines;
+                        self.borrow_lines = result.borrow_lines;
+                        //self.$('.o_ccpp_check_in').append(QWeb.render('CheckInTemplate2', {widget: self}));
+                        self.$('.o_ccpp_check_in1').remove();
+                        self.$('.o_ccpp_check_in2').append(QWeb.render('CheckInTemplate2', {widget: self}));
+                        //self.$('.o_ccpp_check_in') = QWeb.render('CheckInTemplate2', {widget: self})
+                    }
+                    else{
+                        
+                        if (self.is_checkin_calendar == true){
+                            self.do_action('ccpp.act_rocker_timesheet_calendar');
+                        } else {
+                            self.do_action('ccpp.act_rocker_timesheet_tree');
+                    }
+                    }
                 }
             });
 
@@ -162,7 +182,7 @@ odoo.define('ccpp.check_in_view', function (require) {
             var def =  self._rpc({
                 model: 'account.analytic.line',
                 method: 'skip',
-                 args: [analytic_line],
+                args: [analytic_line],
             }).then(function(result) {    
                 
                 if (self.is_checkin_calendar == true){
@@ -173,7 +193,7 @@ odoo.define('ccpp.check_in_view', function (require) {
                 }
             );
         },
-        
+
         _done: function(ev){
             var self = this;
             var ctx;
@@ -212,6 +232,52 @@ odoo.define('ccpp.check_in_view', function (require) {
                 }
             );
 
+        },
+
+        _skip_done_strategy: function(){
+            self = this;
+            if (self.need_purchase_history == true){
+                self.step = '2'
+                //self.$('.o_ccpp_check_in').append(QWeb.render('CheckInTemplate2', {widget: self}));
+                self.$('.o_ccpp_check_in3').remove();
+                self.$('.o_ccpp_check_in2').append(QWeb.render('CheckInTemplate2', {widget: self}));
+                //self.$('.o_ccpp_check_in') = QWeb.render('CheckInTemplate2', {widget: self})
+            } else {
+                
+                if (self.is_checkin_calendar == true){
+                    self.do_action('ccpp.act_rocker_timesheet_calendar');
+                } else {
+                    self.do_action('ccpp.act_rocker_timesheet_tree');
+                    }
+            }
+        },
+
+        _done_strategy: function(){
+            self = this;
+            var ctx;
+            var analytic_line = this.analytic_line.analytic_line_id
+            var def =  self._rpc({
+                model: 'account.analytic.line',
+                method: 'done_strategy',
+                args: [analytic_line],
+            }).then(function(result) {    
+                
+                if (self.need_purchase_history == true){
+                    self.step = '2'
+                    //self.$('.o_ccpp_check_in').append(QWeb.render('CheckInTemplate2', {widget: self}));
+                    self.$('.o_ccpp_check_in3').remove();
+                    self.$('.o_ccpp_check_in2').append(QWeb.render('CheckInTemplate2', {widget: self}));
+                    //self.$('.o_ccpp_check_in') = QWeb.render('CheckInTemplate2', {widget: self})
+                } else {
+                    
+                    if (self.is_checkin_calendar == true){
+                        self.do_action('ccpp.act_rocker_timesheet_calendar');
+                    } else {
+                        self.do_action('ccpp.act_rocker_timesheet_tree');
+                        }
+                }
+                }
+            );
         },
 
         _input_value: function(ev){
