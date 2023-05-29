@@ -227,7 +227,7 @@
                             <field name="employee_id" invisible="True"/>
                         </group>
                         <group>
-                            <field name="show_critical"/>
+                            <field name="show_critical" decoration-danger="show_critical == 'Critical'"/>
                         </group>
                     </group>
                     <div>
@@ -353,8 +353,11 @@
                             <field name="employee_id" invisible="True"/>
                         </group>
                         <group>
-                            <field name="show_critical"/>
-                            <field name="priority_id" string="Priority" options="{'no_open': True}"/>
+                            <field name="show_critical" decoration-danger="show_critical == 'Critical'"/>
+                            <field name="priority_id" string="Priority" options="{'no_open':True}" style="color:white !important; background-color: red !important;" attrs="{'invisible': [('priority_select','!=','1')]}" class="o_priority_narrow_field"/> <!--options="{'no_create':True}"/>-->
+                            <field name="priority_id" string="Priority" options="{'no_open':True}" style="color:white !important; background-color: orange !important;" attrs="{'invisible': [('priority_select','!=','2')]}" class="o_priority_narrow_field"/> <!--options="{'no_create':True}"/>-->
+                            <field name="priority_id" string="Priority" options="{'no_open':True}" style="color:white !important; background-color: #3BB143 !important;" attrs="{'invisible': [('priority_select','!=','3')]}" class="o_priority_narrow_field"/> <!--options="{'no_create':True}"/>-->
+                            <field name="priority_id" string="Priority" options="{'no_open':True}" style="color:white !important; background-color: #1E90FF !important;" attrs="{'invisible': [('priority_select','!=','4')]}" class="o_priority_narrow_field"/> <!--options="{'no_create':True}"/>-->
                             <field name="show_time" readonly="True"/>
                         </group>
                     </group>
@@ -735,8 +738,8 @@
                     <field name="show_critical" decoration-danger="show_critical == 'Critical'"/>
                     <field name="priority_id" string="Priority" options="{'no_open':True}" style="color:white !important; background-color: red !important;" attrs="{'invisible': [('priority_select','!=','1')]}" class="o_priority_narrow_field"/> <!--options="{'no_create':True}"/>-->
                     <field name="priority_id" string="Priority" options="{'no_open':True}" style="color:white !important; background-color: orange !important;" attrs="{'invisible': [('priority_select','!=','2')]}" class="o_priority_narrow_field"/> <!--options="{'no_create':True}"/>-->
-                    <field name="priority_id" string="Priority" options="{'no_open':True}" style="color:white !important; background-color: yellow !important;" attrs="{'invisible': [('priority_select','!=','3')]}" class="o_priority_narrow_field"/> <!--options="{'no_create':True}"/>-->
-                    <field name="priority_id" string="Priority" options="{'no_open':True}" style="color:white !important; background-color: #ADD8E6 !important;" attrs="{'invisible': [('priority_select','!=','4')]}" class="o_priority_narrow_field"/> <!--options="{'no_create':True}"/>-->
+                    <field name="priority_id" string="Priority" options="{'no_open':True}" style="color:white !important; background-color: #3BB143 !important;" attrs="{'invisible': [('priority_select','!=','3')]}" class="o_priority_narrow_field"/> <!--options="{'no_create':True}"/>-->
+                    <field name="priority_id" string="Priority" options="{'no_open':True}" style="color:white !important; background-color: #1E90FF !important;" attrs="{'invisible': [('priority_select','!=','4')]}" class="o_priority_narrow_field"/> <!--options="{'no_create':True}"/>-->
                     <field name="show_time" readonly="True"/>
                     <field name="show_period" readonly="True"/>
                     <field name="deadline_date" widget="date"/>

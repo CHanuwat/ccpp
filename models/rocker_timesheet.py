@@ -851,7 +851,7 @@ class RockerTimesheet(models.Model):
             return False
 
     def write(self, vals):
-        if self.state in ['done','cancel'] and not 'current_situation' in vals and not 'next_action' in vals:
+        if self.state in ['done','cancel'] and not 'current_situation' in vals and not 'next_action' in vals and not 'state' in vals:
             raise UserError("Cannot edit task in state done or cancel.")
         if (('name' in vals and vals['name'] != self.name) or \
         ('priority_id' in vals and vals['priority_id'] != self.priority_id.id) or \
@@ -1559,6 +1559,12 @@ class RockerTimesheet(models.Model):
     def done_strategy(self,analytic_line):
         obj = self.browse(analytic_line)  
         obj.task_strategy_id.button_done()
+        return True
+    
+    @api.model
+    def cancel_task(self,analytic_line):
+        obj = self.browse(analytic_line)  
+        obj.button_cancel()
         return True
                 
     @api.model

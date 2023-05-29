@@ -1,5 +1,5 @@
 /** @odoo-module **/
-
+'use strict';
 import { CalendarCommonPopover } from "@web/views/calendar/calendar_common/calendar_common_popover";
 import { useService } from "@web/core/utils/hooks";
 const { Component, onWillStart } = owl
@@ -44,6 +44,29 @@ export class CCPPCalendarCommonPopover extends CalendarCommonPopover {
             res_model: 'account.analytic.line',
             res_id: this.props.record.id,
             views: [[false, 'form']],});
+        this.props.close();
+    }
+
+    async cancelSituation() {
+        var context = {};
+        context['active_id'] = this.props.record.id;
+        context['res_id'] = this.props.record.id;
+        var self = this;
+        debugger
+        
+        var def =  await this.orm.call(
+            'account.analytic.line',
+            'cancel_task',
+            [this.props.record.id],
+        ).then(function(result) {    
+            
+            this.action.doAction({type: 'ir.actions.act_window',
+            res_model: 'account.analytic.line',
+            res_id: this.props.record.id,
+            views: [[false, 'form']],});
+            }
+        );
+        
         this.props.close();
     }
 
