@@ -26,7 +26,7 @@
         <field name="arch" type="xml">
             <form string="Priority">
                 <sheet>
-                    <iframe title="Report Section" width="600" height="373.5" src="https://app.powerbi.com/view?r=eyJrIjoiMzk1MGM2NTctYTIwYy00OTAwLThlZmUtMmFhZjc1Y2UwMjc5IiwidCI6IjM0MjA4ZjM5LThjZjctNDdhYy04NWEwLTQ2NGRlNjhlZGNlOCIsImMiOjEwfQ%3D%3D" frameborder="0" allowFullScreen="true"></iframe>
+                    <!--<iframe title="Report Section" width="600" height="373.5" src="https://app.powerbi.com/view?r=eyJrIjoiMzk1MGM2NTctYTIwYy00OTAwLThlZmUtMmFhZjc1Y2UwMjc5IiwidCI6IjM0MjA4ZjM5LThjZjctNDdhYy04NWEwLTQ2NGRlNjhlZGNlOCIsImMiOjEwfQ%3D%3D" frameborder="0" allowFullScreen="true"></iframe>-->
                     <group>
                         <group>
                             <field name="name" t-att-t-name="ccpp_template"/>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="approve_activity_data_ccpp" model="approve.activity.type">
+            <field name="name">CCPP Approval</field>
+            <field name="code">ccpp</field>
+        </record>
+        <record id="approve_activity_data_solution" model="approve.activity.type">
+            <field name="name">New Solution Approval</field>
+            <field name="code">solution</field>
+        </record>
+        <record id="approve_activity_data_strategy" model="approve.activity.type">
+            <field name="name">New Strategy Approval</field>
+            <field name="code">strategy</field>
+        </record>
+    </data>
+</odoo>

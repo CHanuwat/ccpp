@@ -581,6 +581,8 @@
                 <field name="name"/>
                 <field name="task_current_action"/>
                 <field name="task_next_action"/>
+                <field name="partner_contact_id"/>
+                <field name="partner_id"/>
             </xpath>
             <xpath expr="//kanban[1]/progressbar[1]" position="replace">
                 <!--<progressbar field="priority_select" colors='{"1": "9", "2": "2", "3": "3", "4": "4"}'/>-->
@@ -729,8 +731,12 @@
             <xpath expr="//form[1]/sheet[1]/group[1]/group[2]" position="replace">
                 <group>
                     <field name="active" invisible="True"/>
-                    <field name="show_critical"/>
-                    <field name="priority_id" string="Priority" options="{'no_open':True}"/> <!--options="{'no_create':True}"/>-->
+                    <field name="priority_select" invisible="1"/>
+                    <field name="show_critical" decoration-danger="show_critical == 'Critical'"/>
+                    <field name="priority_id" string="Priority" options="{'no_open':True}" style="color:white !important; background-color: red !important;" attrs="{'invisible': [('priority_select','!=','1')]}" class="o_priority_narrow_field"/> <!--options="{'no_create':True}"/>-->
+                    <field name="priority_id" string="Priority" options="{'no_open':True}" style="color:white !important; background-color: orange !important;" attrs="{'invisible': [('priority_select','!=','2')]}" class="o_priority_narrow_field"/> <!--options="{'no_create':True}"/>-->
+                    <field name="priority_id" string="Priority" options="{'no_open':True}" style="color:white !important; background-color: yellow !important;" attrs="{'invisible': [('priority_select','!=','3')]}" class="o_priority_narrow_field"/> <!--options="{'no_create':True}"/>-->
+                    <field name="priority_id" string="Priority" options="{'no_open':True}" style="color:white !important; background-color: #ADD8E6 !important;" attrs="{'invisible': [('priority_select','!=','4')]}" class="o_priority_narrow_field"/> <!--options="{'no_create':True}"/>-->
                     <field name="show_time" readonly="True"/>
                     <field name="show_period" readonly="True"/>
                     <field name="deadline_date" widget="date"/>
@@ -760,7 +766,7 @@
                 <field name="domain_partner_ids" invisible="True"/>
                 <field name="partner_id" 
                 attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay','void'])]}"
-                options="{'no_create':True}" 
+                options="{'no_create':True, 'no_open':True}" 
                 domain="[('id','in',domain_partner_ids)]"
                 required="True"/>
             </xpath>
@@ -770,7 +776,7 @@
                 <field name="partner_contact_id" 
                 widget="res_partner_many2one" 
                 domain="[('id','in',domain_partner_contact_ids)]" 
-                options="{'no_create':True}"
+                options="{'no_create':True, 'no_open':True}"
                 context="{'show_title_position':True}" 
                 attrs="{'readonly': [('state', 'in', ['waiting_approve','reject','process','done','cancel','delay','void'])], 'invisible': [('is_multi_host', '=', True)], 'required': [('is_multi_host', '=', False)]}"
                 /> <!--options="{'no_create':True}"/>-->
@@ -811,7 +817,7 @@
                     </group>
                 </page>
                 <page name="approve_lines" string="Approval History" attrs="{'invisible': [('ccpp_approve_lines','=',False)]}">
-                    <field name="ccpp_approve_lines" readonly="True">
+                    <field name="ccpp_approve_lines" readonly="True" style="pointer-events:none;">
                         <tree decoration-success="state == 'approve'" decoration-danger="state == 'reject'" decoration-muted="state == 'cancel'">
                             <field name="sequence"/>
                             <field name="job_approve_ids" widget="many2many_tags"/>
@@ -832,9 +838,9 @@
                 </page>
                 <page name="ccpp_team" string="CCPP Team">
                     <field name="job_ids" options="{'no_create_edit':True}">
-                        <tree>
-                            <field name="employee_id" string="User" widget="many2one_avatar_user"/>
-                            <field name="name" string="Job Position"/>
+                        <tree editable="bottom">
+                            <field name="employee_id" string="User" widget="many2one_avatar_user" readonly="1"/>
+                            <field name="name" string="Job Position" readonly="1"/>
                         </tree>
                     </field>
                 </page>
@@ -1634,7 +1640,7 @@
                     </field>-->
                 </page>
                 <page name="solution_approve_lines" string="Approval History" attrs="{'invisible': [('is_solution','=',False)]}">
-                    <field name="solution_approve_lines" readonly="True">
+                    <field name="solution_approve_lines" readonly="True" style="pointer-events:none;">
                         <tree decoration-success="state == 'approve'" decoration-danger="state == 'reject'" decoration-muted="state == 'cancel'">
                             <field name="sequence"/>
                             <field name="job_approve_ids" widget="many2many_tags"/>
@@ -1646,7 +1652,7 @@
                     </field>
                 </page>
                 <page name="strategy_approve_lines" string="Approval History" attrs="{'invisible': [('is_strategy','=',False)]}">
-                    <field name="strategy_approve_lines" readonly="True">
+                    <field name="strategy_approve_lines" readonly="True" style="pointer-events:none;">
                         <tree decoration-success="state == 'approve'" decoration-danger="state == 'reject'" decoration-muted="state == 'cancel'">
                             <field name="sequence"/>
                             <field name="job_approve_ids" widget="many2many_tags"/>
@@ -2164,7 +2170,7 @@
     <record id="action_my_ccpp_group_by_priority" model="ir.actions.act_window">
         <field name="name">My CCPP</field>
         <field name="res_model">project.project</field>
-        <field name="view_mode">tree,kanban,form,graph</field>
+        <field name="view_mode">tree,kanban,form</field>
         <field name="context">{'search_default_groupby_priority': 0, 'show_create': '1', 'my_ccpp': True, 'create_from_tree': True}</field>
         <field name="view_id" ref="ccpp.ccpp_report_tree_show_create_view"/>
         <field name="search_view_id" ref="ccpp_search_form"/>
@@ -2264,7 +2270,7 @@
     <record id="action_all_ccpp_group_by_priority" model="ir.actions.act_window">
         <field name="name">All CCPP</field>
         <field name="res_model">project.project</field>
-        <field name="view_mode">tree,kanban,form,graph</field>
+        <field name="view_mode">tree,kanban,form</field>
         <field name="context">{'search_default_groupby_priority': 0, 'show_create': '0', 'all_ccpp': True, }</field>
         <field name="view_id" ref="ccpp.ccpp_report_tree_hide_create_view"/>
         <field name="search_view_id" ref="ccpp_search_form"/>
@@ -2280,7 +2286,7 @@
     <record id="action_all_ccpp_group_by_priority_manager_all_department" model="ir.actions.act_window">
         <field name="name">All CCPP</field>
         <field name="res_model">project.project</field>
-        <field name="view_mode">tree,kanban,form,graph</field>
+        <field name="view_mode">tree,kanban,form</field>
         <field name="context">{'search_default_groupby_priority': 0, 'show_create': '0', 'all_ccpp': True, }</field>
         <field name="view_id" ref="ccpp.ccpp_report_tree_hide_create_view_manager_all_department"/>
         <field name="search_view_id" ref="ccpp_search_form"/>
@@ -2296,7 +2302,7 @@
     <record id="action_all_ccpp_group_by_priority_ceo" model="ir.actions.act_window">
         <field name="name">All CCPP</field>
         <field name="res_model">project.project</field>
-        <field name="view_mode">tree,kanban,form,graph</field>
+        <field name="view_mode">tree,kanban,form</field>
         <field name="context">{'search_default_groupby_priority': 0, 'show_create': '0', 'all_ccpp': True, }</field>
         <field name="view_id" ref="ccpp.ccpp_report_tree_hide_create_view_ceo"/>
         <field name="search_view_id" ref="ccpp_search_form"/>

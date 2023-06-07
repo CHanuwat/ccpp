@@ -20,6 +20,7 @@ import math
 import googlemaps
 from datetime import datetime
 from pprint import pprint
+from odoo.osv import expression
 
 STATUS_COLOR = {
     'on_track': 20,  # green / success
@@ -48,7 +49,7 @@ STATE_COLOR = {
 
 class Project(models.Model):
     _inherit = "project.project"
-    _desciption = "CCPP"
+    _description = "CCPP"
     #_rec_name = 'rec_name'
 
     def _get_default_job(self):
@@ -191,6 +192,9 @@ class Project(models.Model):
                     ccpp_tree_id = self.env.ref('ccpp.ccpp_approve_dashboard_tree').id
                     if view.get('id',False) != ccpp_tree_id:
                         action = [rec for rec in view['toolbar']['action'] if rec.get('name', False) != 'Approve CCPP']
+                        view['toolbar']['action'] = action
+                    else:
+                        action = [rec for rec in view['toolbar']['action'] if rec.get('name', False) == 'Approve CCPP']
                         view['toolbar']['action'] = action
         return res
 
@@ -610,9 +614,17 @@ class Project(models.Model):
             approve_id = self.env['approval'].search([('model_ids','in', model_id.ids),
                                                       ('department_id','=', obj.department_id.id),
                                                       ('job_request_ids','in', obj.job_id.id)])
-            vals_list = []
+            if not approve_id:
+                approve_id = self.env['approval'].search([('model_ids','in', model_id.ids),
+                                                      ('department_id','=', obj.department_id.id),
+                                                      ('job_request_ids','=', False),
+                                                      ('contract_type_id','=',obj.job_id.contract_type_id.id)
+                                                    ])
+            
             if not approve_id:
                 raise UserError("Approval Workflow is not set")
+            
+            vals_list = []
             for approve_line in approve_id.lines:
                 vals = {
                     'ccpp_id': obj.id,
@@ -622,6 +634,25 @@ class Project(models.Model):
                 }
                 vals_list.append(vals)    
             self.env['ccpp.approve.line'].create(vals_list)
+            
+            approve_activity_type_id = self.env['approve.activity.type'].search([('code','=','ccpp')],limit=1)
+            for approve_line in obj.ccpp_approve_lines.filtered(lambda o:o.state == 'waiting_approve'):
+                for job_approve_id in approve_line.job_approve_ids:
+                    todos = {
+                        'res_id': obj.id,
+                        'res_model_id': self.env['ir.model'].sudo().search([('model', '=', obj._name)]).id,
+                        'user_id': job_approve_id.employee_id.user_id.id,
+                        'summary': ('CCPP Approve'),
+                        'note': ('CCPP Approve'),
+                        'activity_type_id': 4,
+                        'ccpp_approve_line_id': approve_line.id,
+                        'approve_activity_type_id': approve_activity_type_id.id,
+                        'job_id': job_approve_id.id,
+                        #'date_deadline': obj.deadline_date or datetime.now().strftime("%Y-%m-%d"),
+                    }
+                    self.env['mail.activity'].sudo().create(todos)
+                    
+                break
     
     @api.depends('ccpp_approve_lines', 'ccpp_approve_lines.is_approve', 'ccpp_approve_lines.job_approve_ids', 'ccpp_approve_lines.sequence', 'ccpp_approve_lines.state', 'state' )
     def _compute_current_approve(self):
@@ -758,11 +789,11 @@ class Project(models.Model):
             obj.state = 'waiting_approve'
             for solution_id in obj.tasks_solution:
                 if solution_id.state == 'open':
-                    solution_id.create_approve_lines()
+                    solution_id.with_context(send_from_ccpp=True).create_approve_lines()
                     solution_id.state = 'waiting_approve'
                 for strategy_id in solution_id.child_ids:
                     if strategy_id.state == 'open':
-                        strategy_id.create_approve_lines()
+                        strategy_id.with_context(send_from_ccpp=True).create_approve_lines()
                         strategy_id.state = 'waiting_approve'
             obj.create_approve_lines()
     
@@ -794,18 +825,22 @@ class Project(models.Model):
     def button_approve(self):
         for obj in self:
             employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+            count_approve_line = 0
             for approve_line in obj.ccpp_approve_lines:
+                count_approve_line += 1
                 if approve_line.state == 'waiting_approve':
                     approve_line.approve_date = datetime.now()
                     approve_line.job_approve_by_id = employee_id.job_id.id
                     approve_line.state = 'approve'
-                    break
                     
-            
+                    activity_ids = self.env['mail.activity'].sudo().search([('ccpp_approve_line_id', '=', approve_line.id)])
+                    activity_ids.action_done()
+                    
+                    break
                 
             for solution_id in obj.tasks_solution:
                 if solution_id.state == 'waiting_approve':
-                    solution_id.button_approve_solution()
+                    solution_id.with_context(approve_from_ccpp=True).button_approve_solution()
                     #for strategy_id in solution_id.child_ids:
                     #    if strategy_id.state == 'waiting_approve':
                     #        strategy_id.button_approve_strategy()
@@ -814,6 +849,28 @@ class Project(models.Model):
             if not waiting_another_level:
                 obj.button_approve_final()
                 obj.check_ccpp_delayed()
+            else:
+                approve_activity_type_id = self.env['approve.activity.type'].search([('code','=','ccpp')],limit=1)
+                approve_line_id = obj.ccpp_approve_lines[count_approve_line]
+                for approve_line in approve_line_id:
+                    for job_approve_id in approve_line.job_approve_ids:
+                        todos = {
+                            'res_id': obj.id,
+                            'res_model_id': self.env['ir.model'].sudo().search([('model', '=', obj._name)]).id,
+                            'user_id': job_approve_id.employee_id.user_id.id,
+                            'summary': ('CCPP Approve'),
+                            'note': ('CCPP Approve'),
+                            'activity_type_id': 4,
+                            'ccpp_approve_line_id': approve_line.id,
+                            'approve_activity_type_id': approve_activity_type_id.id,
+                            'job_id': job_approve_id.id,
+                            # 'date_deadline': obj.deadline_date or datetime.now().strftime("%Y-%m-%d"),
+                        }
+                        self.env['mail.activity'].sudo().create(todos)
+                        
+                    break
+                
+                
             
                 
 
@@ -837,6 +894,10 @@ class Project(models.Model):
                     approve_line.approve_date = datetime.now()
                     approve_line.job_approve_by_id = employee_id.job_id.id
                     approve_line.state = 'reject'
+
+                    activity_ids = self.env['mail.activity'].sudo().search([('ccpp_approve_line_id', '=', approve_line.id)])
+                    activity_ids.action_done()
+                    
                     break
             ccpp_approve_line_ids = obj.ccpp_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
             ccpp_approve_line_ids.write({'state': 'reject'})
@@ -931,6 +992,10 @@ class Project(models.Model):
             obj.state = 'open'
             ccpp_approve_line_ids = obj.ccpp_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
             ccpp_approve_line_ids.write({'state': 'cancel'})
+            
+            activity_ids = self.env['mail.activity'].sudo().search([('ccpp_approve_line_id', '=', ccpp_approve_line_ids[0].id)])
+            activity_ids.action_done()
+            
             for solution_id in obj.tasks_solution:
                 solution_approve_line_ids = solution_id.solution_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
                 solution_approve_line_ids.write({'state': 'cancel'})
@@ -1478,6 +1543,7 @@ class Project(models.Model):
 class Task(models.Model):
     _inherit = "project.task" 
     _order = "code"
+    _description = "Solution/Strategy"
     #_rec_name = "rec_name"
     
     def _get_default_level(self):
@@ -1591,10 +1657,12 @@ class Task(models.Model):
                         action = [rec for rec in view['toolbar']['action'] if rec.get('name', False) not in ['Approve Solution', 'Approve Strategy']]
                         view['toolbar']['action'] = action
                     elif view.get('id',False) == strategy_tree_id:
-                        action = [rec for rec in view['toolbar']['action'] if rec.get('name', False) not in ['Approve Solution']]
+                        #action = [rec for rec in view['toolbar']['action'] if rec.get('name', False) not in ['Approve Solution']]
+                        action = [rec for rec in view['toolbar']['action'] if rec.get('name', False) == 'Approve Strategy']
                         view['toolbar']['action'] = action
                     elif view.get('id',False) == solution_tree_id:
-                        action = [rec for rec in view['toolbar']['action'] if rec.get('name', False) not in ['Approve Strategy']]
+                        # action = [rec for rec in view['toolbar']['action'] if rec.get('name', False) not in ['Approve Strategy']]
+                        action = [rec for rec in view['toolbar']['action'] if rec.get('name', False) == 'Approve Solution']
                         view['toolbar']['action'] = action
         return res
     
@@ -1981,7 +2049,14 @@ class Task(models.Model):
                                                       ('job_request_ids','in', obj.job_id.id)
                                                     ])
             if not approve_id:
+                approve_id = self.env['approval'].search([('model_ids','in', model_id.ids),
+                                                      ('department_id','=', obj.department_id.id),
+                                                      ('job_request_ids','=', False),
+                                                      ('contract_type_id','=',obj.job_id.contract_type_id.id)
+                                                    ])
+            if not approve_id:
                 raise UserError("Approval Workflow is not set")
+            
             vals_list = []
             for approve_line in approve_id.lines:
                 if obj.is_solution:
@@ -2001,6 +2076,36 @@ class Task(models.Model):
                 vals_list.append(vals)
 
             self.env['ccpp.approve.line'].create(vals_list)
+            
+            approve_activity_type_id = self.env['approve.activity.type']
+            if obj.is_solution:
+                approve_lines = obj.solution_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
+                approve_title = ('Solution Approve')
+                approve_activity_type_id = self.env['approve.activity.type'].search([('code','=','solution')],limit=1)
+            elif obj.is_strategy:
+                approve_lines = obj.strategy_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
+                approve_title = ('Strategy Approve')
+                approve_activity_type_id = self.env['approve.activity.type'].search([('code','=','strategy')],limit=1)
+            
+            if not self._context.get('send_from_solution',False) and not self._context.get('send_from_ccpp',False):
+                
+                for approve_line in approve_lines:
+                    for job_approve_id in approve_line.job_approve_ids:
+                        todos = {
+                            'res_id': obj.id,
+                            'res_model_id': self.env['ir.model'].sudo().search([('model', '=', obj._name)]).id,
+                            'user_id': job_approve_id.employee_id.user_id.id,
+                            'summary': approve_title,
+                            'note': approve_title,
+                            'activity_type_id': 4,
+                            'ccpp_approve_line_id': approve_line.id,
+                            'approve_activity_type_id': approve_activity_type_id.id,
+                            'job_id': job_approve_id.id,
+                            # 'date_deadline': obj.deadline_date or datetime.now().strftime("%Y-%m-%d"),
+                        }
+                        self.env['mail.activity'].sudo().create(todos)
+                        
+                    break
 
     @api.depends('parent_id')
     def _compute_level(self):
@@ -2233,7 +2338,7 @@ class Task(models.Model):
             obj.state = 'waiting_approve'
             for strategy_id in obj.child_ids:
                 if strategy_id.state == 'open':
-                    strategy_id.create_approve_lines()
+                    strategy_id.with_context(send_from_solution=True).create_approve_lines()
                     strategy_id.state = 'waiting_approve'
             obj.create_approve_lines()
 
@@ -2245,16 +2350,43 @@ class Task(models.Model):
     def button_approve_strategy(self):
         for obj in self:
             employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+            count_approve_line = 0
             for approve_line in obj.strategy_approve_lines:
+                count_approve_line += 1
                 if approve_line.state == 'waiting_approve':
                     approve_line.approve_date = datetime.now()
                     approve_line.job_approve_by_id = employee_id.job_id.id
                     approve_line.state = 'approve'
+                    
+                    activity_ids = self.env['mail.activity'].sudo().search([('ccpp_approve_line_id', '=', approve_line.id)])
+                    activity_ids.action_done()
+                    
                     break
                     
             waiting_another_level = obj.strategy_approve_lines.filtered(lambda o:not o.state != 'waiting_approve')
             if not waiting_another_level:
                 obj.button_approve_strategy_final()
+            else:
+                if not self._context.get('approve_from_solution',False):
+                    approve_activity_type_id = self.env['approve.activity.type'].search([('code','=','strategy')],limit=1)
+                    approve_line_id = obj.ccpp_approve_lines[count_approve_line]
+                    for approve_line in approve_line_id:
+                        for job_approve_id in approve_line.job_approve_ids:
+                            todos = {
+                                'res_id': obj.id,
+                                'res_model_id': self.env['ir.model'].sudo().search([('model', '=', obj._name)]).id,
+                                'user_id': job_approve_id.employee_id.user_id.id,
+                                'summary': ('Strategy Approve'),
+                                'note': ('Strategy Approve'),
+                                'activity_type_id': 4,
+                                'ccpp_approve_line_id': approve_line.id,
+                                'approve_activity_type_id': approve_activity_type_id.id,
+                                'job_id': job_approve_id.id,
+                                # 'date_deadline': obj.project_id.deadline_date or datetime.now().strftime("%Y-%m-%d"),
+                            }
+                            self.env['mail.activity'].sudo().create(todos)
+                            
+                        break
         
     def button_approve_strategy_final(self):
         for obj in self:
@@ -2270,20 +2402,47 @@ class Task(models.Model):
     def button_approve_solution(self):
         for obj in self:
             employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+            count_approve_line = 0
             for approve_line in obj.solution_approve_lines:
+                count_approve_line += 1
                 if approve_line.state == 'waiting_approve':
                     approve_line.approve_date = datetime.now()
                     approve_line.job_approve_by_id = employee_id.job_id.id
                     approve_line.state = 'approve'
+                    
+                    activity_ids = self.env['mail.activity'].sudo().search([('ccpp_approve_line_id', '=', approve_line.id)])
+                    activity_ids.action_done()
+                    
                     break
                     
             waiting_another_level = obj.solution_approve_lines.filtered(lambda o:not o.state != 'waiting_approve')
             if not waiting_another_level:
                 obj.button_approve_solution_final()
+            else:
+                if not self._context.get('approve_from_ccpp',False):
+                    approve_activity_type_id = self.env['approve.activity.type'].search([('code','=','solution')],limit=1)
+                    approve_line_id = obj.ccpp_approve_lines[count_approve_line]
+                    for approve_line in approve_line_id:
+                        for job_approve_id in approve_line.job_approve_ids:
+                            todos = {
+                                'res_id': obj.id,
+                                'res_model_id': self.env['ir.model'].sudo().search([('model', '=', obj._name)]).id,
+                                'user_id': job_approve_id.employee_id.user_id.id,
+                                'summary': ('Solution Approve'),
+                                'note': ('Solution Approve'),
+                                'activity_type_id': 4,
+                                'ccpp_approve_line_id': approve_line.id,
+                                'approve_activity_type_id': approve_activity_type_id.id,
+                                'job_id': job_approve_id.id,
+                                # 'date_deadline': obj.project_id.deadline_date or datetime.now().strftime("%Y-%m-%d"),
+                            }
+                            self.env['mail.activity'].sudo().create(todos)
+                            
+                        break
                 
             for strategy_id in obj.child_ids:
                 if strategy_id.state == 'waiting_approve':
-                    strategy_id.button_approve_strategy()
+                    strategy_id.with_context(approve_from_solution=True).button_approve_strategy()
     
     def button_approve_solution_final(self):
         for obj in self:
@@ -2303,7 +2462,12 @@ class Task(models.Model):
                     approve_line.approve_date = datetime.now()
                     approve_line.job_approve_by_id = employee_id.job_id.id
                     approve_line.state = 'reject'
+                    
+                    activity_ids = self.env['mail.activity'].sudo().search([('ccpp_approve_line_id', '=', approve_line.id)])
+                    activity_ids.action_done()
+                    
                     break
+                
             strategy_approve_line_ids = obj.strategy_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
             strategy_approve_line_ids.write({'state': 'reject'})
             obj.state = 'reject'
@@ -2321,7 +2485,12 @@ class Task(models.Model):
                     approve_line.approve_date = datetime.now()
                     approve_line.job_approve_by_id = employee_id.job_id.id
                     approve_line.state = 'reject'
+                    
+                    activity_ids = self.env['mail.activity'].sudo().search([('ccpp_approve_line_id', '=', approve_line.id)])
+                    activity_ids.action_done()
+                    
                     break
+                
             solution_approve_line_ids = obj.solution_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
             solution_approve_line_ids.write({'state': 'reject'})
             obj.state = 'reject'
@@ -2347,12 +2516,16 @@ class Task(models.Model):
             strategy_approve_line_ids = obj.strategy_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
             strategy_approve_line_ids.write({'state': 'cancel'})
             obj.state = 'open'
+            activity_ids = self.env['mail.activity'].sudo().search([('ccpp_approve_line_id', '=', strategy_approve_line_ids[0].id)])
+            activity_ids.action_done()
             
     def button_to_open_solution(self):
         for obj in self:
             obj.state = 'open'
             solution_approve_line_ids = obj.solution_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
             solution_approve_line_ids.write({'state': 'cancel'})
+            activity_ids = self.env['mail.activity'].sudo().search([('ccpp_approve_line_id', '=', solution_approve_line_ids[0].id)])
+            activity_ids.action_done()
             for strategy_id in obj.child_ids:
                 strategy_approve_line_ids = strategy_id.strategy_approve_lines.filtered(lambda o:o.state == 'waiting_approve')
                 strategy_approve_line_ids.write({'state': 'cancel'})

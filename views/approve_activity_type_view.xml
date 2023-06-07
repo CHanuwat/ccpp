@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="approve_activity_type_action" model="ir.actions.act_window">
+        <field name="name">Approve Activity Type</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">approve.activity.type</field>
+        <field name="view_mode">tree,kanban,form</field>
+    </record>
+
+    <record id="approve_activity_type_kanban_action" model="ir.actions.act_window">
+        <field name="name">Approval Dashboard</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">approve.activity.type</field>
+        <field name="view_mode">kanban</field>
+    </record>
+
+    <record id="approve_activity_type_view_tree" model="ir.ui.view">
+        <field name="name">approve.activity.type.view.tree</field>
+        <field name="model">approve.activity.type</field>
+        <field name="arch" type="xml">
+            <tree default_order="name">
+                <field name="name"/>
+                <field name="code"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="approve_activity_type_view_form" model="ir.ui.view">
+        <field name="name">approve.activity.type.view.form</field>
+        <field name="model">approve.activity.type</field>
+        <field name="arch" type="xml">
+            <form string="Approve Activity Type">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="code"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="approve_activity_type_view_kanban" model="ir.ui.view">
+        <field name="name">approve.activity.type.view.kanban</field>
+        <field name="model">approve.activity.type</field>
+        <field name="arch" type="xml">
+            <kanban class="oe_background_grey o_kanban_dashboard o_emphasize_colors o_stock_kanban" create="0" group_create="false">
+                <field name="name"/>
+                <field name="count_doc"/>
+                <field name="code"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div name="ccpp_dashboard">
+                            <div t-attf-class="o_kanban_card_header">
+                                <div class="o_kanban_card_header_title">
+                                    <div class="o_primary" t-if="!selection_mode">
+                                        <a>
+                                            <field name="name"/>
+                                        </a>
+                                        <t t-if="record.count_doc.value > 0">
+                                            <span class="ccpp_dot" t-esc="record.count_doc.value"></span>
+                                        </t>
+                                    </div>
+                                    <div class="o_primary" t-if="selection_mode">
+                                        <field name="name"/>
+                                    </div>
+                                </div>
+                                <!--<div class="o_kanban_manage_button_section" t-if="!selection_mode">
+                                    <a class="o_kanban_manage_toggle_button" href="#"><i class="fa fa-ellipsis-v" role="img" aria-label="Manage" title="Manage"/></a>
+                                </div>-->
+                            </div>
+                            <div class="container o_kanban_card_content" t-if="!selection_mode">
+                                <div class="row">
+                                    <div class="col-8 o_kanban_primary_left">
+                                        <t t-if="record.count_doc.value > 0">
+                                            <button class="btn btn-primary" name="action_get_doc" type="object">
+                                                <span><t t-esc="record.count_doc.value"/> Document </span>
+                                            </button>
+                                        </t>
+                                        <t t-if="record.count_doc.value == 0">
+                                            <span class="no_waiting_approve">ยังไม่มีรายการรออนุมัติ</span>
+                                        </t>
+
+                                    </div>
+                                    <!--<div class="col-6 o_kanban_primary_right">
+                                        <button class="btn btn-primary" name="action_get_task" type="object">
+                                            <span> View Task </span>
+                                        </button>
+                                    </div>-->
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    
+    <menuitem name="Approval Dashboard"
+            id="menu_main_approval_dashboard"
+            web_icon="ccpp,static/description/approve_icon.png"
+            sequence="5"
+            />
+    
+    <menuitem id="menu_approval_dashboard" name="Approval Dashboard" parent="ccpp.menu_main_approval_dashboard" action="approve_activity_type_kanban_action" sequence="1"/>
+    <menuitem id="menu_approve_activity_type" name="Approve Activity Type" parent="ccpp.menu_main_approval_dashboard" action="approve_activity_type_action" sequence="2" groups="base.group_system"/>
+
+</odoo>

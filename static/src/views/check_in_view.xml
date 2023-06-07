@@ -132,8 +132,8 @@
                     </div>
                     <div t-if="widget.step == '1' and widget.analytic_line.strategy != false" class="flex-grow-1 update_check_in done_strategy">
                         <button t-attf-class="o_hr_attendance_sign_in_out_icon btn btn-{{ checked_in ? 'warning' : 'success' }} align-self-center px-5 py-3 mt-4 mb-2 done_strategy">
-                            <span class="align-middle fs-2 me-3 text-white">Check IN &amp; Done Strategy</span>
-                            <i t-attf-class="fa fa-2x fa-sign-in align-middle"/>
+                            <span class="align-middle fs-2 me-3 text-white done_strategy">Check IN &amp; Done Strategy</span>
+                            <i t-attf-class="fa fa-2x fa-sign-in align-middle done_strategy"/>
                         </button>
                     </div>
 
@@ -224,6 +224,40 @@
                         </div>
                     </div>
                     
+                    <div t-if="widget.step == '2'" class="flex-grow-1">
+                        <button type="button" class="btn-secondary px-5 py-3 mt-4 mb-2 skip_done">
+                            <span class="align-middle fs-2 me-3">Skip &amp; Done</span>
+                            <i t-attf-class="fa fa-4x align-middle"/>
+                        </button>
+                        <button  type="button" class="btn-success px-5 py-3 mt-4 mb-2 done">
+                            <span class="align-middle fs-2 me-3">Done</span>
+                            <i t-attf-class="fa fa-4x align-middle"/>
+                        </button>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </t>
+
+    <t t-name="CheckInTemplate3">
+		<t t-call="HrAttendanceCardLayout" style="min-width: 700px !important;">
+            <t t-set="bodyContent">
+                <t t-if="widget.employee">
+
+                    <t t-call="HrAttendanceUserBadge">
+                        <t t-set="userId" t-value="widget.employee.id"/>
+                        <t t-set="userName" t-value="widget.employee.name"/>
+                    </t>
+
+                    <div class="flex-grow-1">
+                        <h1 class="mt-5" t-esc="widget.employee.name"/>
+                        <h3 class="" t-esc="widget.date.date_time_now"/>
+                    </div>
+
+                    <div>
+                        <h3>Are you sure to done strategy</h3>
+                    </div>
+
                     <div t-if="widget.step == '2'" class="flex-grow-1">
                         <button type="button" class="btn-secondary px-5 py-3 mt-4 mb-2 skip_done">
                             <span class="align-middle fs-2 me-3">Skip &amp; Done</span>

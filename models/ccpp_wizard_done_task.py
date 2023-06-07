@@ -40,35 +40,42 @@ class WizardRejectDoneTask(models.TransientModel):
     solution_id = fields.Many2one("project.task", string="Solution", default=_default_value_solution)
     strategy_id = fields.Many2one("project.task", string="Strategy", default=_default_value_strategy)
     
+    # def button_done(self):
+    #     for obj in self:
+    #         if obj.strategy_id:
+    #             obj.strategy_id.button_done()
+    #         obj.task_id.button_done()
+            
+    #         current_year = str(datetime.now().year)
+    #         purchase_history_id = self.env['ccpp.purchase.history'].search([('customer_id','=',obj.task_id.customer_id.id),
+    #                                                                         ('year_selection','=',current_year),
+    #                                                                         ('job_id','=',obj.task_id.job_id.id)
+    #                                                                         ])  
+    #         if purchase_history_id:
+    #             action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_wizard_fill_history_action')
+    #             action['context'] = {'default_task': obj.task_id.id}
+    #             return action
+            
     def button_done(self):
         for obj in self:
             if obj.strategy_id:
                 obj.strategy_id.button_done()
-            obj.task_id.button_done()
-            
-            current_year = str(datetime.now().year)
-            purchase_history_id = self.env['ccpp.purchase.history'].search([('customer_id','=',obj.task_id.customer_id.id),
-                                                                            ('year_selection','=',current_year),
-                                                                            ('job_id','=',obj.task_id.job_id.id)
-                                                                            ])  
-            if purchase_history_id:
-                action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_wizard_fill_history_action')
-                action['context'] = {'default_task': obj.task_id.id}
-                return action
+            context = self._context.get("context")
+            obj.task_id.update_check_in(context)
                 
-    def button_done_and_skip(self):
-        for obj in self:
-            obj.task_id.button_done()
+    # def button_done_and_skip(self):
+    #     for obj in self:
+    #         obj.task_id.button_done()
             
-            current_year = str(datetime.now().year)
-            purchase_history_id = self.env['ccpp.purchase.history'].search([('customer_id','=',obj.task_id.customer_id.id),
-                                                                            ('year_selection','=',current_year),
-                                                                            ('job_id','=',obj.task_id.job_id.id)
-                                                                            ])  
-            if purchase_history_id:
-                action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_wizard_fill_history_action')
-                action['context'] = {'default_task': obj.task_id.id}
-                return action
+    #         current_year = str(datetime.now().year)
+    #         purchase_history_id = self.env['ccpp.purchase.history'].search([('customer_id','=',obj.task_id.customer_id.id),
+    #                                                                         ('year_selection','=',current_year),
+    #                                                                         ('job_id','=',obj.task_id.job_id.id)
+    #                                                                         ])  
+    #         if purchase_history_id:
+    #             action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_wizard_fill_history_action')
+    #             action['context'] = {'default_task': obj.task_id.id}
+    #             return action
                 
 
                 

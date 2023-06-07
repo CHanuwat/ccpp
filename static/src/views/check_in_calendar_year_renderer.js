@@ -17,7 +17,6 @@ export class CCPPCalendarYearRenderer extends CalendarYearRenderer {
         }
         if (record.rawRecord.state == 'done'){
             el.classList.add("o_calendar_color_11");
-            debugger
         }
         
 }
