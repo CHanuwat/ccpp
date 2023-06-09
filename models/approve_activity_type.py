@@ -42,6 +42,9 @@ class ApproveActivityType(models.Model):
             elif obj.code == 'strategy':
                 action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_strategy_approve_dashboard_action')
                 action['domain'] = [('id', 'in', record_ids)]
+            elif obj.code == 'request':
+                action = self.env['ir.actions.act_window']._for_xml_id('iti_request.request_order_action_new')
+                action['domain'] = [('id', 'in', record_ids)]
             return action
     
     def unlink(self):

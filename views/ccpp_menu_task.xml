@@ -6,7 +6,7 @@
     <menuitem name="Task"
             id="menu_main_task"
             web_icon="ccpp,static/description/calendar_icon.png"
-            sequence="4"/>
+            sequence="5"/>
 
     <record model="ir.ui.menu" id="project.menu_project_management">
         <field name="action" eval="False"/>

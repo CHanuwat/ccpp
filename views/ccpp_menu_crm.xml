@@ -36,7 +36,7 @@
     </record> -->
 
     <record model="ir.ui.menu" id="crm.crm_menu_root">
-        <field name="sequence" eval="2"/>
+        <field name="sequence" eval="3"/>
         <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
     </record>
 

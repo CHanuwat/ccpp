@@ -53,19 +53,23 @@
 }
 
 .o_calendar_renderer .fc-view .o_calendar_color_11.fc-event .fc-bg {
-  background:#bbbbbb !important;
+  background:#808080 !important;
+  color: white;
 }
 
 .o_calendar_renderer .fc-view .o_calendar_color_6.fc-event .fc-bg {
-  background: var(--biz-theme-primary-color) !important;
+  background: #71639e !important;
+  color: white;
 }
 
 .o_calendar_renderer .fc-view .o_calendar_color_11.fc-event {
-  color: #ffffff !important;
+  background:#808080 !important;
+  color: white;
 }
 
 .o_calendar_renderer .fc-view .o_calendar_color_6.fc-event {
-  background: var(--biz-theme-primary-color) !important;
+  background: #71639e !important;
+  color: white;
 }
 
 .o_calendar_renderer .fc-view .o_calendar_color_11 {
@@ -81,31 +85,31 @@
 }
 
 .o_cw_popover_link.o_calendar_color_6 {
-  background:#bbbbbb !important;
+  background:#808080 !important;
   border-color: #808080 !important;
-  color: #ffffff !important;
+  color: white !important;
 }
 
 .o_cw_popover_link.o_calendar_color_11 {
-  background: var(--biz-theme-primary-color) !important;
+  background: #71639e !important;
   border-color: #808080 !important;
-  color: #ffffff !important;
+  color: white !important;
 }
 
 .o_cw_popover_link .fc-view .o_calendar_color_11.fc-event .fc-bg {
-  background:#bbbbbb !important;
+  background:#808080 !important;
 }
 
 .o_cw_popover_link .fc-view .o_calendar_color_6.fc-event .fc-bg {
-  background: var(--biz-theme-primary-color) !important;
+  background: #71639e !important;
 }
 
 .o_cw_popover_link .fc-view .o_calendar_color_11.fc-event {
-  color: #ffffff !important;
+  color: white !important;
 }
 
 .o_cw_popover_link .fc-view .o_calendar_color_6.fc-event {
-  background: var(--biz-theme-primary-color) !important;
+  background: #71639e !important;
 }
 
 .o_cw_popover_link .fc-view .o_calendar_color_11 {

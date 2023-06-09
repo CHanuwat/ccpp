@@ -14,17 +14,22 @@
   }
 }
 
+// .background-theme-ccpp{
+//   background-color: var(--biz-theme-primary-color) !important;
+//   border-color: var(--biz-theme-primary-color) !important;
+// }
+
 .background-theme-ccpp{
-  background-color: var(--biz-theme-primary-color) !important;
-  border-color: var(--biz-theme-primary-color) !important;
+  background-color: #71639e;
+  border-color: #71639e;
 }
 
 .font-theme-ccpp{
-  color: var(--biz-theme-primary-text-color) !important;
+  color: white;
 }
 
 .ccpp_kanban_text{
-  color: var(--biz-theme-primary-color) !important;
+  color: black;
 }
 
 .o_priority_narrow_field {

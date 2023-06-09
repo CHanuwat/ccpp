@@ -902,7 +902,7 @@
                     </field>
                 </page>
                 <page name="strategy_history" string="Strategy History">
-                    <div style="border: 0px solid #1ea8e7b3;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #1ea8e7b3">
+                    <div style="border: 0px solid #1ea8e7b3;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #71639e">
                         <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Current Period Strategy</p>
                     </div>
                     <field name="strategy_lines" readonly="True">
@@ -916,7 +916,7 @@
                             <field name="state" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'state_color'}"/>
                         </tree>
                     </field>
-                    <div style="border: 0px solid #dee1e6;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #dee1e6">
+                    <div style="border: 0px solid #dee1e6;padding: 5px;border-radius: 7px;margin-top: 10px;margin-bottom: 10px;background: #71639e">
                         <p style="margin: auto;color: white;font-weight: 700;text-align: left;">Previous Period Strategy</p>
                     </div>
                     <field name="strategy_history_lines" readonly="True">
@@ -2366,7 +2366,7 @@
         </record>
 
         <record model="ir.ui.menu" id="project.menu_main_pm">
-            <field name="sequence" eval="3"></field>
+            <field name="sequence" eval="4"></field>
         </record>
 
         <record model="ir.ui.menu" id="project.menu_project_report_task_analysis">
