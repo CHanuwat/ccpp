@@ -12,7 +12,7 @@ class Job(models.Model):
     
     
     name = fields.Char(translate=False)
-    code = fields.Char(string="Code", required=True)
+    code = fields.Char(string="Code", required=True, default="New")
     parent_id = fields.Many2one("hr.job", string="Parent Job Position")
     child_lines = fields.One2many("hr.job", 'parent_id', string="Child Job Position")
     employee_id = fields.Many2one("hr.employee", string="Employee")
@@ -25,9 +25,9 @@ class Job(models.Model):
         ('no_of_recruitment_positive', 'CHECK(no_of_recruitment >= 0)', 'The expected number of new employees must be positive.')
     ]
     
-    def unlink(self):
-        raise UserError("ระบบไม่สามารถลบตำแหน่งได้")
-        res = super().unlink()
+    # def unlink(self):
+    #     raise UserError("ระบบไม่สามารถลบตำแหน่งได้")
+    #     res = super().unlink()
     
     @api.depends('department_id')
     def _compute_domain_division(self):

@@ -57,6 +57,7 @@
         "views/ccpp_menu_crm.xml",
         "views/ccpp_menu_customer.xml",
         "views/ccpp_menu_task.xml",
+        "views/ccpp_menu_manual.xml",
         "views/ccpp_menu_replace_all.xml",
         ],
     'qweb': [ 

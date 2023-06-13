@@ -9,11 +9,7 @@
             <xpath expr="//form[1]/sheet[1]/div[2]" position="after">
                 <div class="oe_title">
                     <label for="code"/>
-                    <h3><field name="code" placeholder="e.g. SALE-001" class="o_parent_job_narrow_field"/></h3>
-                </div>
-                <div class="oe_title">
-                    <label for="parent_id"/>
-                    <h3><field name="parent_id" placeholder="e.g. Senior Sales Manager" class="o_parent_job_narrow_field"/></h3>
+                    <h3><field name="code" placeholder="e.g. SALE-001" class="o_parent_job_narrow_field" readonly="1"/></h3>
                 </div>
             </xpath>
             <xpath expr="//form[1]/sheet[1]/notebook[1]" position="inside">
@@ -29,6 +25,9 @@
             <xpath expr="//form[1]/sheet[1]/notebook[1]/page[1]/group[1]/group[1]/field[@name='department_id']" position="after">
                 <field name="domain_division_ids" invisible="True"/>
                 <field name="division_id" domain="[('id','in',domain_division_ids)]" options="{'no_create': True}"/>
+            </xpath>
+            <xpath expr="//form[1]/sheet[1]/notebook[1]/page[1]/group[1]/group[1]/field[@name='employee_id']" position="after">            
+                <field name="parent_id" placeholder="e.g. Senior Sales Manager"/>
             </xpath>
         </field>
     </record>

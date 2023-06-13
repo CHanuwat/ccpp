@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="act_manual_url" model="ir.actions.act_url">
+        <field name="name">Customer Funding/Budget</field>
+        <field name="type">ir.actions.act_url</field>
+        <field name="url">https://medos-doc.winnergy.co.th/</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem name="Manual"
+            id="menu_main_manual"
+            web_icon="ccpp,static/description/manual_icon.png"
+            action="act_manual_url"
+            sequence="501"/>
+
+</odoo>
