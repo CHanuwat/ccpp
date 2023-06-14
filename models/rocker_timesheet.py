@@ -1447,10 +1447,14 @@ class RockerTimesheet(models.Model):
     def get_location_name(self,latitude,longitude):
         location_name = ""
         
-        key = "AIzaSyBGMY2ya5VHQ8_2GqA31xfKhpfFGOUQGwg" # key max
-        gmaps = googlemaps.Client(key="AIzaSyD3nsr3IPMf1VheJjOyujfcDArTtQli0YM") # key P'Bank
+        key_max_old = "AIzaSyBGMY2ya5VHQ8_2GqA31xfKhpfFGOUQGwg" # key max
+        key_max = "AIzaSyAMnFrYwsSAIirLacIcdCG9zELKSckgOis"
+        key_max_14_06_23 = "AIzaSyDoQOI2TsaFcuPFuCi0ZBlucEl3gpN7Cc4"
+        # gmaps = googlemaps.Client(key="AIzaSyD3nsr3IPMf1VheJjOyujfcDArTtQli0YM") # key P'Bank
+        gmaps = googlemaps.Client(key=key_max_14_06_23) # key P'Bank
+        # gmaps = googlemaps.Client(key=key) # key P'Bank
         # Geocoding an address
-        geocode_result = gmaps.geocode('1600 Amphitheatre Parkway, Mountain View, CA')
+        # geocode_result = gmaps.geocode('1600 Amphitheatre Parkway, Mountain View, CA')
 
         # Look up an address with reverse geocoding
         reverse_geocode_result = gmaps.reverse_geocode((latitude, longitude))
