@@ -500,7 +500,7 @@ class RockerTimesheet(models.Model):
     division_id = fields.Many2one("hr.department",string="Department", related="employee_id.division_id", store=True, track_visibility="onchange")
     job_id = fields.Many2one("hr.job", string="Job Position", default=_get_default_job, required=True, track_visibility="onchange")#default=_get_default_job, 
     domain_job_ids = fields.Many2many("hr.job", string="Domain Job", compute="_compute_domain_job_ids")
-    job_ids = fields.Many2many("hr.job", "task_hr_job_rel", "task_id", "job_id", string="CCPP Team", default=_get_default_job_ids, track_visibility="onchange", required=True)
+    job_ids = fields.Many2many("hr.job", "task_hr_job_rel", "task_id", "job_id", string="Task Team", default=_get_default_job_ids, track_visibility="onchange", required=True)
 
     state_color = fields.Integer(compute='_compute_state_color')
     latitude = fields.Float(string="Latitude")
@@ -698,12 +698,7 @@ class RockerTimesheet(models.Model):
             update.task_strategy_id.sudo().task_next_action = update.next_action
             update.task_strategy_id.parent_id.sudo().task_next_action_solution = update.next_action
             update.task_strategy_id.project_id.sudo().task_next_action = update.next_action
-            print("SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS")
-            print(update.project_id)
-            print(update.temp_project_id)
-            print("SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS")
-            if update.project_id:
-                update.job_ids = update.project_id.job_ids.ids
+
             #if not update.code:
             #    sequence_date = datetime.now().strftime("%Y-%m-%d")
             #    try:
@@ -748,7 +743,8 @@ class RockerTimesheet(models.Model):
             raise UserError("Please select CCPP Customer or Potential")
         if 'project_id' in vals:
             ccpp_id = self.env['project.project'].browse(vals['project_id'])
-            vals['job_ids'] = ccpp_id.job_ids.ids
+            if ccpp_id:
+                vals['job_ids'] = ccpp_id.job_ids.ids
         if 'date' in vals and not 'start' in vals:
             _logger.debug('Creation comes somewhere else than Rocker')
             global default_start_time
