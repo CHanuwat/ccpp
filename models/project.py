@@ -1025,9 +1025,16 @@ class Project(models.Model):
                         
     def run_script_update(self):
         
-        department_ids = self.env['hr.department'].search([])
-        for department_id in department_ids:
-            department_id.complete_name = department_id.name
+        task_ids = self.env['account.analytic.line'].search([])
+        for task_id in task_ids:
+            if task_id.project_id:
+                task_id.write({'job_ids': task_id.project_id.job_ids.ids })
+            else:
+                task_id.write({'job_ids': [task_id.job_id.id] })
+
+        # department_ids = self.env['hr.department'].search([])
+        # for department_id in department_ids:
+        #     department_id.complete_name = department_id.name
         
         # approval_ids = self.env['approval'].search([])
         # for approve_id in approval_ids:

@@ -14,7 +14,7 @@
         <record id="ccpp_task_job_rule" model="ir.rule">
             <field name="name">CCPP Task: Job Rule</field>
             <field name="model_id" ref="model_account_analytic_line"/>
-            <field name="domain_force">[('job_id', 'in', user.job_ids.ids)]</field>
+            <field name="domain_force">[('job_ids', 'in', [job.id for job in user.job_ids])]</field>
         </record>
         <record id="ccpp_sale_target_job_rule" model="ir.rule">
             <field name="name">CCPP Sale Target: Job Rule</field>

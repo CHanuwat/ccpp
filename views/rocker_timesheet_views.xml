@@ -152,6 +152,14 @@
                                 <page name="note" string="Note">
                                     <field name="note"/>
                                 </page>
+                                <page name="task_team" string="Task Team">
+                                    <field name="job_ids" options="{'no_create_edit':True}">
+                                        <tree editable="bottom">
+                                            <field name="employee_id" string="User" widget="many2one_avatar_user" readonly="1"/>
+                                            <field name="name" string="Job Position" readonly="1"/>
+                                        </tree>
+                                    </field>
+                                </page>
                                 <page name="log_page" string="Log">
                                     <field name="log_lines" readonly="True">
                                         <tree edit="false" create="false" delete="false">
@@ -408,6 +416,14 @@
                                         <field name="date" invisible="1"/>
                                     </group>
                                 </group>
+                            </page>
+                            <page name="task_team" string="Task Team">
+                                <field name="job_ids" options="{'no_create_edit':True}">
+                                    <tree editable="bottom">
+                                        <field name="employee_id" string="User" widget="many2one_avatar_user" readonly="1"/>
+                                        <field name="name" string="Job Position" readonly="1"/>
+                                    </tree>
+                                </field>
                             </page>
                         </notebook>
                         <!--<xpath expr="//footer" position="inside">

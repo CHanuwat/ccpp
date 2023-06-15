@@ -399,6 +399,10 @@ class RockerTimesheet(models.Model):
             #raise UserError("Not recognize the Employee. Please Configure User to Employee to get the job")
         return employee_id.job_id
 
+    def _get_default_job_ids(self):
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        return employee_id.job_id
+
     # existing fields
     company_id = fields.Many2one('res.company', "Company", default=lambda self: self.env.user.company_id, store=True,
                                  required=True)
@@ -496,6 +500,7 @@ class RockerTimesheet(models.Model):
     division_id = fields.Many2one("hr.department",string="Department", related="employee_id.division_id", store=True, track_visibility="onchange")
     job_id = fields.Many2one("hr.job", string="Job Position", default=_get_default_job, required=True, track_visibility="onchange")#default=_get_default_job, 
     domain_job_ids = fields.Many2many("hr.job", string="Domain Job", compute="_compute_domain_job_ids")
+    job_ids = fields.Many2many("hr.job", "task_hr_job_rel", "task_id", "job_id", string="CCPP Team", default=_get_default_job_ids, track_visibility="onchange", required=True)
 
     state_color = fields.Integer(compute='_compute_state_color')
     latitude = fields.Float(string="Latitude")
@@ -693,6 +698,12 @@ class RockerTimesheet(models.Model):
             update.task_strategy_id.sudo().task_next_action = update.next_action
             update.task_strategy_id.parent_id.sudo().task_next_action_solution = update.next_action
             update.task_strategy_id.project_id.sudo().task_next_action = update.next_action
+            print("SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS")
+            print(update.project_id)
+            print(update.temp_project_id)
+            print("SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS")
+            if update.project_id:
+                update.job_ids = update.project_id.job_ids.ids
             #if not update.code:
             #    sequence_date = datetime.now().strftime("%Y-%m-%d")
             #    try:
@@ -735,6 +746,9 @@ class RockerTimesheet(models.Model):
         # creation from hr_timesheet or time_off: set stop & duration
         if not vals['is_go_ccpp_customer'] and not vals['is_go_potential']:
             raise UserError("Please select CCPP Customer or Potential")
+        if 'project_id' in vals:
+            ccpp_id = self.env['project.project'].browse(vals['project_id'])
+            vals['job_ids'] = ccpp_id.job_ids.ids
         if 'date' in vals and not 'start' in vals:
             _logger.debug('Creation comes somewhere else than Rocker')
             global default_start_time
@@ -851,7 +865,7 @@ class RockerTimesheet(models.Model):
             return False
 
     def write(self, vals):
-        if self.state in ['done','cancel'] and not 'current_situation' in vals and not 'next_action' in vals and not 'state' in vals:
+        if self.state in ['done','cancel'] and not 'current_situation' in vals and not 'next_action' in vals and not 'state' in vals and not 'job_ids' in vals:
             raise UserError("Cannot edit task in state done or cancel.")
         if (('name' in vals and vals['name'] != self.name) or \
         ('priority_id' in vals and vals['priority_id'] != self.priority_id.id) or \
@@ -1418,7 +1432,9 @@ class RockerTimesheet(models.Model):
     def _compute_distance(self):
         for obj in self:
             diff = 0
-            gmaps = googlemaps.Client(key="AIzaSyD3nsr3IPMf1VheJjOyujfcDArTtQli0YM")
+            key_max_14_06_23 = "AIzaSyDoQOI2TsaFcuPFuCi0ZBlucEl3gpN7Cc4"
+            # gmaps = googlemaps.Client(key="AIzaSyD3nsr3IPMf1VheJjOyujfcDArTtQli0YM")
+            gmaps = googlemaps.Client(key=key_max_14_06_23)
             geocode_result = gmaps.geocode(obj.customer_id.name)
             if obj.latitude and obj.longitude and geocode_result:
                 
