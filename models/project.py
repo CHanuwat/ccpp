@@ -63,6 +63,14 @@ class Project(models.Model):
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
         return employee_id.job_id
 
+    def _get_default_employee_ids(self):
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        return employee_id
+
+    def _get_default_employee(self):
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        return employee_id
+
     # def _get_default_sale_team(self):
     #     print("x*50"+"pass pass pass")
     #     return self.env['crm.team'].search([('user_id','=',self.env.user.id)], limit=1)
@@ -76,7 +84,8 @@ class Project(models.Model):
     rec_name = fields.Char(string="Record Name", default='CCPP')
     department_id = fields.Many2one("hr.department",string="Department", related="employee_id.department_id", store=True, track_visibility="onchange")
     division_id = fields.Many2one("hr.department",string="Division", related="employee_id.division_id", store=True, track_visibility="onchange")
-    employee_id = fields.Many2one("hr.employee", string="User", related="job_id.employee_id", store=True, track_visibility="onchange")
+    employee_id = fields.Many2one("hr.employee", string="User", default=_get_default_employee, track_visibility="onchange")
+    employee_ids = fields.Many2many("hr.employee", "ccpp_hr_employee_rel", "ccpp_id", "employee_id", string="CCPP Team", default=_get_default_employee_ids, track_visibility="onchange", required=True)
     job_id = fields.Many2one("hr.job", string="Job Position", default=_get_default_job, required=True, track_visibility="onchange")#default=_get_default_job, 
     job_ids = fields.Many2many("hr.job", "ccpp_hr_job_rel", "ccpp_id", "job_id", string="CCPP Team", default=_get_default_job_ids, track_visibility="onchange", required=True)
     domain_job_ids = fields.Many2many("hr.job", string="Domain Job", compute="_compute_domain_job_ids")
@@ -222,11 +231,11 @@ class Project(models.Model):
             domain_partner_contact = self.env['res.partner']
             partner_contact = self.env['res.partner']
             if obj.partner_id:
-                partner_contact |= self.env['ccpp.customer.information'].search([('job_id','=',obj.job_id.id),
+                partner_contact |= self.env['ccpp.customer.information'].search([('sale_person_id','=',obj.employee_id.id),
                                                                                     ('customer_id','=',obj.partner_id.id),
                                                                                     ('type', 'in', ['internal','external']), 
                                                                                     ('partner_id','!=',obj.employee_id.work_contact_id.id)]).mapped('partner_id')
-                partner_contact |= self.env['ccpp.customer.information'].search([('job_id','=',obj.job_id.id),
+                partner_contact |= self.env['ccpp.customer.information'].search([('sale_person_id','=',obj.employee_id.id),
                                                                                     ('customer_id','=',obj.partner_id.id),
                                                                                     ('type', '=', 'customer'), 
                                                                                     ('partner_ids','not in',obj.employee_id.work_contact_id.id)]).mapped('partner_ids')
@@ -337,12 +346,12 @@ class Project(models.Model):
                 is_ready_create_location = False
             obj.is_ready_create_solution = is_ready_create_location
             
-    @api.depends('job_id')
+    @api.depends('job_id','employee_id')
     def _compute_is_owner(self):
         for obj in self:
             is_owner = False
             employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-            if obj.job_id in employee_id.job_lines:
+            if obj.employee_id.id == employee_id.id:
                 is_owner = True
             obj.is_owner = is_owner
             
@@ -424,7 +433,7 @@ class Project(models.Model):
         for obj in self:
             job_ids = self.env['hr.job']
             if obj.employee_id:
-                for job_id in obj.employee_id.job_lines:
+                for job_id in obj.employee_id.job_id:
                     job_ids |= job_id
             obj.domain_job_ids = job_ids.ids
     
@@ -536,11 +545,11 @@ class Project(models.Model):
             #        partner_contact_ids |= child_id
             
             if obj.partner_id:
-                partner_contact_ids |= self.env['ccpp.customer.information'].search([('job_id','=',obj.job_id.id),
+                partner_contact_ids |= self.env['ccpp.customer.information'].search([('sale_person_id','=',obj.employee_id.id),
                                                                                     ('customer_id','=',obj.partner_id.id),
                                                                                     ('type', 'in', ['internal','external']), 
                                                                                     ('partner_id','!=',obj.employee_id.work_contact_id.id)]).mapped('partner_id')
-                partner_contact_ids |= self.env['ccpp.customer.information'].search([('job_id','=',obj.job_id.id),
+                partner_contact_ids |= self.env['ccpp.customer.information'].search([('sale_person_id','=',obj.employee_id.id),
                                                                                     ('customer_id','=',obj.partner_id.id),
                                                                                     ('type', '=', 'customer'), 
                                                                                     ('partner_ids','not in',obj.employee_id.work_contact_id.id)]).mapped('partner_ids')
@@ -550,9 +559,9 @@ class Project(models.Model):
     def _compute_domain_partner_ids(self):
         for obj in self:
             customer_ids = self.env['ccpp.customer.information']
-            if obj.job_id:
-                customer_ids = self.env['ccpp.customer.information'].search([('job_id','=',obj.job_id.id)]).mapped('customer_id')
-                customer_name = self.env['ccpp.customer.information'].search([('job_id','=',obj.job_id.id)]).mapped('customer_id.name')
+            if obj.employee_id:
+                customer_ids = self.env['ccpp.customer.information'].search([('sale_person_id','=',obj.employee_id.id)]).mapped('customer_id')
+                customer_name = self.env['ccpp.customer.information'].search([('sale_person_id','=',obj.employee_id.id)]).mapped('customer_id.name')
             obj.domain_partner_ids = customer_ids.ids
     
     
@@ -1024,13 +1033,32 @@ class Project(models.Model):
                     strategy_id.delay_date = date_today
                         
     def run_script_update(self):
-        
+        ccpp_ids = self.env['project.project'].search([])
+        count_ccpp = 0
+        for ccpp_id in ccpp_ids:
+            count_ccpp += 1
+            employee_ids = self.env['hr.employee']
+            for job_id in ccpp_id.job_ids:
+                employee_ids |= job_id.employee_id
+            print("CCPP -> ",count_ccpp,'/',len(ccpp_ids))
+            ccpp_id.employee_ids = employee_ids
+
         task_ids = self.env['account.analytic.line'].search([])
+        count_task = 0
         for task_id in task_ids:
-            if task_id.project_id:
-                task_id.write({'job_ids': task_id.project_id.job_ids.ids })
-            else:
-                task_id.write({'job_ids': [task_id.job_id.id] })
+            count_task += 1
+            employee_ids = self.env['hr.employee']
+            for job_id in task_id.job_ids:
+                employee_ids |= job_id.employee_id
+            print("Task -> ",count_task,'/',len(task_ids))
+            task_id.employee_ids = employee_ids
+        
+        # task_ids = self.env['account.analytic.line'].search([])
+        # for task_id in task_ids:
+        #     if task_id.project_id:
+        #         task_id.write({'job_ids': task_id.project_id.job_ids.ids })
+        #     else:
+        #         task_id.write({'job_ids': [task_id.job_id.id] })
 
         # department_ids = self.env['hr.department'].search([])
         # for department_id in department_ids:
@@ -1139,52 +1167,52 @@ class Project(models.Model):
                 
         action['domain'] = [('id','in',ccpp_ids.ids)]
         return action
-    # use
-    def action_ccpp_department_group_by_priority_manager(self):
-        #self = self.sudo()
-        company_ids = self._context.get('allowed_company_ids')
-        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.action_all_ccpp_group_by_priority')
-        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-        job_ids = self.get_child_job(employee_id.job_lines)
-        ccpp_ids = self.env['project.project'].search([('job_id', 'in', job_ids.ids),('company_id','in',company_ids)])
-        action['domain'] = [('id','in',ccpp_ids.ids)]
-        return action
-    # use
-    def action_ccpp_department_group_by_priority_manager_all_department(self):
-        company_ids = self._context.get('allowed_company_ids')
-        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.action_all_ccpp_group_by_priority_manager_all_department')
-        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-        job_ids = self.get_child_job(employee_id.job_lines)
-        ccpp_ids = self.env['project.project'].search([('department_id','=',employee_id.department_id.id),
-                                                       ('company_id', 'in', company_ids)
-                                                        ])
-        action['domain'] = [('id','in',ccpp_ids.ids)]
-        return action
-    # use
-    def action_ccpp_department_group_by_priority_ceo(self):
-        company_ids = self._context.get('allowed_company_ids')
-        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.action_all_ccpp_group_by_priority_ceo')
-        ccpp_ids = self.env['project.project'].search([
-                                                        ('company_id', 'in', company_ids)
-                                                       ])
-        action['domain'] = [('id','in',ccpp_ids.ids)]
-        print("X*"*100)
-        print(self.env.user.employee_id)
-        return action
+    
+    # def action_ccpp_department_group_by_priority_manager(self):
+    #     #self = self.sudo()
+    #     company_ids = self._context.get('allowed_company_ids')
+    #     action = self.env['ir.actions.act_window']._for_xml_id('ccpp.action_all_ccpp_group_by_priority')
+    #     employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+    #     job_ids = self.get_child_job(employee_id.job_id)
+    #     ccpp_ids = self.env['project.project'].search([('job_id', 'in', job_ids.ids),('company_id','in',company_ids)])
+    #     action['domain'] = [('id','in',ccpp_ids.ids)]
+    #     return action
+
+    # def action_ccpp_department_group_by_priority_manager_all_department(self):
+    #     company_ids = self._context.get('allowed_company_ids')
+    #     action = self.env['ir.actions.act_window']._for_xml_id('ccpp.action_all_ccpp_group_by_priority_manager_all_department')
+    #     employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+    #     job_ids = self.get_child_job(employee_id.job_id)
+    #     ccpp_ids = self.env['project.project'].search([('department_id','=',employee_id.department_id.id),
+    #                                                    ('company_id', 'in', company_ids)
+    #                                                     ])
+    #     action['domain'] = [('id','in',ccpp_ids.ids)]
+    #     return action
+
+    # def action_ccpp_department_group_by_priority_ceo(self):
+    #     company_ids = self._context.get('allowed_company_ids')
+    #     action = self.env['ir.actions.act_window']._for_xml_id('ccpp.action_all_ccpp_group_by_priority_ceo')
+    #     ccpp_ids = self.env['project.project'].search([
+    #                                                     ('company_id', 'in', company_ids)
+    #                                                    ])
+    #     action['domain'] = [('id','in',ccpp_ids.ids)]
+    #     print("X*"*100)
+    #     print(self.env.user.employee_id)
+    #     return action
         
-    def action_ccpp_department_group_by_customer_manager(self):
-        action = self.env['ir.actions.act_window']._for_xml_id('ccpp.action_my_ccpp_group_by_customer')
-        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-        job_ids = self.get_child_job(employee_id.job_lines)
-        ccpp_ids = self.env['project.project'].search([('job_id', 'in', job_ids.ids)])
-        action['domain'] = [('id','in',ccpp_ids.ids)]
-        return action
+    # def action_ccpp_department_group_by_customer_manager(self):
+    #     action = self.env['ir.actions.act_window']._for_xml_id('ccpp.action_my_ccpp_group_by_customer')
+    #     employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+    #     job_ids = self.get_child_job(employee_id.job_id)
+    #     ccpp_ids = self.env['project.project'].search([('job_id', 'in', job_ids.ids)])
+    #     action['domain'] = [('id','in',ccpp_ids.ids)]
+    #     return action
     
     def action_my_ccpp_group_by_priority_user(self):
         company_ids = self._context.get('allowed_company_ids')
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.action_my_ccpp_group_by_priority')
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-        ccpp_ids = self.env['project.project'].search([('job_id', 'in', employee_id.job_lines.ids),
+        ccpp_ids = self.env['project.project'].search([('employee_id', '=', employee_id.id),
                                                        ('company_id', 'in', company_ids)])
         action['domain'] = [('id','in',ccpp_ids.ids)]
         return action
@@ -1204,12 +1232,12 @@ class Project(models.Model):
         ccpp = self.env['project.project']
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
         if employee_id.job_id:
-            result['priority_1'] = ccpp.search_count([('priority_id.point','=',1),('job_id', 'in', employee_id.job_lines.ids)])
-            result['priority_2'] = ccpp.search_count([('priority_id.point','=',2),('job_id', 'in', employee_id.job_lines.ids)])
-            result['priority_3'] = ccpp.search_count([('priority_id.point','=',3),('job_id', 'in', employee_id.job_lines.ids)])
-            result['priority_4'] = ccpp.search_count([('priority_id.point','=',4),('job_id', 'in', employee_id.job_lines.ids)])
-            result['delay'] = ccpp.search_count([('is_delay','=',True),('job_id', 'in', employee_id.job_lines.ids)])
-            result['undefine'] = ccpp.search_count([('priority_select','=','to_define'),('job_id', 'in', employee_id.job_lines.ids)])
+            result['priority_1'] = ccpp.search_count([('priority_id.point','=',1),('employee_id', 'in', [employee_id.id])])
+            result['priority_2'] = ccpp.search_count([('priority_id.point','=',2),('employee_id', 'in', [employee_id.id])])
+            result['priority_3'] = ccpp.search_count([('priority_id.point','=',3),('employee_id', 'in', [employee_id.id])])
+            result['priority_4'] = ccpp.search_count([('priority_id.point','=',4),('employee_id', 'in', [employee_id.id])])
+            result['delay'] = ccpp.search_count([('is_delay','=',True),('employee_id', 'in', [employee_id.id])])
+            result['undefine'] = ccpp.search_count([('priority_select','=','to_define'),('employee_id', 'in', [employee_id.id])])
         return result
         
     @api.model
@@ -1226,13 +1254,13 @@ class Project(models.Model):
         }
         ccpp = self.env['project.project']
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-        job_ids = self.get_child_job(employee_id.job_lines)
-        result['priority_1'] = ccpp.search_count([('priority_id.point','=',1),('job_id', 'in', job_ids.ids),('company_id','in',company_ids)])
-        result['priority_2'] = ccpp.search_count([('priority_id.point','=',2),('job_id', 'in', job_ids.ids),('company_id','in',company_ids)])
-        result['priority_3'] = ccpp.search_count([('priority_id.point','=',3),('job_id', 'in', job_ids.ids),('company_id','in',company_ids)])
-        result['priority_4'] = ccpp.search_count([('priority_id.point','=',4),('job_id', 'in', job_ids.ids),('company_id','in',company_ids)])
-        result['delay'] = ccpp.search_count([('is_delay','=',True),('job_id', 'in', job_ids.ids),('company_id','in',company_ids)])
-        result['undefine'] = ccpp.search_count([('priority_select','=','to_define'),('job_id', 'in', job_ids.ids),('company_id','in',company_ids)])
+        employee_ids = self.get_child_job(employee_id.job_id).mapped("employee_ids")
+        result['priority_1'] = ccpp.search_count([('priority_id.point','=',1),('employee_ids', 'in', employee_ids.ids),('company_id','in',company_ids)])
+        result['priority_2'] = ccpp.search_count([('priority_id.point','=',2),('employee_ids', 'in', employee_ids.ids),('company_id','in',company_ids)])
+        result['priority_3'] = ccpp.search_count([('priority_id.point','=',3),('employee_ids', 'in', employee_ids.ids),('company_id','in',company_ids)])
+        result['priority_4'] = ccpp.search_count([('priority_id.point','=',4),('employee_ids', 'in', employee_ids.ids),('company_id','in',company_ids)])
+        result['delay'] = ccpp.search_count([('is_delay','=',True),('employee_ids', 'in', employee_ids.ids),('company_id','in',company_ids)])
+        result['undefine'] = ccpp.search_count([('priority_select','=','to_define'),('employee_ids', 'in', employee_ids.ids),('company_id','in',company_ids)])
         print(result)
         return result       
     
@@ -1250,7 +1278,6 @@ class Project(models.Model):
         }
         ccpp = self.env['project.project']
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-        job_ids = self.get_child_job(employee_id.job_lines)
         result['priority_1'] = ccpp.search_count([('priority_id.point','=',1),('department_id', '=', employee_id.department_id.id),('company_id','in',company_ids)])
         result['priority_2'] = ccpp.search_count([('priority_id.point','=',2),('department_id', '=', employee_id.department_id.id),('company_id','in',company_ids)])
         result['priority_3'] = ccpp.search_count([('priority_id.point','=',3),('department_id', '=', employee_id.department_id.id),('company_id','in',company_ids)])
@@ -1274,7 +1301,6 @@ class Project(models.Model):
         }
         ccpp = self.env['project.project']
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-        job_ids = self.get_child_job(employee_id.job_lines)
         result['priority_1'] = ccpp.search_count([('priority_id.point','=',1),('company_id','in',company_ids)])
         result['priority_2'] = ccpp.search_count([('priority_id.point','=',2),('company_id','in',company_ids)])
         result['priority_3'] = ccpp.search_count([('priority_id.point','=',3),('company_id','in',company_ids)])
@@ -1306,54 +1332,54 @@ class Project(models.Model):
         company_ids = self._context.get('allowed_company_ids')
         print(company_ids)
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-        job_ids = self.get_child_job(employee_id.job_lines)
+        employee_ids = self.get_child_job(employee_id.job_id).mapped("employee_ids")
         ccpp = self.env['project.project']
         starting_day_of_current_year = datetime.now().date().replace(month=1, day=1)
         ending_day_of_current_year = datetime.now().date().replace(month=12, day=31)
         if self.env.user.has_group('ccpp.group_ccpp_backoffice_user') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_user'):
-            first_this_year_success = ccpp.search_count([('job_id', 'in', employee_id.job_lines.ids),
+            first_this_year_success = ccpp.search_count([('employee_id', '=', employee_id.id),
                                                    #('company_id','in', company_ids),
                                                    ('state','=','done'),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',1)])
-            first_this_year_all = ccpp.search_count([('job_id', 'in', employee_id.job_lines.ids),
+            first_this_year_all = ccpp.search_count([('employee_id', '=', employee_id.id),
                                                    #('company_id','in', company_ids),
                                                    ('state','not in',['cancel','void']),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',1)])
-            second_this_year_success = ccpp.search_count([('job_id', 'in', employee_id.job_lines.ids),
+            second_this_year_success = ccpp.search_count([('employee_id', '=', employee_id.id),
                                                    #('company_id','in', company_ids),
                                                    ('state','=','done'),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',2)])
-            second_this_year_all = ccpp.search_count([('job_id', 'in', employee_id.job_lines.ids),
+            second_this_year_all = ccpp.search_count([('employee_id', '=', employee_id.id),
                                                    #('company_id','in', company_ids),
                                                    ('state','not in',['cancel','void']),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',2)])
-            third_this_year_success = ccpp.search_count([('job_id', 'in', employee_id.job_lines.ids),
+            third_this_year_success = ccpp.search_count([('employee_id', '=', employee_id.id),
                                                    #('company_id','in', company_ids),
                                                    ('state','=','done'),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',3)])
-            third_this_year_all = ccpp.search_count([('job_id', 'in', employee_id.job_lines.ids),
+            third_this_year_all = ccpp.search_count([('employee_id', '=', employee_id.id),
                                                    #('company_id','in', company_ids),
                                                    ('state','not in',['cancel','void']),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',3)])
-            fourth_this_year_success = ccpp.search_count([('job_id', 'in', employee_id.job_lines.ids),
+            fourth_this_year_success = ccpp.search_count([('employee_id', '=', employee_id.id),
                                                    #('company_id','in', company_ids),
                                                    ('state','=','done'),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',4)])
-            fourth_this_year_all = ccpp.search_count([('job_id', 'in', employee_id.job_lines.ids),
+            fourth_this_year_all = ccpp.search_count([('employee_id', '=', employee_id.id),
                                                    #('company_id','in', company_ids),
                                                    ('state','not in',['cancel','void']),
                                                    ('deadline_date','>=',starting_day_of_current_year),
@@ -1361,49 +1387,49 @@ class Project(models.Model):
                                                    ('priority_id.point','=',4)])
         
         if self.env.user.has_group('ccpp.group_ccpp_backoffice_manager') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_manager'):
-            first_this_year_success = ccpp.search_count([('job_id', 'in', job_ids.ids),
+            first_this_year_success = ccpp.search_count([('employee_ids', 'in', employee_ids.ids),
                                                    #('company_id','in', company_ids),
                                                    ('state','=','done'),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',1)])
-            first_this_year_all = ccpp.search_count([('job_id', 'in', job_ids.ids),
+            first_this_year_all = ccpp.search_count([('employee_ids', 'in', employee_ids.ids),
                                                    #('company_id','in', company_ids),
                                                    ('state','not in',['cancel','void']),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',1)])
-            second_this_year_success = ccpp.search_count([('job_id', 'in', job_ids.ids),
+            second_this_year_success = ccpp.search_count([('employee_ids', 'in', employee_ids.ids),
                                                    #('company_id','in', company_ids),
                                                    ('state','not in',['cancel','void']),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',2)])
-            second_this_year_all = ccpp.search_count([('job_id', 'in', job_ids.ids),
+            second_this_year_all = ccpp.search_count([('employee_ids', 'in', employee_ids.ids),
                                                    #('company_id','in', company_ids),
                                                    ('state','not in',['cancel','void']),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',2)])
-            third_this_year_success = ccpp.search_count([('job_id', 'in', job_ids.ids),
+            third_this_year_success = ccpp.search_count([('employee_ids', 'in', employee_ids.ids),
                                                    #('company_id','in', company_ids),
                                                    ('state','=','done'),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',3)])
-            third_this_year_all = ccpp.search_count([('job_id', 'in', job_ids.ids),
+            third_this_year_all = ccpp.search_count([('employee_ids', 'in', employee_ids.ids),
                                                    #('company_id','in', company_ids),
                                                    ('state','not in',['cancel','void']),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',3)])
-            fourth_this_year_success = ccpp.search_count([('job_id', 'in', job_ids.ids),
+            fourth_this_year_success = ccpp.search_count([('employee_ids', 'in', employee_ids.ids),
                                                    #('company_id','in', company_ids),
                                                    ('state','=','done'),
                                                    ('deadline_date','>=',starting_day_of_current_year),
                                                    ('deadline_date','<=',ending_day_of_current_year),
                                                    ('priority_id.point','=',4)])
-            fourth_this_year_all = ccpp.search_count([('job_id', 'in', job_ids.ids),
+            fourth_this_year_all = ccpp.search_count([('employee_ids', 'in', employee_ids.ids),
                                                    #('company_id','in', company_ids),
                                                    ('state','not in',['cancel','void']),
                                                    ('deadline_date','>=',starting_day_of_current_year),
@@ -1880,7 +1906,7 @@ class Task(models.Model):
         for obj in self:
             is_owner = False
             employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-            if obj.project_id.job_id in employee_id.job_lines:
+            if obj.project_id.employee_id.id == employee_id.id:
                 is_owner = True
             obj.is_owner = is_owner
         
@@ -2789,7 +2815,7 @@ class ProjectApprovelines(models.Model):
             user_ids = self.env['hr.employee']
             if obj.state in ['waiting_approve','cancel']:
                 for job_id in obj.job_approve_ids:
-                    user_ids |= job_id.employee_id
+                    user_ids |= job_id.employee_ids
                 obj.user_approve_ids = user_ids
             if obj.state in ['approve','reject']:
                 obj.user_approve_ids = obj.job_approve_by_id.employee_id

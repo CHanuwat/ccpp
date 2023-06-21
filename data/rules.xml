@@ -27,5 +27,31 @@
             <field name="domain_force">[('job_id', 'in', user.job_ids.ids)]</field>
         </record>
 
+        <record id="ccpp_employee_rule" model="ir.rule">
+            <field name="name">CCPP: Employee Rule</field>
+            <field name="model_id" ref="model_project_project"/>
+            <field name="domain_force">[('employee_ids', 'in', [employee_id.id for employee_id in user.employee_level_ids]), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="ccpp_customer_information_employee_rule" model="ir.rule">
+            <field name="name">CCPP Customer Information: Employee Rule</field>
+            <field name="model_id" ref="model_ccpp_customer_information"/>
+            <field name="domain_force">[('sale_person_id', 'in', user.employee_level_ids.ids), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="ccpp_task_employee_rule" model="ir.rule">
+            <field name="name">CCPP Task: Employee Rule</field>
+            <field name="model_id" ref="model_account_analytic_line"/>
+            <field name="domain_force">[('employee_ids', 'in', [employee_id.id for employee_id in user.employee_level_ids]), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="ccpp_sale_target_employee_rule" model="ir.rule">
+            <field name="name">CCPP Sale Target: Employee Rule</field>
+            <field name="model_id" ref="model_ccpp_sale_target"/>
+            <field name="domain_force">[('sale_person_id', 'in', user.employee_level_ids.ids), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="ccpp_purchase_history_employee_rule" model="ir.rule">
+            <field name="name">CCPP Purchase History: Employee Rule</field>
+            <field name="model_id" ref="model_ccpp_purchase_history"/>
+            <field name="domain_force">[('sale_person_id', 'in', user.employee_level_ids.ids), ('company_id', 'in', company_ids)]</field>
+        </record>
+
     </data>
 </odoo>

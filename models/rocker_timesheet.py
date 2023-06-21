@@ -92,7 +92,7 @@ class RockerTimesheet(models.Model):
             domain_project = []
             ccpp_ids = self.env['project.project']
             if obj.customer_id:
-                domain = [('job_id','=',obj.job_id.id),
+                domain = [('employee_id','=',obj.employee_id.id),
                           ('state','=','process'),
                           ('company_id','=',obj.company_id.id)
                           ]
@@ -403,6 +403,14 @@ class RockerTimesheet(models.Model):
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
         return employee_id.job_id
 
+    def _get_default_employee(self):
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        return employee_id
+    
+    def _get_default_employee_ids(self):
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        return employee_id
+
     # existing fields
     company_id = fields.Many2one('res.company', "Company", default=lambda self: self.env.user.company_id, store=True,
                                  required=True)
@@ -469,7 +477,8 @@ class RockerTimesheet(models.Model):
     #                              default=lambda self: self.env['hr.employee'].search(
     #                                  [('user_id', '=', self.env.user.id),
     #                                   ('company_id', '=', self.env.company.id)]).id, store=True)
-    employee_id = fields.Many2one("hr.employee", string="User", related="job_id.employee_id", store=True, track_visibility="onchange")
+    employee_id = fields.Many2one("hr.employee", string="User", default=_get_default_employee, track_visibility="onchange")
+    employee_ids = fields.Many2many("hr.employee", "task_hr_employee_rel", "task_id", "employee_id", string="Task Team", default=_get_default_employee_ids, track_visibility="onchange", required=True)
     department_id = fields.Many2one('hr.department', "Department", compute='_compute_department_id', store=True,
                                     compute_sudo=True)
     unit_amount = fields.Float('Actual Work', default=_default_work, required=True, help="Work amount in hours")
@@ -515,7 +524,7 @@ class RockerTimesheet(models.Model):
         for obj in self:
             is_owner = False
             employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-            if obj.job_id in employee_id.job_lines:
+            if obj.job_id in employee_id.job_id:
                 is_owner = True
             obj.is_owner = is_owner
 
@@ -524,7 +533,7 @@ class RockerTimesheet(models.Model):
         for obj in self:
             job_ids = self.env['hr.job']
             if obj.sale_person_id:
-                for job_id in obj.sale_person_id.job_lines:
+                for job_id in obj.sale_person_id.job_id:
                     job_ids |= job_id
             obj.domain_job_ids = job_ids.ids
             
@@ -573,7 +582,7 @@ class RockerTimesheet(models.Model):
             ccpp_ids = self.env['project.project']
             employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
             if obj.customer_id:
-                domain = [('job_ids','in',[job.id for job in employee_id.job_lines]),('state','=','process')]
+                domain = [('employee_ids','in',[employee_id.id]),('state','=','process')]
                 domain.append(('partner_id','=',obj.customer_id.id))
                 if obj.priority_id:
                     domain.append(('priority_id','=',obj.priority_id.id))
@@ -609,16 +618,16 @@ class RockerTimesheet(models.Model):
             #    customer_ids = self.env['project.project'].search([('user_id','=',self.env.user.id),
             #                                                       ('state','=','process')]).mapped('partner_id')
             if obj.is_go_ccpp_customer and obj.priority_id:
-                customer_ids = self.env['project.project'].search([('job_ids','in', [job.id for job in employee_id.job_lines]),
+                customer_ids = self.env['project.project'].search([('employee_ids','in', [employee_id.id]),
                                                                    ('state','=','process'),
                                                                    ('priority_id','=',obj.priority_id.id)]).mapped('partner_id')
             if obj.is_go_potential:
                 year = str(datetime.now().year)
-                customer_ids = self.env['ccpp.customer.information'].search([('job_id','in', employee_id.job_lines.ids),
+                customer_ids = self.env['ccpp.customer.information'].search([('sale_person_id','=', employee_id.id),
                                                                              ('active','=',True),
                                                                              ('year_selection','=',year),
                                                                              ('type','in',['customer','external'])], order="potential_ranking").mapped('customer_id')
-                customer_ids |= self.env['ccpp.customer.information'].search([('job_id','in', employee_id.job_lines.ids),
+                customer_ids |= self.env['ccpp.customer.information'].search([('sale_person_id','=', employee_id.id),
                                                                              ('active','=',True),
                                                                              ('year_selection','=',year),
                                                                              ('type','in',['internal'])], order="potential_ranking").mapped('partner_id')
@@ -745,6 +754,7 @@ class RockerTimesheet(models.Model):
             ccpp_id = self.env['project.project'].browse(vals['project_id'])
             if ccpp_id:
                 vals['job_ids'] = ccpp_id.job_ids.ids
+                vals['employee_ids'] = ccpp_id.employee_ids.ids
         if 'date' in vals and not 'start' in vals:
             _logger.debug('Creation comes somewhere else than Rocker')
             global default_start_time
@@ -861,7 +871,7 @@ class RockerTimesheet(models.Model):
             return False
 
     def write(self, vals):
-        if self.state in ['done','cancel'] and not 'current_situation' in vals and not 'next_action' in vals and not 'state' in vals and not 'job_ids' in vals:
+        if self.state in ['done','cancel'] and not 'current_situation' in vals and not 'next_action' in vals and not 'state' in vals and not 'job_ids' in vals and not 'employee_ids' in vals:
             raise UserError("Cannot edit task in state done or cancel.")
         if (('name' in vals and vals['name'] != self.name) or \
         ('priority_id' in vals and vals['priority_id'] != self.priority_id.id) or \
@@ -1344,19 +1354,19 @@ class RockerTimesheet(models.Model):
         
         task = self.env['account.analytic.line']
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-        job_ids = self.get_child_job(employee_id.job_lines)
+        employee_ids = self.get_child_job(employee_id.job_id).mapped("employee_ids")
         company_ids = self._context.get('allowed_company_ids')
         
         if (self.env.user.has_group('ccpp.group_ccpp_backoffice_user') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_user')) and employee_id.job_lines:
-            result['today'] = task.search_count([('stop', '>=', today_start),('stop', '<=', today_stop),('job_id', 'in', employee_id.job_lines.ids),('company_id', 'in', company_ids)])
-            result['this_week'] = task.search_count([('stop', '>=', week_start),('stop', '<=', week_stop),('job_id', 'in', employee_id.job_lines.ids),('company_id', 'in', company_ids)])
-            result['this_month'] = task.search_count([('stop', '>=', month_start),('stop', '<', month_stop),('job_id', 'in', employee_id.job_lines.ids),('company_id', 'in', company_ids)])
-            result['all'] = task.search_count([('job_id', 'in', employee_id.job_lines.ids),('company_id', 'in', company_ids)])
+            result['today'] = task.search_count([('stop', '>=', today_start),('stop', '<=', today_stop),('employee_id', '=', employee_ids.id),('company_id', 'in', company_ids)])
+            result['this_week'] = task.search_count([('stop', '>=', week_start),('stop', '<=', week_stop),('employee_id', '=', employee_id.id),('company_id', 'in', company_ids)])
+            result['this_month'] = task.search_count([('stop', '>=', month_start),('stop', '<', month_stop),('employee_id', '=', employee_id.id),('company_id', 'in', company_ids)])
+            result['all'] = task.search_count([('employee_id', '=', employee_id.id),('company_id', 'in', company_ids)])
         elif self.env.user.has_group('ccpp.group_ccpp_backoffice_manager') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_manager'):
-            result['today'] = task.search_count([('stop', '>=', today_start),('stop', '<=', today_stop),('job_id', 'in', job_ids.ids),('company_id', 'in', company_ids)])
-            result['this_week'] = task.search_count([('stop', '>=', week_start),('stop', '<=', week_stop),('job_id', 'in', job_ids.ids),('company_id', 'in', company_ids)])
-            result['this_month'] = task.search_count([('stop', '>=', month_start),('stop', '<', month_stop),('job_id', 'in', job_ids.ids),('company_id', 'in', company_ids)])
-            result['all'] = task.search_count([('job_id', 'in', job_ids.ids),('company_id', 'in', company_ids)])
+            result['today'] = task.search_count([('stop', '>=', today_start),('stop', '<=', today_stop),('employee_ids', 'in', employee_ids.ids),('company_id', 'in', company_ids)])
+            result['this_week'] = task.search_count([('stop', '>=', week_start),('stop', '<=', week_stop),('employee_ids', 'in', employee_ids.ids),('company_id', 'in', company_ids)])
+            result['this_month'] = task.search_count([('stop', '>=', month_start),('stop', '<', month_stop),('employee_ids', 'in', employee_ids.ids),('company_id', 'in', company_ids)])
+            result['all'] = task.search_count([('employee_ids', 'in', employee_ids.ids),('company_id', 'in', company_ids)])
         elif self.env.user.has_group('ccpp.group_ccpp_backoffice_manager_all_department') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_manager_all_department'):
             result['today'] = task.search_count([('stop', '>=', today_start),('stop', '<=', today_stop),('department_id', '=', employee_id.department_id.id),('company_id', 'in', company_ids)])
             result['this_week'] = task.search_count([('stop', '>=', week_start),('stop', '<=', week_stop),('department_id', '=', employee_id.department_id.id),('company_id', 'in', company_ids)])
@@ -1519,7 +1529,7 @@ class RockerTimesheet(models.Model):
         current_year = str(datetime.now().year)
         purchase_history_id = self.env['ccpp.purchase.history'].search([('customer_id','=',obj.customer_id.id),
                                                                         ('year_selection','=',current_year),
-                                                                        ('job_id','=',obj.job_id.id)
+                                                                        ('sale_person_id','=',obj.employee_id.id)
                                                                         ]) 
         order_line_list = []
         borrow_line_list = []
@@ -1553,7 +1563,7 @@ class RockerTimesheet(models.Model):
         current_year = str(datetime.now().year)
         purchase_history_id = self.env['ccpp.purchase.history'].search([('customer_id','=',obj.customer_id.id),
                                                                         ('year_selection','=',current_year),
-                                                                        ('job_id','=',obj.job_id.id)
+                                                                        ('sale_person_id','=',obj.employee_id.id)
                                                                 ])
 
         for purchase_history_line_id in purchase_history_id.winmed_lines:
@@ -1589,7 +1599,7 @@ class RockerTimesheet(models.Model):
         current_year = str(datetime.now().year)
         purchase_history_id = self.env['ccpp.purchase.history'].search([('customer_id','=',obj.customer_id.id),
                                                                         ('year_selection','=',current_year),
-                                                                        ('job_id','=',obj.job_id.id)
+                                                                        ('sale_persone_id','=',obj.employee_id.id)
                                                                 ])
 
         for purchase_history_line_id in purchase_history_id.winmed_lines:

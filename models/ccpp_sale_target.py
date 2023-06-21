@@ -69,6 +69,10 @@ class CCPPSaleTarget(models.Model):
         #    print(self.env.user.name)
         #    raise UserError("Not recognize the Employee. Please Configure User to Employee to get the job")
         return employee_id.job_id
+    
+    def _get_default_employee(self):
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        return employee_id
         
     name = fields.Char(string="Name")
     sale_period_id = fields.Many2one("ccpp.sale.target.period", string="Period")
@@ -136,7 +140,7 @@ class CCPPSaleTarget(models.Model):
     target = fields.Float(string="Sales Target")
     actual = fields.Float(string="Sales Actual")
     actual_percent = fields.Float(string="% Success", compute="_compute_actual_percent", store=True)
-    sale_person_id = fields.Many2one("hr.employee", related="job_id.employee_id", string="Sales Person", required=True)
+    sale_person_id = fields.Many2one("hr.employee", default=_get_default_employee, string="Sales Person", required=True)
     job_id = fields.Many2one("hr.job", string="Job Position",  default=_get_default_job, required=True, track_visibility="onchange")#default=_get_default_job,
     domain_job_ids = fields.Many2many("hr.job", string="Domain Job", compute="_compute_domain_job_ids")
     department_id = fields.Many2one("hr.department", string="Deparment", related="sale_person_id.department_id")

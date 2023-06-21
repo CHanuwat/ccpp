@@ -839,11 +839,18 @@
                         </tree>
                     </field>
                 </page>
-                <page name="ccpp_team" string="CCPP Team">
+                <!-- <page name="ccpp_team" string="CCPP Team">
                     <field name="job_ids" options="{'no_create_edit':True}">
                         <tree editable="bottom">
                             <field name="employee_id" string="User" widget="many2one_avatar_user" readonly="1"/>
                             <field name="name" string="Job Position" readonly="1"/>
+                        </tree>
+                    </field>
+                </page> -->
+                <page name="ccpp_team" string="CCPP Team">
+                    <field name="employee_ids" options="{'no_create_edit':True}">
+                        <tree editable="bottom">
+                            <field name="user_id" string="User" widget="many2one_avatar_user" readonly="1"/>
                         </tree>
                     </field>
                 </page>
@@ -2084,13 +2091,13 @@
         <field name="code">action = model.action_my_ccpp_group_by_priority_user()</field>
     </record>
 
-    <record id="action_all_ccpp_group_by_customer_manager" model="ir.actions.server">
+    <!-- <record id="action_all_ccpp_group_by_customer_manager" model="ir.actions.server">
         <field name="name">All CCPP Group by Customer</field>
         <field name="model_id" ref="model_project_project"/>
         <field name="type">ir.actions.server</field>
         <field name="state">code</field>
         <field name="code">action = model.action_ccpp_department_group_by_customer_manager()</field>
-    </record>
+    </record> -->
 
     <record id="action_ccpp_dashboard" model="ir.actions.client">
         <field name="name">CCPP Dashboard</field>

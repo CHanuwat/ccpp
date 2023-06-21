@@ -11,7 +11,25 @@ class Users(models.Model):
     
 #    partner_id = fields.Many2one(auto_join=True)
     job_ids = fields.Many2many('hr.job',compute="_compute_job_ids")
+    employee_level_ids = fields.Many2many('hr.employee', 'res_user_hr_employee_rel', 'user_id', 'employee_id', compute="_compute_employee_level_ids")
     
+    def _compute_employee_level_ids(self):
+        for obj in self:
+            employee_id = self.env['hr.employee'].search([('user_id','=',obj.id)], limit=1)
+            if obj.has_group('ccpp.group_ccpp_backoffice_user') or obj.has_group('ccpp.group_ccpp_frontoffice_user'):
+                obj.employee_level_ids = employee_id
+            elif obj.has_group('ccpp.group_ccpp_backoffice_manager') or obj.has_group('ccpp.group_ccpp_frontoffice_manager'):
+                job_ids = self.get_child_job(employee_id.job_id)
+                obj.employee_level_ids = job_ids.mapped("employee_ids")
+            elif obj.has_group('ccpp.group_ccpp_backoffice_manager_all_department') or obj.has_group('ccpp.group_ccpp_frontoffice_manager_all_department'):
+                job_ids = self.env['hr.job'].search([('department_id','=',employee_id.department_id.id)])                
+                obj.employee_level_ids = job_ids.mapped("employee_ids")
+            elif obj.has_group('ccpp.group_ccpp_ceo'):
+                all_job_ids = self.env['hr.job'].search([])
+                obj.employee_level_ids = all_job_ids.mapped("employee_ids")
+            else:
+                obj.employee_level_ids = self.env['hr.employee']  
+
     def _compute_job_ids(self):
         for obj in self:
             employee_id = self.env['hr.employee'].search([('user_id','=',obj.id)], limit=1)

@@ -69,6 +69,10 @@ class CCPPCustomerInformation(models.Model):
             customer_id = self.env.user.company_id.partner_id
         return customer_id
 
+    def _get_default_employee(self):
+        employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
+        return employee_id
+
     name = fields.Char(string="Name", compute="_compute_name", store=True)
     date_from = fields.Date("From", required=True, default=_get_default_date_from, track_visibility="onchange")
     date_to = fields.Date("To", required=True, default=_get_default_date_to)
@@ -78,7 +82,7 @@ class CCPPCustomerInformation(models.Model):
     partner_ids = fields.Many2many("res.partner", string="Contact", track_visibility="onchange")
     domain_partner_ids = fields.Many2many("res.partner", string="Domain partner", compute="_compute_domain_partner_ids")
     active = fields.Boolean(string="Active", default=True, track_visibility="onchange")
-    sale_person_id = fields.Many2one("hr.employee", string="Sales Person", related="job_id.employee_id", required=True, store=True, track_visibility="onchange")
+    sale_person_id = fields.Many2one("hr.employee", string="Sales Person", default=_get_default_employee, required=True, store=True, track_visibility="onchange")
     department_id = fields.Many2one("hr.department",string="Department", related="sale_person_id.department_id", store=True, track_visibility="onchange")
     division_id = fields.Many2one("hr.department",string="Department", related="sale_person_id.division_id", store=True, track_visibility="onchange")
     job_id = fields.Many2one("hr.job", string="Job Position", default=_get_default_job, required=True, track_visibility="onchange")#default=_get_default_job, 
@@ -204,7 +208,7 @@ class CCPPCustomerInformation(models.Model):
         for obj in self:
             job_ids = self.env['hr.job']
             if obj.sale_person_id:
-                for job_id in obj.sale_person_id.job_lines:
+                for job_id in obj.sale_person_id.job_id:
                     job_ids |= job_id
             obj.domain_job_ids = job_ids.ids
             
@@ -230,27 +234,27 @@ class CCPPCustomerInformation(models.Model):
     @api.constrains('potential_ranking','competitor_ranking',"customer_id","year_selection")
     def constraint_customer(self):
         for obj in self:
-            customer_potential_rank = self.env["ccpp.customer.information"].search([("job_id",'=',obj.job_id.id),
+            customer_potential_rank = self.env["ccpp.customer.information"].search([("sale_person_id",'=',obj.sale_person_id.id),
                                                                                     ("year_selection",'=',obj.year_selection),
                                                                                     ("type",'=',obj.type),
                                                                                     ('potential_ranking','=',obj.potential_ranking),
                                                                                     ('potential_ranking','!=',False),
                                                                                     ('id','!=',obj.id)],limit=1)
-            customer_competitor_rank = self.env["ccpp.customer.information"].search([("job_id",'=',obj.job_id.id),
+            customer_competitor_rank = self.env["ccpp.customer.information"].search([("sale_person_id",'=',obj.sale_person_id.id),
                                                                                      ("year_selection",'=',obj.year_selection),
                                                                                      ("type",'=',obj.type),
                                                                                     ('competitor_ranking','=',obj.competitor_ranking),
                                                                                     ('competitor_ranking','!=',False),
                                                                                     ('id','!=',obj.id)],limit=1)
             if obj.type == 'customer':
-                check_customer_date_from = self.env["ccpp.customer.information"].search([("job_id",'=',obj.job_id.id),
+                check_customer_date_from = self.env["ccpp.customer.information"].search([("sale_person_id",'=',obj.sale_person_id.id),
                                                                                 ('id','!=',obj.id),
                                                                                 ("type",'=',obj.type),
                                                                                 ('customer_id','=',obj.customer_id.id),
                                                                                 ('year_selection','=',obj.year_selection),
                                                                                 ],limit=1)
             elif obj.type in ['external','internal']:
-                check_customer_date_from = self.env["ccpp.customer.information"].search([("job_id",'=',obj.job_id.id),
+                check_customer_date_from = self.env["ccpp.customer.information"].search([("sale_person_id",'=',obj.sale_person_id.id),
                                                                                 ('id','!=',obj.id),
                                                                                 ("type",'=',obj.type),
                                                                                 ('customer_id','=',obj.customer_id.id),
@@ -317,12 +321,12 @@ class CCPPCustomerInformation(models.Model):
     def _compute_actual_sale_ranking(self):
         for obj in self:
             customer_info_ids = self.env["ccpp.customer.information"].search([('year_selection','=',obj.year_selection),
-                                                                              ("job_id",'=',obj.job_id.id),
+                                                                              ("sale_person_id",'=',obj.sale_person_id.id),
                                                                               ("type",'=',obj.type),
                                                                               ("total_sale_revenue",'!=',False),
                                                                               ],order="total_sale_revenue desc, date_from")
             customer_info_norank_ids = self.env["ccpp.customer.information"].search([('year_selection','=',obj.year_selection),
-                                                                              ("job_id",'=',obj.job_id.id),
+                                                                              ("sale_person_id",'=',obj.sale_person_id.id),
                                                                               ("type",'=',obj.type),
                                                                               ("total_sale_revenue",'=',False),
                                                                               ],order="date_from desc")
@@ -355,7 +359,7 @@ class CCPPCustomerInformation(models.Model):
             
     def open_sales_target(self):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_sale_target_action')
-        sales_target_ids = self.env['ccpp.sale.target'].search([('job_id','=',self.job_id.id)])
+        sales_target_ids = self.env['ccpp.sale.target'].search([('sale_person_id','=',self.sale_person_id.id)])
         action['domain'] = [('id', 'in', sales_target_ids.ids)]
         return action
     
@@ -366,7 +370,7 @@ class CCPPCustomerInformation(models.Model):
     
     def open_purchase_history(self):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_purchase_history_action')
-        purchase_history_ids = self.env['ccpp.purchase.history'].search([('job_id','=',self.job_id.id),('customer_id','=',self.customer_id.id)])
+        purchase_history_ids = self.env['ccpp.purchase.history'].search([('sale_person_id','=',self.sale_person_id.id),('customer_id','=',self.customer_id.id)])
         action['domain'] = [('id', 'in', purchase_history_ids.ids)]
         action['context'] = {}
         return action
@@ -375,15 +379,15 @@ class CCPPCustomerInformation(models.Model):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.action_my_ccpp_group_by_priority')
         ccpp_ids = self.env['project.project']
         if self.type == 'customer':
-            ccpp_ids = self.env['project.project'].search([('job_ids','in',[self.job_id.id]),('partner_id','=',self.customer_id.id),('partner_contact_id','in',self.partner_ids.ids)])
+            ccpp_ids = self.env['project.project'].search([('employee_ids','in',[self.sale_person_id.id]),('partner_id','=',self.customer_id.id),('partner_contact_id','in',self.partner_ids.ids)])
         elif self.type in ['internal','external']:
-            ccpp_ids = self.env['project.project'].search([('job_ids','in',[self.job_id.id]),('partner_id','=',self.customer_id.id),('partner_contact_id','=',self.partner_id.id)])
+            ccpp_ids = self.env['project.project'].search([('employee_ids','in',[self.sale_person_id.id]),('partner_id','=',self.customer_id.id),('partner_contact_id','=',self.partner_id.id)])
         action['domain'] = [('id', 'in', ccpp_ids.ids)]
         return action
     
     def open_current_situation(self):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.act_rocker_timesheet_tree')
-        update_ids = self.env['account.analytic.line'].search([('job_id','=',self.job_id.id),('customer_id','=',self.customer_id.id)])
+        update_ids = self.env['account.analytic.line'].search([('sale_person_id','=',self.sale_person_id.id),('customer_id','=',self.customer_id.id)])
         action['domain'] = [('id', 'in', update_ids.ids)]
         action['context'] = {}
         return action
@@ -400,7 +404,7 @@ class CCPPCustomerInformation(models.Model):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_customer_information_action')
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
         information_ids = self.env['ccpp.customer.information'].search([('type','=','customer'),
-                                                                ('job_id', 'in', employee_id.job_lines.ids),
+                                                                ('sale_person_id', '=', employee_id.id),
                                                                 ('company_id','in', company_ids),
                                                                 ])
         action['domain'] = [('id','in',information_ids.ids)]
@@ -448,7 +452,7 @@ class CCPPCustomerInformation(models.Model):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_external_information_action')
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
         information_ids = self.env['ccpp.customer.information'].search([('type','=','external'),
-                                                                ('job_id', 'in', employee_id.job_lines.ids),
+                                                                ('sale_person_id', 'in', employee_id.id),
                                                                 ('company_id','in', company_ids),
                                                                 ])
         action['domain'] = [('id','in',information_ids.ids)]
@@ -496,7 +500,7 @@ class CCPPCustomerInformation(models.Model):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_internal_information_action')
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
         information_ids = self.env['ccpp.customer.information'].search([('type','=','internal'),
-                                                                ('job_id', 'in', employee_id.job_lines.ids),
+                                                                ('sale_person_id', 'in', employee_id.id),
                                                                 ('company_id','in', company_ids),
                                                                 ])
         action['domain'] = [('id','in',information_ids.ids)]
@@ -557,26 +561,26 @@ class CCPPCustomerInformation(models.Model):
         company_ids = self._context.get('allowed_company_ids')
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
         customer_information = self.env['ccpp.customer.information']
-        job_ids = self.get_child_job(employee_id.job_lines)
+        employee_ids = self.get_child_job(employee_id.job_id).mapped("employee_ids")
         if self.env.user.has_group('ccpp.group_ccpp_backoffice_user') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_user'):
             result['my_customer'] = customer_information.search_count([('type','=','internal'),
-                                                                       ('job_id', 'in', employee_id.job_lines.ids),
+                                                                       ('sale_person_id', '=', employee_id.id),
                                                                        ('company_id','in', company_ids)])
             result['all_customer'] = customer_information.search_count([('type','=','internal'),
-                                                                        ('job_id', 'in', employee_id.job_lines.ids),
+                                                                        ('sale_person_id', '=', employee_id.id),
                                                                         ('company_id','in', company_ids)])
         
         if self.env.user.has_group('ccpp.group_ccpp_backoffice_manager') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_manager'):
             result['my_customer'] = customer_information.search_count([('type','=','internal'),
-                                                                       ('job_id', 'in', employee_id.job_lines.ids),
+                                                                       ('sale_person_id', '=', employee_id.id),
                                                                        ('company_id','in', company_ids)])
             result['all_customer'] = customer_information.search_count([('type','=','internal'),
-                                                                        ('job_id', 'in', job_ids.ids),
+                                                                        ('sale_person_id', 'in', employee_ids.ids),
                                                                         ('company_id','in', company_ids),
                                                                             ])
         if self.env.user.has_group('ccpp.group_ccpp_backoffice_manager_all_department') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_manager_all_department'):
             result['my_customer'] = customer_information.search_count([('type','=','internal'),
-                                                                       ('job_id', 'in', employee_id.job_lines.ids),
+                                                                       ('sale_person_id', '=', employee_id.id),
                                                                        ('company_id','in', company_ids)])
             result['all_customer'] = customer_information.search_count([('type','=','internal'),
                                                                         ('department_id', '=', employee_id.department_id.id),
@@ -584,7 +588,7 @@ class CCPPCustomerInformation(models.Model):
                                                                             ])
         if self.env.user.has_group('ccpp.group_ccpp_ceo'):
             result['my_customer'] = customer_information.search_count([('type','=','internal'),
-                                                                       ('job_id', 'in', employee_id.job_lines.ids),
+                                                                       ('sale_person_id', '=', employee_id.id),
                                                                        ('company_id','in', company_ids)])
             result['all_customer'] = customer_information.search_count([('type','=','internal'),
                                                                         ('company_id','in', company_ids),
@@ -603,26 +607,26 @@ class CCPPCustomerInformation(models.Model):
         company_ids = self._context.get('allowed_company_ids')
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
         customer_information = self.env['ccpp.customer.information']
-        job_ids = self.get_child_job(employee_id.job_lines)
+        employee_ids = self.get_child_job(employee_id.job_id).mapped("employee_ids")
         if self.env.user.has_group('ccpp.group_ccpp_backoffice_user') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_user'):
             result['my_customer'] = customer_information.search_count([('type','=','external'),
-                                                                       ('job_id', 'in', employee_id.job_lines.ids),
+                                                                       ('sale_person_id', '=', employee_id.id),
                                                                        ('company_id','in', company_ids)])
             result['all_customer'] = customer_information.search_count([('type','=','external'),
-                                                                        ('job_id', 'in', employee_id.job_lines.ids),
+                                                                        ('sale_person_id', '=', employee_id.id),
                                                                         ('company_id','in', company_ids)])
         
         if self.env.user.has_group('ccpp.group_ccpp_backoffice_manager') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_manager'):
             result['my_customer'] = customer_information.search_count([('type','=','external'),
-                                                                       ('job_id', 'in', employee_id.job_lines.ids),
+                                                                       ('sale_person_id', '=', employee_id.id),
                                                                        ('company_id','in', company_ids)])
             result['all_customer'] = customer_information.search_count([('type','=','external'),
-                                                                        ('job_id', 'in', job_ids.ids),
+                                                                        ('sale_person_id', 'in', employee_ids.ids),
                                                                         ('company_id','in', company_ids),
                                                                             ])
         if self.env.user.has_group('ccpp.group_ccpp_backoffice_manager_all_department') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_manager_all_department'):
             result['my_customer'] = customer_information.search_count([('type','=','external'),
-                                                                       ('job_id', 'in', employee_id.job_lines.ids),
+                                                                       ('sale_person_id', '=', employee_id.id),
                                                                        ('company_id','in', company_ids)])
             result['all_customer'] = customer_information.search_count([('type','=','external'),
                                                                         ('department_id', '=', employee_id.department_id.id),
@@ -630,7 +634,7 @@ class CCPPCustomerInformation(models.Model):
                                                                             ])
         if self.env.user.has_group('ccpp.group_ccpp_ceo'):
             result['my_customer'] = customer_information.search_count([('type','=','external'),
-                                                                       ('job_id', 'in', employee_id.job_lines.ids),
+                                                                       ('sale_person_id', '=', employee_id.id),
                                                                        ('company_id','in', company_ids)])
             result['all_customer'] = customer_information.search_count([('type','=','external'),
                                                                         ('company_id','in', company_ids),
@@ -646,7 +650,7 @@ class CCPPCustomerInformation(models.Model):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_internal_information_action')
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
         information_ids = self.env['ccpp.customer.information'].search([('type','=','internal'),
-                                                                ('job_id', 'in', employee_id.job_lines.ids),
+                                                                ('sale_person_id', '=', employee_id.id),
                                                                 ('company_id','in', company_ids),
                                                                 ])
         action['domain'] = [('id','in',information_ids.ids)]
@@ -659,15 +663,15 @@ class CCPPCustomerInformation(models.Model):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_internal_information_action')
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
         information_ids = customer_information = self.env['ccpp.customer.information']
-        job_ids = self.get_child_job(employee_id.job_lines)
+        employee_ids = self.get_child_job(employee_id.job_id).mapped("employee_ids")
         if self.env.user.has_group('ccpp.group_ccpp_backoffice_user') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_user'):
             information_ids= customer_information.search([('type','=','internal'),
-                                                        ('job_id', 'in', employee_id.job_lines.ids),
+                                                        ('sale_person_id', '=', employee_id.id),
                                                         ('company_id','in', company_ids)])
         
         if self.env.user.has_group('ccpp.group_ccpp_backoffice_manager') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_manager'):
             information_ids = customer_information.search([('type','=','internal'),
-                                                            ('job_id', 'in', job_ids.ids),
+                                                            ('sale_person_id', 'in', employee_ids.ids),
                                                             ('company_id','in', company_ids),
                                                         ])
         if self.env.user.has_group('ccpp.group_ccpp_backoffice_manager_all_department') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_manager_all_department'):
@@ -690,7 +694,7 @@ class CCPPCustomerInformation(models.Model):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_external_information_action')
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
         information_ids = self.env['ccpp.customer.information'].search([('type','=','external'),
-                                                                ('job_id', 'in', employee_id.job_lines.ids),
+                                                                ('sale_person_id', '=', employee_id.id),
                                                                 ('company_id','in', company_ids),
                                                                 ])
         action['domain'] = [('id','in',information_ids.ids)]
@@ -703,15 +707,15 @@ class CCPPCustomerInformation(models.Model):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_external_information_action')
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
         information_ids = customer_information = self.env['ccpp.customer.information']
-        job_ids = self.get_child_job(employee_id.job_lines)
+        employee_ids = self.get_child_job(employee_id.job_id).mapped("employee_ids")
         if self.env.user.has_group('ccpp.group_ccpp_backoffice_user') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_user'):
             information_ids= customer_information.search([('type','=','external'),
-                                                        ('job_id', 'in', employee_id.job_lines.ids),
+                                                        ('sale_person_id', '=', employee_id.id),
                                                         ('company_id','in', company_ids)])
         
         if self.env.user.has_group('ccpp.group_ccpp_backoffice_manager') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_manager'):
             information_ids = customer_information.search([('type','=','external'),
-                                                            ('job_id', 'in', job_ids.ids),
+                                                            ('sale_person_id', 'in', employee_ids.ids),
                                                             ('company_id','in', company_ids),
                                                         ])
         if self.env.user.has_group('ccpp.group_ccpp_backoffice_manager_all_department') or self.env.user.has_group('ccpp.group_ccpp_frontoffice_manager_all_department'):
