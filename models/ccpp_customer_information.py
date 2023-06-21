@@ -452,7 +452,7 @@ class CCPPCustomerInformation(models.Model):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_external_information_action')
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
         information_ids = self.env['ccpp.customer.information'].search([('type','=','external'),
-                                                                ('sale_person_id', 'in', employee_id.id),
+                                                                ('sale_person_id', '=', employee_id.id),
                                                                 ('company_id','in', company_ids),
                                                                 ])
         action['domain'] = [('id','in',information_ids.ids)]
@@ -500,7 +500,7 @@ class CCPPCustomerInformation(models.Model):
         action = self.env['ir.actions.act_window']._for_xml_id('ccpp.ccpp_internal_information_action')
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
         information_ids = self.env['ccpp.customer.information'].search([('type','=','internal'),
-                                                                ('sale_person_id', 'in', employee_id.id),
+                                                                ('sale_person_id', '=', employee_id.id),
                                                                 ('company_id','in', company_ids),
                                                                 ])
         action['domain'] = [('id','in',information_ids.ids)]
