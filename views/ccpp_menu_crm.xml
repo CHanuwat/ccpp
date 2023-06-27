@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
-    <record model="ir.ui.menu" id="crm.crm_menu_forecast">
+    <!-- <record model="ir.ui.menu" id="crm.crm_menu_forecast">
         <field name="action" eval="False"></field>
     </record>
     <record model="ir.ui.menu" id="crm.crm_opportunity_report_menu">
@@ -30,7 +30,7 @@
     </record>
     <record model="ir.ui.menu" id="crm.menu_crm_opportunities">
         <field name="action" eval="False"/>
-    </record>
+    </record> -->
     <!-- <record model="ir.ui.menu" id="sale_crm.sale_order_menu_quotations_crm">
         <field name="action" eval="False"/>
     </record> -->
@@ -42,20 +42,25 @@
 
     	
 
+    <menuitem name="CRM" id="menu_ccpp_crm_main" groups="base.group_system" parent="project.menu_main_pm" sequence="6" />
+        <menuitem name="CCPP Approval" id="menu_ccpp_approve_dashboard_manager" action="ccpp_ccpp_approve_dashboard_action_manager" parent="menu_ccpp_approve_dashboard_manager_parent" sequence="1" />
+        <menuitem name="New Solution Approval" id="menu_solution_approve_dashboard_manager" action="ccpp_solution_approve_dashboard_action_manager" parent="menu_ccpp_approve_dashboard_manager_parent" sequence="2" />
+        <menuitem name="New Strategy Approval" id="menu_strategy_approve_dashboard_manager" action="ccpp_strategy_approve_dashboard_action_manager" parent="menu_ccpp_approve_dashboard_manager_parent" sequence="3" />
 
-    <menuitem
+
+    <!-- <menuitem
         id="ccpp_crm_customer"
         name="Customer"
         parent="crm.crm_menu_root"
         sequence="1"
-    />
+    /> -->
 
     <!-- Sale Target -->
 
     <menuitem
         id="ccpp_crm_sale_target_user"
         name="Sales Target"
-        parent="crm.crm_menu_root"
+        parent="menu_ccpp_crm_main"
         action="ccpp_sale_target_action_user"
         sequence="2"
         groups="ccpp.group_ccpp_frontoffice_user"
@@ -64,7 +69,7 @@
     <menuitem
         id="ccpp_crm_sale_target_manager"
         name="Sales Target"
-        parent="crm.crm_menu_root"
+        parent="menu_ccpp_crm_main"
         action="ccpp_sale_target_action"
         sequence="2"
         groups="ccpp.group_ccpp_frontoffice_manager"
@@ -73,7 +78,7 @@
     <menuitem
         id="ccpp_crm_sale_target_manager_all_department"
         name="Sales Target"
-        parent="crm.crm_menu_root"
+        parent="menu_ccpp_crm_main"
         action="ccpp_sale_target_action"
         sequence="2"
         groups="ccpp.group_ccpp_frontoffice_manager_all_department"
@@ -82,7 +87,7 @@
     <menuitem
         id="ccpp_crm_sale_target_ceo"
         name="Sales Target"
-        parent="crm.crm_menu_root"
+        parent="menu_ccpp_crm_main"
         action="ccpp_sale_target_action"
         sequence="2"
         groups="ccpp.group_ccpp_ceo"
@@ -90,17 +95,17 @@
 
     <!-- Purchase History -->
 
-    <menuitem
+    <!-- <menuitem
         id="ccpp_purchase_history"
         name="Purchase History"
         parent="crm.crm_menu_root"
         sequence="3"
-    /> 
+    />  -->
 
     <menuitem
         id="ccpp_crm_purchase_history_user"
         name="Customer Purchase History"
-        parent="ccpp_purchase_history"
+        parent="menu_ccpp_crm_main"
         action="ccpp_purchase_history_action_user"
         sequence="1"
         groups="ccpp.group_ccpp_frontoffice_user"
@@ -109,7 +114,7 @@
     <menuitem
         id="ccpp_crm_purchase_history_manager"
         name="Customer Purchase History"
-        parent="ccpp_purchase_history"
+        parent="menu_ccpp_crm_main"
         action="ccpp_purchase_history_action"
         sequence="1"
         groups="ccpp.group_ccpp_frontoffice_manager"
@@ -118,7 +123,7 @@
     <menuitem
         id="ccpp_crm_purchase_history_manager_all_department"
         name="Customer Purchase History"
-        parent="ccpp_purchase_history"
+        parent="menu_ccpp_crm_main"
         action="ccpp_purchase_history_action"
         sequence="1"
         groups="ccpp.group_ccpp_frontoffice_manager_all_department"
@@ -127,7 +132,7 @@
     <menuitem
         id="ccpp_crm_purchase_history_ceo"
         name="Customer Purchase History"
-        parent="ccpp_purchase_history"
+        parent="menu_ccpp_crm_main"
         action="ccpp_purchase_history_action"
         sequence="1"
         groups="ccpp.group_ccpp_ceo"
@@ -136,7 +141,7 @@
     <menuitem
         id="ccpp_crm_purchase_history_detail_line_user"
         name="Purchase History Detail"
-        parent="ccpp_purchase_history"
+        parent="menu_ccpp_crm_main"
         action="ccpp_purchase_history_detail_line_action_user"
         sequence="2"
         groups="ccpp.group_ccpp_frontoffice_user"
@@ -145,7 +150,7 @@
     <menuitem
         id="ccpp_crm_purchase_history_detail_line_manager"
         name="Purchase History Detail"
-        parent="ccpp_purchase_history"
+        parent="menu_ccpp_crm_main"
         action="ccpp_purchase_history_detail_line_action"
         sequence="2"
         groups="ccpp.group_ccpp_frontoffice_manager"
@@ -154,7 +159,7 @@
     <menuitem
         id="ccpp_crm_purchase_history_detail_line_manager_all_department"
         name="Purchase History Detail"
-        parent="ccpp_purchase_history"
+        parent="menu_ccpp_crm_main"
         action="ccpp_purchase_history_detail_line_action"
         sequence="2"
         groups="ccpp.group_ccpp_frontoffice_manager_all_department"
@@ -163,7 +168,7 @@
     <menuitem
         id="ccpp_crm_purchase_history_detail_line_ceo"
         name="Purchase History Detail"
-        parent="ccpp_purchase_history"
+        parent="menu_ccpp_crm_main"
         action="ccpp_purchase_history_detail_line_action"
         sequence="2"
         groups="ccpp.group_ccpp_ceo"
