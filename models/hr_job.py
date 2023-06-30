@@ -20,8 +20,8 @@ class Job(models.Model):
     domain_division_ids = fields.Many2many("hr.department", string="Domain Division", compute="_compute_domain_division")
     
     _sql_constraints = [
-        #('name_company_uniq', 'unique(name, company_id, department_id)', 'The name of the job position must be unique per department in company!'),
-        ('name_company_uniq', 'unique(code, company_id)', 'The code of the job position must be unique in company!'),
+        ('name_company_uniq', 'unique(name, company_id, department_id)', 'The name of the job position must be unique per department in company!'),
+        # ('name_company_uniq', 'unique(code, company_id)', 'The code of the job position must be unique in company!'),
         ('no_of_recruitment_positive', 'CHECK(no_of_recruitment >= 0)', 'The expected number of new employees must be positive.')
     ]
     
