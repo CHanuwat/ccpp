@@ -127,6 +127,7 @@ class Home(WebHome):
             # searching for symbols
             symbol_error = re.search("[~!@#$%^&*]", password) is None
             if symbol_error and config_special_symbol:
+                sym = "[~!@#$%^&*]"
                 qcontext['error'] = "Password must have 1 symbol %s"%sym
 
         if 'error' not in qcontext and request.httprequest.method == 'POST':
