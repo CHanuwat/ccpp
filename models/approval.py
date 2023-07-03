@@ -84,7 +84,7 @@ class ApprovalLine(models.Model):
         for obj in self:
             user_approve_ids = self.env['hr.employee']
             if obj.job_approve_ids:
-                user_approve_ids = self.env['hr.job'].browse(obj.job_approve_ids.ids).mapped('employee_id')
+                user_approve_ids = self.env['hr.employee'].search([('job_id', 'in', obj.job_approve_ids.ids)])
             obj.user_approve_ids = user_approve_ids
             
     def unlink(self):

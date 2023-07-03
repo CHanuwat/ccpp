@@ -1423,7 +1423,10 @@
                 <span class="o_tooltip o_tooltip_visible right o_animated ccpp_tooltip" attrs="{'invisible': ['|','|',('is_delay','=',False),('state','in',['cancel','void']),('is_solution','=',False)]}"></span>
             </xpath>
 
-            <xpath expr="//form[1]/sheet[1]/group[1]" position="replace">
+            <xpath expr="//form[1]/sheet[1]/group[1]" position="attributes">
+                <attribute name="invisible">True</attribute>
+            </xpath>
+            <xpath expr="//form[1]/sheet[1]/group[1]" position="after">
                 <group>
                     <group>
                         <field name="code" string="Solution No." attrs="{'invisible': [('is_solution','=',False)]}" readonly="True"/>
