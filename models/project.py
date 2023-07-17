@@ -1033,25 +1033,34 @@ class Project(models.Model):
                     strategy_id.delay_date = date_today
                         
     def run_script_update(self):
-        ccpp_ids = self.env['project.project'].search([])
-        count_ccpp = 0
-        for ccpp_id in ccpp_ids:
-            count_ccpp += 1
-            employee_ids = self.env['hr.employee']
-            for job_id in ccpp_id.job_ids:
-                employee_ids |= job_id.employee_id
-            print("CCPP -> ",count_ccpp,'/',len(ccpp_ids))
-            ccpp_id.employee_ids = employee_ids
 
-        task_ids = self.env['account.analytic.line'].search([])
-        count_task = 0
-        for task_id in task_ids:
-            count_task += 1
-            employee_ids = self.env['hr.employee']
-            for job_id in task_id.job_ids:
-                employee_ids |= job_id.employee_id
-            print("Task -> ",count_task,'/',len(task_ids))
-            task_id.employee_ids = employee_ids
+        # vals = {'name','max'}
+        partner_check_ids = self.env['res.partner'].search([('user_ids', '!=', False)])
+        print(len(partner_check_ids))
+        partner_id = self.env['res.partner'].browse(81844)
+        partner = partner_id.write({'status_data': '0', 'no': 'COR-D06-0000-00', 'sfid': '', 'no_2': 'RRE-00101', 'name': 'นายธนกร วิทยะสิรินันท์', 'name_2': '', 'address': '', 'address_2': '', 'address_3': '', 'post_code': '', 'city': '', 'country': '', 'phone_no': '', 'contact': '', 'saleperson_code': '', 'customer_price_group': '', 'customer_disc_group': '', 'payment_terms_code': '7D', 'reminder_terms_code': '', 'fin_charge_terms_code': '', 'currency_code': '', 'search_name': 'นายธนกร วิทยะสิรินันท์', 'credit_limit_lcy': '0E-20', 'customer_posting_group': 'COR', 'gen_bus_posting_group': 'DOMESTIC', 'vat_bus_posting_group': 'VATHO', 'blocked': '0', 'privacy_blocked': '0', 'last_date_modified': '2021-03-03 00:00:00', 'application_method': '0', 'combine_shipments': '0', 'reserve': '1', 'shipping_advice': '0', 'shipping_agent_code': '', 'base_calendar_code': '', 'vat_registration_no': '', 'consignment': '0', 'consignment_location_code': '', 'ic_partner_code': '', 'nav_id': '355595b2-25a2-4484-a987-d04630907126', 'company_vat': '0107563000240','company_id':1, 'company_type': 'person'})
+        print(partner)
+        
+        
+        # ccpp_ids = self.env['project.project'].search([])
+        # count_ccpp = 0
+        # for ccpp_id in ccpp_ids:
+        #     count_ccpp += 1
+        #     employee_ids = self.env['hr.employee']
+        #     for job_id in ccpp_id.job_ids:
+        #         employee_ids |= job_id.employee_id
+        #     print("CCPP -> ",count_ccpp,'/',len(ccpp_ids))
+        #     ccpp_id.employee_ids = employee_ids
+
+        # task_ids = self.env['account.analytic.line'].search([])
+        # count_task = 0
+        # for task_id in task_ids:
+        #     count_task += 1
+        #     employee_ids = self.env['hr.employee']
+        #     for job_id in task_id.job_ids:
+        #         employee_ids |= job_id.employee_id
+        #     print("Task -> ",count_task,'/',len(task_ids))
+        #     task_id.employee_ids = employee_ids
         
         # task_ids = self.env['account.analytic.line'].search([])
         # for task_id in task_ids:

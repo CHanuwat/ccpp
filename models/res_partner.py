@@ -38,13 +38,13 @@ class Partner(models.Model):
                 parent_id = self._context.get('external_parent')
                 partner_id = self.env['res.partner'].browse(parent_id)
                 if partner_id.company_type == 'person':
-                    parent_id = self.env['res.partner']
+                    partner_id.company_type = 'company'
         if self._context.get('create_customer_contact'):
             if self._context.get('customer_parent'):
                 parent_id = self._context.get('customer_parent')
                 partner_id = self.env['res.partner'].browse(parent_id)
                 if partner_id.company_type == 'person':
-                    parent_id = self.env['res.partner']
+                    partner_id.company_type = 'company'
         return parent_id
     
     job_position_id = fields.Many2one('res.partner.position', string='Job Position', index=True, copy=False ,help="replace instead function field char")
@@ -162,8 +162,11 @@ class Partner(models.Model):
     def _constrains_name(self):
         for obj in self:
             if obj.name:
-                partner_duplicate = self.env['res.partner'].search([('id','!=',obj.id),('name','=',obj.name)],limit=1)
+                partner_duplicate = self.env['res.partner'].search([('id','!=',obj.id),('name','=',obj.name),('company_id','=',obj.company_id.id),('nav_id','=',obj.nav_id)])
                 if partner_duplicate:
+                    print(partner_duplicate)
+                    print("Partner Duplicate")
+                    print(obj)
                     raise ValidationError(_("Contact name must be unique %s"%partner_duplicate.name))
                 
 class PartnerPosition(models.Model):
