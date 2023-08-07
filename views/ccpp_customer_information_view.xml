@@ -178,8 +178,8 @@
                     <div style="border-top: 2px solid #e6e6e6;padding: 0px;;margin-top: 10px; margin-bottom: 10px;"/>
                     <group>
                         <group>
-                            <field name="company_name" invisible="True"/> <!--attrs="{'invisible': [('customer_id','!=', False)]}"/>-->
-                            <field name="customer_id" domain="['&amp;', ('nav_id','!=', False),'|',('is_customer','=',True),('is_potential','=',True)]" 
+                            <field name="company_name" invisible="True"/> <!--attrs="{'invisible': [('customer_id','!=', False)]}"/>--> <!-- '&amp;', ('nav_id','!=', False), -->
+                            <field name="customer_id" domain="['|',('is_customer','=',True),('is_potential','=',True)]" 
                             attrs="{'required': [('company_name','=',False)], 'invisible':[('company_name','!=', False),('company_name','!=','')]}"
                             context="{'create_potential': True}"/>
                             <label for="is_customer" string=""/>
@@ -192,7 +192,7 @@
                             <field name="domain_partner_ids" invisible="True"/>
                             <field name="partner_ids" context="{'show_title_position':True, 'create_customer_contact':True, 'customer_parent': customer_id}"
                             string="Contact Person" 
-                            domain="['&amp;', ('nav_id','!=', False),'|',('is_customer','=',True),('is_potential','=',True)]" 
+                            domain="['|',('is_customer','=',True),('is_potential','=',True)]" 
                             required="True" 
                             options="{'no_quick_create': True}">
                                 <tree>
@@ -525,7 +525,7 @@
                             attrs="{'required': [('company_name','=',False)], 'invisible':[('company_name','!=', False),('company_name','!=','')]}"
                             options="{'no_quick_create': True}"
                             context="{'create_external_customer':True}"
-                            domain="['&amp;', ('nav_id','!=', False),'|',('is_customer','=',True),('is_potential','=',True)]"
+                            domain="['|',('is_customer','=',True),('is_potential','=',True)]"
                             />
                             <label for="is_customer" string=""/>
                             <div class="o_row" name="div_km_home_work">
@@ -537,7 +537,7 @@
                             <field name="domain_partner_ids" invisible="True"/>
                             <field name="partner_id" string="Contact Person" 
                             context="{'show_title_position':True, 'create_external_contact':True, 'external_parent': customer_id}" 
-                            domain="['&amp;', ('nav_id','!=', False),'|',('is_customer','=',True),('is_potential','=',True)]" 
+                            domain="['|',('is_customer','=',True),('is_potential','=',True)]" 
                             required="True" 
                             options="{'no_quick_create': True}"
                             />

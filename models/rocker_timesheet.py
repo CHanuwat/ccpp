@@ -1396,7 +1396,7 @@ class RockerTimesheet(models.Model):
     @api.model
     def check_job_current(self):
         employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-        return employee_id.job_lines.ids
+        return [employee_id.job_id.id]
             
     @api.model
     def get_employee(self,context):

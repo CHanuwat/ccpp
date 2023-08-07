@@ -18,7 +18,7 @@
 
     <!-- Contacts -->
     <record model="ir.ui.menu" id="contacts.menu_contacts">
-        <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
+        <field name="groups_id" eval="[(6,0,[ref('base.group_system'),ref('ccpp.group_access_contact')])]"/>
     </record>
 
     <!-- Timesheet -->
@@ -92,9 +92,9 @@
     </record>
 
     <!-- Sales -->
-    <!--<record model="ir.ui.menu" id="sale.sale_menu_root">
-        <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
-    </record>-->
+    <record model="ir.ui.menu" id="sale.sale_menu_root">
+        <field name="groups_id" eval="[(6,0,[ref('base.group_system'),ref('ccpp.group_access_sale')])]"/>
+    </record>
 
     <!-- CRM -->
     <record model="ir.ui.menu" id="crm.crm_menu_root">

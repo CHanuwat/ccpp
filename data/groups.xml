@@ -55,5 +55,13 @@
             <field name="name">Access CRM</field>
             <field name="category_id" ref="module_category_access_module"/>
         </record>
+        <record id="group_access_contact" model="res.groups">
+            <field name="name">Access Contact</field>
+            <field name="category_id" ref="module_category_access_module"/>
+        </record>
+        <record id="group_access_sale" model="res.groups">
+            <field name="name">Access Sale</field>
+            <field name="category_id" ref="module_category_access_module"/>
+        </record>
     </data>
 </odoo>
