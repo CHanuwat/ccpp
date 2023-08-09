@@ -36,6 +36,11 @@
                         <group>
                             <field name="name"/>
                             <field name="code"/>
+                            <field name="info"/>
+                            <!-- <field name="background_color"/> -->
+                            <field name="icon" widget="image" class="oe_avatar" options="{'preview_image': 'icon'}"/>
+                            <!-- <field name="icon" widget="image" class="oe_avatar" options="{'preview_image': 'image_128'}"/> -->
+                            <!-- <field name="aat_id"/> -->
                         </group>
                     </group>
                 </sheet>
@@ -47,52 +52,75 @@
         <field name="name">approve.activity.type.view.kanban</field>
         <field name="model">approve.activity.type</field>
         <field name="arch" type="xml">
-            <kanban class="oe_background_grey o_kanban_dashboard o_emphasize_colors o_stock_kanban" create="0" group_create="false">
+        <!-- class="oe_background_grey o_kanban_dashboard o_emphasize_colors o_stock_kanban" -->
+            <kanban class="o_modules_kanban" create="0" group_create="false">
                 <field name="name"/>
                 <field name="count_doc"/>
                 <field name="code"/>
+                <field name="icon"/>
+                <field name="id"/>
+                <field name="info"/>
+                <!-- <field name="background_color"/> -->
                 <templates>
                     <t t-name="kanban-box">
-                        <div name="ccpp_dashboard">
-                            <div t-attf-class="o_kanban_card_header">
-                                <div class="o_kanban_card_header_title">
-                                    <div class="o_primary" t-if="!selection_mode">
-                                        <a>
-                                            <field name="name"/>
-                                        </a>
-                                        <t t-if="record.count_doc.value > 0">
-                                            <span class="ccpp_dot" t-esc="record.count_doc.value"></span>
-                                        </t>
-                                    </div>
-                                    <div class="o_primary" t-if="selection_mode">
-                                        <field name="name"/>
-                                    </div>
-                                </div>
-                                <!--<div class="o_kanban_manage_button_section" t-if="!selection_mode">
-                                    <a class="o_kanban_manage_toggle_button" href="#"><i class="fa fa-ellipsis-v" role="img" aria-label="Manage" title="Manage"/></a>
-                                </div>-->
-                            </div>
-                            <div class="container o_kanban_card_content" t-if="!selection_mode">
-                                <div class="row">
-                                    <div class="col-8 o_kanban_primary_left">
-                                        <t t-if="record.count_doc.value > 0">
-                                            <button class="btn btn-primary" name="action_get_doc" type="object">
-                                                <span><t t-esc="record.count_doc.value"/> Document </span>
+                        <div name="ccpp_dashboard" class="oe_module_vignette rounded">
+                            <img class="oe_module_icon" t-att-src="kanban_image('approve.activity.type', 'icon', record.id.raw_value)" t-att-title="Icon" t-att-alt="Icon"/>
+                            <div class="oe_module_desc" t-att-title="record.name.value">
+                                <h4 class="o_kanban_record_title">
+                                    <span><t t-esc="record.name.value"/></span>
+                                </h4>
+                                <p class="oe_module_name"><span><t t-esc="record.info.value"/></span></p>
+                                <div class="o_kanban_primary_left">
+                                    <t t-if="record.count_doc.value == 0 and record.count_doc_service.value == 0 and record.count_doc_direct.value == 0">
+                                        <span class="oe_module_name">ยังไม่มีรายการรออนุมัติ</span>
+                                    </t>
+                                    <t t-if="record.count_doc.value > 0">
+                                        <div class="oe_module_action d-flex justify-content-end">
+                                            <button class="btn border rounded btn-danger btn-xl oe_kanban_action oe_kanban_action_button" name="action_get_doc" type="object">
+                                                <span>To Review : <t t-esc="record.count_doc.value"/></span>
                                             </button>
-                                        </t>
-                                        <t t-if="record.count_doc.value == 0">
-                                            <span class="no_waiting_approve">ยังไม่มีรายการรออนุมัติ</span>
-                                        </t>
-
-                                    </div>
-                                    <!--<div class="col-6 o_kanban_primary_right">
-                                        <button class="btn btn-primary" name="action_get_task" type="object">
-                                            <span> View Task </span>
-                                        </button>
-                                    </div>-->
+                                        </div>
+                                    </t>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- <div name="ccpp_dashboard">
+                            <div class="col-12 row">
+                                <div class="col-4">
+                                    <img style="width: 100%;" t-att-src="kanban_image('approve.activity.type', 'icon', record.id.raw_value)" t-att-title="Icon" t-att-alt="Icon"/>
+                                </div>
+                                <div class="col-8">
+                                    <div t-attf-class="o_kanban_card_header">
+                                        <div class="o_kanban_card_header_title">
+                                            <div class="o_primary" t-if="!selection_mode">
+                                                <a><field name="name"/></a>
+                                                <t t-if="record.count_doc.value > 0">
+                                                    <span class="ccpp_dot" t-esc="record.count_doc.value"></span>
+                                                </t>
+                                            </div>
+                                            <div class="o_primary" t-if="selection_mode">
+                                                <field name="name"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="container o_kanban_card_content" t-if="!selection_mode">
+                                        <div class="row">
+                                            <div class="col-8 o_kanban_primary_left">
+                                                <t t-if="record.count_doc.value > 0">
+                                                    <button class="btn btn-primary" name="action_get_doc" type="object">
+                                                        <span><t t-esc="record.count_doc.value"/> Document </span>
+                                                    </button>
+                                                </t>
+                                                <t t-if="record.count_doc.value == 0 and record.count_doc_service.value == 0 and record.count_doc_direct.value == 0">
+                                                    <span class="no_waiting_approve">ยังไม่มีรายการรออนุมัติ</span>
+                                                </t>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> -->
                     </t>
                 </templates>
             </kanban>
