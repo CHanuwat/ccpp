@@ -37,6 +37,7 @@
                             <field name="name"/>
                             <field name="code"/>
                             <field name="info"/>
+                            <field name='home_action_id'/>
                             <!-- <field name="background_color"/> -->
                             <field name="icon" widget="image" class="oe_avatar" options="{'preview_image': 'icon'}"/>
                             <!-- <field name="icon" widget="image" class="oe_avatar" options="{'preview_image': 'image_128'}"/> -->
@@ -64,10 +65,17 @@
                 <templates>
                     <t t-name="kanban-box">
                         <div name="ccpp_dashboard" class="oe_module_vignette rounded">
+                            <div class="oe_module_action d-flex justify-content-end" style="position: absolute; top: 3%; right: 1%;">
+                                <button class="btn oe_kanban_action oe_kanban_action_button" name="action_to_model" type="object">
+                                    <span class="fa fa-list-ul"/>
+                                </button>
+                            </div>
                             <img class="oe_module_icon" t-att-src="kanban_image('approve.activity.type', 'icon', record.id.raw_value)" t-att-title="Icon" t-att-alt="Icon"/>
                             <div class="oe_module_desc" t-att-title="record.name.value">
                                 <h4 class="o_kanban_record_title">
-                                    <span><t t-esc="record.name.value"/></span>
+                                    <button class="p-0 dropdown-toggle btn o-no-caret" aria-expanded="false" name="action_to_model" type="object">
+                                        <span><t t-esc="record.name.value"/></span>
+                                    </button>
                                 </h4>
                                 <p class="oe_module_name"><span><t t-esc="record.info.value"/></span></p>
                                 <div class="o_kanban_primary_left">
@@ -77,7 +85,7 @@
                                     <t t-if="record.count_doc.value > 0">
                                         <div class="oe_module_action d-flex justify-content-end">
                                             <button class="btn border rounded btn-danger btn-xl oe_kanban_action oe_kanban_action_button" name="action_get_doc" type="object">
-                                                <span>To Review : <t t-esc="record.count_doc.value"/></span>
+                                                <span>To Approve : <t t-esc="record.count_doc.value"/></span>
                                             </button>
                                         </div>
                                     </t>

@@ -22,6 +22,7 @@ class ApproveActivityType(models.Model):
     icon = fields.Image("Icon Image", compute='_compute_image', inverse='_set_image')
     icon_binary = fields.Binary("Icon", attachment=True,copy=False)
     info = fields.Text("Info")
+    home_action_id = fields.Many2one("ir.actions.act_window","Home Action")
     #background_color = fields.Char("Background Color", default="#ffffff")
 
     def _compute_image(self):
@@ -56,6 +57,14 @@ class ApproveActivityType(models.Model):
             count_doc = len(activity_ids)
             obj.count_doc = count_doc
         
+    def action_to_model(self):
+        for obj in self:
+            if not obj.home_action_id:
+                raise UserError("Missing Home Action")
+            action = self.env['ir.actions.act_window']._for_xml_id(obj.home_action_id.xml_id)
+            print("xxxxxxxxx action : ",action)
+            return action
+
     def action_get_doc(self):
         for obj in self:
             action = True
