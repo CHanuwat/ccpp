@@ -4,7 +4,7 @@
     'name': 'CCPP',
     'version': '1',
     'category': 'customize',
-    'sequence': 1001,
+    # 'sequence': 1001,
     'summary': 'CCPP',
     'description': "Project CCPP",
     'depends': ['base',
@@ -17,6 +17,7 @@
                 'crm',
                 'hr_hourly_cost',
                 'hr_timesheet',
+                'sale',
                 ],
     'data': [
         "data/ir_sequence.xml",

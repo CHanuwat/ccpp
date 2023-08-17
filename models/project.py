@@ -106,7 +106,7 @@ class Project(models.Model):
     user_id = fields.Many2one(related="employee_id.user_id", string="CCPP User", store=True)
     color = fields.Integer(related="priority_id.color", store=True)
     domain_partner_ids = fields.Many2many("res.partner", string="Domain Customer", compute="_compute_domain_partner_ids")
-    partner_id = fields.Many2one('res.partner', string="Customer (Company)", domain="[('id','in',domain_partner_ids)]", track_visibility="onchange")
+    partner_id = fields.Many2one('res.partner', string="Customer (Company)", track_visibility="onchange")
 
     # Host CCPP
     partner_contact_id = fields.Many2one("res.partner", string="Host of CCPP (Contact)", track_visibility="onchange")
