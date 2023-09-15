@@ -43,7 +43,7 @@
 
     <!-- Inventory -->
     <record model="ir.ui.menu" id="stock.menu_stock_root">
-        <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
+        <field name="groups_id" eval="[(6,0,[ref('base.group_system'),ref('ccpp.group_access_stock')])]"/>
     </record>
 
     <!-- Employees -->
