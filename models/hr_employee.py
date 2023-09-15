@@ -12,6 +12,9 @@ class HrEmployeePrivate(models.Model):
     job_lines = fields.One2many("hr.job", 'employee_id', string="Job Lines")
     division_id = fields.Many2one("hr.department", string="Division")
     domain_division_ids = fields.Many2many("hr.department", string="Domain Division", compute="_compute_domain_division")
+    timeoff_approve_user = fields.Char(string="Timeoff Approve User", compute="_compute_timeoff_approve_user")
+    timeoff_approve_job = fields.Char(string="Timeoff Approve Job", compute="_compute_timeoff_approve_user")
+    
     
     def unlink(self):
         raise UserError("ระบบไม่สามารถข้อมูลพนักงานได้")
@@ -103,6 +106,38 @@ class HrEmployeePrivate(models.Model):
                 obj.work_contact_id.job_position_id = job_position_id
             else:
                 obj._origin.work_contact_id.job_position_id = False
+
+    def _compute_timeoff_approve_user(self):
+        for obj in self:
+            approve_name = ''
+            approve_job = ''
+            model_id = self.env['ir.model'].sudo().search([('model','=','hr.leave')])
+            approve_ids = self.env['approval'].search([('model_ids','in', model_id.ids),
+                                                        ('department_id','=', obj.department_id.id),
+                                                        ('contract_type_id','=', obj.job_id.contract_type_id.id),
+                                                        ('contract_type_id','!=', False)])
+            # ใช้กับพนักงานที่มีdivision_id
+            if not approve_ids:
+                approve_ids = self.env['approval'].search([('model_ids','in', model_id.ids),
+                                                        ('department_id','=', obj.department_id.id),
+                                                        ('division_id','=', obj.division_id.id),
+                                                        ('division_id','!=', False)])
+            # ใช้กับพนักงาน
+            if not approve_ids:
+                approve_ids = self.env['approval'].search([('model_ids','in', model_id.ids),
+                                                        ('department_id','=', obj.department_id.id),
+                                                        ('division_id','=', False),
+                                                        ('contract_type_id','=', False),])
+            for approve_id in approve_ids:
+                for approve_line in approve_id.lines:
+                    for job_id in approve_line.job_approve_ids:
+                        approve_job += job_id.name
+                        for employee_id in job_id.employee_ids:
+                            approve_name += employee_id.name
+
+            obj.timeoff_approve_user = approve_name
+            obj.timeoff_approve_job = approve_job
+    
 
 # class HrExpense(models.Model):
 #     _inherit = "hr.expense"

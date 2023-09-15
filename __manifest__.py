@@ -18,6 +18,8 @@
                 'hr_hourly_cost',
                 'hr_timesheet',
                 'sale',
+                'dms',
+                'survey',
                 ],
     'data': [
         "data/ir_sequence.xml",

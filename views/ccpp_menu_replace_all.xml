@@ -66,6 +66,11 @@
         <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
     </record>
 
+    <!-- Survey -->
+    <record model="ir.ui.menu" id="survey.menu_surveys">
+        <field name="groups_id" eval="[(6,0,[ref('base.group_system'),ref('ccpp.group_access_survey')])]"/>
+    </record>
+
     <!-- Expense -->
     <!--<record model="ir.ui.menu" id="hr_expense.menu_hr_expense_root">
         <field name="groups_id" eval="[(6,0,[ref('base.group_system')])]"/>
@@ -101,5 +106,7 @@
         <field name="sequence" eval="3"/>
         <field name="groups_id" eval="[(6,0,[ref('base.group_system'),ref('ccpp.group_access_discuss')])]"/>
     </record>
+
+    
 
 </odoo>
