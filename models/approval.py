@@ -50,8 +50,8 @@ class Approval(models.Model):
     def _compute_domain_job_request_ids(self):
         for obj in self:
             domain_job_request_ids = self.env['hr.job']
-            if obj.department_id and obj.contract_type_id:
-                domain_job_request_ids = self.env['hr.job'].search([('department_id','=',obj.department_id.id),('contract_type_id','=',obj.contract_type_id.id)])
+            if obj.department_id:
+                domain_job_request_ids = self.env['hr.job'].search([('department_id','=',obj.department_id.id)])
             obj.domain_job_request_ids = domain_job_request_ids
 
                 
