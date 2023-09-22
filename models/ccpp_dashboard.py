@@ -9,6 +9,7 @@ from random import randint
 
 class CCPPDashboard(models.Model):
     _name = "ccpp.dashboard"
+    _description = "CCPP Dashboard"
     _inherit = ['mail.thread','portal.mixin','mail.activity.mixin']
     #_rec_name = "customer_name"
 

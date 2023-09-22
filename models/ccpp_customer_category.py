@@ -9,6 +9,7 @@ from random import randint
 
 class CCPPCustomerCategory(models.Model):
     _name = "ccpp.customer.category"
+    _description = "CCPP Customer Category"
 
     name = fields.Char(string="Name")
     active = fields.Boolean(string="Active", default=True)

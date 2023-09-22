@@ -17,6 +17,7 @@ STATUS_COLOR = {
 class CCPPPurchaseHistory(models.Model):
     _name = "ccpp.purchase.history"
     _inherit = ['mail.thread']
+    _description = "CCPP Purchase History"
     _order = "name"
     
     """def _get_default_date_from(self):
@@ -172,7 +173,7 @@ class CCPPPurchaseHistory(models.Model):
     total_use_qty = fields.Float(string="Total Used Qty", compute="_compute_total")
     note = fields.Text("Competitors' Sales Strategy")
     sale_person_id = fields.Many2one("hr.employee", string="Sales Person", required=True)
-    job_id = fields.Many2one("hr.job", string="Job Position", default=_get_default_job, required=True, track_visibility="onchange")
+    job_id = fields.Many2one("hr.job", string="Job Position", default=_get_default_job, required=True, tracking=True)
     domain_job_ids = fields.Many2many("hr.job", string="Domain Job", compute="_compute_domain_job_ids")
     department_id = fields.Many2one("hr.department", string="Deparment", related="sale_person_id.department_id")
     division_id = fields.Many2one("hr.department", string="Division", related="sale_person_id.division_id")

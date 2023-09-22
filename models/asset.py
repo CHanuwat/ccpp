@@ -9,13 +9,14 @@ from random import randint
 
 class Asset(models.Model):
     _name = "asset"
+    _description = "CCPP Asset"
     _inherit = ['mail.thread','portal.mixin','mail.activity.mixin']
 
     code = fields.Char(string="Asset No.")
-    name = fields.Char(string="Asset Name", track_visibility="onchange", required=True)
-    date = fields.Date(string="Create Date", default=fields.Date.today, track_visibility="onchange", required=True)
+    name = fields.Char(string="Asset Name", tracking=True, required=True)
+    date = fields.Date(string="Create Date", default=fields.Date.today, tracking=True, required=True)
     active = fields.Boolean(string="Active", default="True")
-    customer_id = fields.Many2one("res.partner", string="Customer", track_visibility="onchange", required=False)
+    customer_id = fields.Many2one("res.partner", string="Customer", tracking=True, required=False)
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.user.company_id)
     
     @api.model_create_multi

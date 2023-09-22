@@ -9,6 +9,7 @@ from random import randint
 
 class CCPPCustomerBudget(models.Model):
     _name = "ccpp.customer.budget"
+    _description = "CCPP Customer Budget"
 
     name = fields.Char(string="Name")
     active = fields.Boolean(string="Active", default=True)

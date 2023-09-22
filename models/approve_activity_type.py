@@ -9,6 +9,7 @@ from random import randint
 
 class ApproveActivityType(models.Model):
     _name = "approve.activity.type"
+    _description = "Approval Activity Type"
     _inherit = ['mail.thread']
 
     def _get_default_color(self):

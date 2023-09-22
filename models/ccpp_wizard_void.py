@@ -9,6 +9,7 @@ from random import randint
 
 class WizardVoidCCPP(models.TransientModel):
     _name = "ccpp.wizard.void"
+    _description = "CCPP Wizard Void"
 
     def _default_value_ccpp(self):
         ccpp_id = False

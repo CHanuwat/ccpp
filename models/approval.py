@@ -10,6 +10,7 @@ from random import randint
 class Approval(models.Model):
     _name = "approval"
     _inherit = ['mail.thread','portal.mixin','mail.activity.mixin']
+    _description = "Approval Workflow"
     _order = "name"
 
     name = fields.Char(string="Name", compute="_compute_name")

@@ -67,7 +67,7 @@
                         <div name="ccpp_dashboard" class="oe_module_vignette rounded">
                             <div class="oe_module_action d-flex justify-content-end" style="position: absolute; top: 3%; right: 1%;">
                                 <button class="btn oe_kanban_action oe_kanban_action_button" name="action_to_model" type="object">
-                                    <span class="fa fa-list-ul"/>
+                                    <span class="fa fa-list-ul" string=" "/>
                                 </button>
                             </div>
                             <img class="oe_module_icon" t-att-src="kanban_image('approve.activity.type', 'icon', record.id.raw_value)" t-att-title="Icon" t-att-alt="Icon"/>

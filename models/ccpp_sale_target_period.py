@@ -9,6 +9,7 @@ from random import randint
 
 class CCPPSaleTargetPeriod(models.Model):
     _name = "ccpp.sale.target.period"
+    _description = "CCPP Sale Target Period"
     _inherit = ['mail.thread']
     
     def _get_default_date_from(self):

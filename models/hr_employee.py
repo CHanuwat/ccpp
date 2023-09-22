@@ -88,12 +88,10 @@ class HrEmployeePrivate(models.Model):
                 if obj.job_lines.ids < obj._origin.job_lines.ids:
                     continue
                 new_line = []
-                for i in obj.job_lines.ids:
-	                if i not in obj._origin.job_lines.ids:
-		                new_line.append(i)
-                print("Max"*100)
-                print(obj.job_lines.ids)
-                print(obj._origin.job_lines.ids)
+                # for i in obj.job_lines.ids:
+	            #     if i not in obj._origin.job_lines.ids:
+		        #         new_line.append(i)
+
                 if not new_line:
                     continue
                 new_line_id = self.env['hr.job'].browse(new_line[0])

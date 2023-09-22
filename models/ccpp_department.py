@@ -8,6 +8,7 @@ from pprint import pprint
 
 class CCPPDepartment(models.Model):
     _name = "ccpp.department"
+    _description = "CCPP Department"
     _inherit = ['mail.thread']
 
     name = fields.Char("Name")

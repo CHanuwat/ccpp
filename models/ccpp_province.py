@@ -9,6 +9,7 @@ from random import randint
 
 class CCPPProvince(models.Model):
     _name = "ccpp.province"
-
+    _description = "CCPP Province"
+    
     name = fields.Char(string="Name")
     active = fields.Boolean(string="Active", default=True)

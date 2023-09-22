@@ -266,7 +266,7 @@
             <field name="priority" eval="100"/>
             <field name="arch" type="xml">
                 <tree editable="top" create="false" delete="false" import="false" string="Projects">
-                    <button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>
+                    <button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" string=" " class="oe_highlight"/>
                     <field name="name" readonly="1"/>
                     <field name="rocker_type" readonly="0"/>
                     <!--<field name="allow_timesheets" readonly="0"/>-->

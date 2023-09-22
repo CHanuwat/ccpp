@@ -9,6 +9,7 @@ from random import randint
 
 class WizardCancelCCPP(models.TransientModel):
     _name = "ccpp.wizard.cancel"
+    _description = "CCPP Wizard Cancel"
 
     def _default_value_ccpp(self):
         ccpp_id = False

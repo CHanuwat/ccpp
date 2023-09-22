@@ -9,6 +9,7 @@ from random import randint
 
 class WizardRejectDoneTask(models.TransientModel):
     _name = "ccpp.wizard.done.task"
+    _description = "CCPP Wizard Done Task"
 
     def _default_value_task(self):
         task_id = False

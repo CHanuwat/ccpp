@@ -2030,7 +2030,7 @@
         <field eval="202" name="priority"/>
         <field name="arch" type="xml">
             <tree js_class="ccpp_tree" expand="0" default_order="partner_id" delete="1">
-                <button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>
+                <button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" string=" " class="oe_highlight"/>
                 <field name="name" string="CCPP" class="fw-bold"/>
                 <field name="partner_id" string="Customer"/>
                 <!--<field name="color" invisible="1"/>
@@ -2050,7 +2050,7 @@
         <field eval="203" name="priority"/>
         <field name="arch" type="xml">
             <tree delete="0" create="0">
-                <button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>
+                <button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" string=" " class="oe_highlight"/>
                 <field name="name" string="CCPP" class="fw-bold"/>
                 <!--<field name="color" invisible="1"/>
                 <field name="priority_select" string="Priority" readonly="True" widget="status_with_color_ccpp" options="{'color_field': 'color'}"/>-->
@@ -2113,7 +2113,7 @@
         <field eval="201" name="priority"/>
         <field name="arch" type="xml">
             <tree delete="0" create="0" expand="1">
-                <button type="action" name="ccpp.action_open_solution_strategy_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>
+                <button type="action" name="ccpp.action_open_solution_strategy_edit_form" icon="fa-folder-open-o" string=" " class="oe_highlight"/>
                 <field name="code" string="Strategy No." class="fw-bold"/>
                 <field name="name" string="Strategy Title" class="fw-bold"/>
                 <field name="task_last_situation_id" string="Current Situation"/>
@@ -2166,7 +2166,7 @@
         <field eval="201" name="priority"/>
         <field name="arch" type="xml">
             <tree delete="1" create="0" expand="0" js_class="ccpp_dashboard_list" class="ccpp_list">
-                <button type="object" name="check_view_step" icon="fa-folder-open-o" class="oe_highlight"/>
+                <button type="object" name="check_view_step" icon="fa-folder-open-o" string=" " class="oe_highlight"/>
                 <field name="code" string="CCPP No." readonly="1"/>
                 <field name="name" string="CCPP Title" class="fw-bold" readonly="1"/>
                 <field name="partner_id" string="Customer" readonly="1" options="{'no_open': True}"/>
@@ -2217,7 +2217,7 @@
         <field eval="201" name="priority"/>
         <field name="arch" type="xml">
             <tree delete="0" create="0" expand="0" js_class="ccpp_dashboard_list_manager" class="ccpp_list">
-                <button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>
+                <button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" string=" " class="oe_highlight"/>
                 <field name="code" string="CCPP No."/>
                 <field name="name" string="CCPP Title" class="fw-bold"/>
                 <field name="partner_id" string="Customer"/>
@@ -2240,7 +2240,7 @@
         <field eval="202" name="priority"/>
         <field name="arch" type="xml">
             <tree delete="0" create="0" expand="0" js_class="ccpp_dashboard_list_manager_all_department" class="ccpp_list">
-                <button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" class="oe_highlight"/>
+                <button type="action" name="ccpp.action_open_project_edit_form" icon="fa-folder-open-o" string=" " class="oe_highlight"/>
                 <field name="code" string="CCPP No."/>
                 <field name="name" string="CCPP Title" class="fw-bold"/>
                 <field name="partner_id" string="Customer"/>
@@ -2263,7 +2263,7 @@
         <field eval="203" name="priority"/>
         <field name="arch" type="xml">
             <tree delete="0" create="0" expand="0" js_class="ccpp_dashboard_list_ceo" class="ccpp_list">
-                <button type="object" name="check_view_step" icon="fa-folder-open-o" class="oe_highlight"/>
+                <button type="object" name="check_view_step" icon="fa-folder-open-o" string=" " class="oe_highlight"/>
                 <field name="code" string="CCPP No."/>
                 <field name="name" string="CCPP Title" class="fw-bold"/>
                 <field name="partner_id" string="Customer"/>

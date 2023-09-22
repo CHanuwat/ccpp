@@ -477,8 +477,8 @@ class RockerTimesheet(models.Model):
     #                              default=lambda self: self.env['hr.employee'].search(
     #                                  [('user_id', '=', self.env.user.id),
     #                                   ('company_id', '=', self.env.company.id)]).id, store=True)
-    employee_id = fields.Many2one("hr.employee", string="User", default=_get_default_employee, track_visibility="onchange")
-    employee_ids = fields.Many2many("hr.employee", "task_hr_employee_rel", "task_id", "employee_id", string="Task Team", default=_get_default_employee_ids, track_visibility="onchange", required=True)
+    employee_id = fields.Many2one("hr.employee", string="User", default=_get_default_employee, tracking=True)
+    employee_ids = fields.Many2many("hr.employee", "task_hr_employee_rel", "task_id", "employee_id", string="Task Team", default=_get_default_employee_ids, tracking=True, required=True)
     department_id = fields.Many2one('hr.department', "Department", compute='_compute_department_id', store=True,
                                     compute_sudo=True)
     unit_amount = fields.Float('Actual Work', default=_default_work, required=True, help="Work amount in hours")
@@ -505,11 +505,11 @@ class RockerTimesheet(models.Model):
     note = fields.Text("Note")
     checkin_date = fields.Datetime(string="Check In Date")
     
-    department_id = fields.Many2one("hr.department",string="Department", related="employee_id.department_id", store=True, track_visibility="onchange")
-    division_id = fields.Many2one("hr.department",string="Department", related="employee_id.division_id", store=True, track_visibility="onchange")
-    job_id = fields.Many2one("hr.job", string="Job Position", default=_get_default_job, required=True, track_visibility="onchange")#default=_get_default_job, 
+    department_id = fields.Many2one("hr.department",string="Department", related="employee_id.department_id", store=True, tracking=True)
+    division_id = fields.Many2one("hr.department",string="Department", related="employee_id.division_id", store=True, tracking=True)
+    job_id = fields.Many2one("hr.job", string="Job Position", default=_get_default_job, required=True, tracking=True)#default=_get_default_job, 
     domain_job_ids = fields.Many2many("hr.job", string="Domain Job", compute="_compute_domain_job_ids")
-    job_ids = fields.Many2many("hr.job", "task_hr_job_rel", "task_id", "job_id", string="Task Team", default=_get_default_job_ids, track_visibility="onchange", required=True)
+    job_ids = fields.Many2many("hr.job", "task_hr_job_rel", "task_id", "job_id", string="Task Team", default=_get_default_job_ids, tracking=True, required=True)
 
     state_color = fields.Integer(compute='_compute_state_color')
     latitude = fields.Float(string="Latitude")

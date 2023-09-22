@@ -9,6 +9,7 @@ from random import randint
 
 class CCPPWizardFillHistory(models.TransientModel):
     _name = "ccpp.wizard.fill.history"
+    _description = "CCPP Wizard Fill History"
 
     def _default_value_task(self):
         task_id = False

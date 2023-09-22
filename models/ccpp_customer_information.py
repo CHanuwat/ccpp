@@ -10,6 +10,7 @@ from random import randint
 class CCPPCustomerInformation(models.Model):
     _name = "ccpp.customer.information"
     _inherit = ['mail.thread','portal.mixin','mail.activity.mixin']
+    _description = "CCPP Customer Information"
     _order = "year_selection desc, potential_ranking asc"
     #_rec_name = "customer_name"
 
@@ -74,29 +75,29 @@ class CCPPCustomerInformation(models.Model):
         return employee_id
 
     name = fields.Char(string="Name", compute="_compute_name", store=True)
-    date_from = fields.Date("From", required=True, default=_get_default_date_from, track_visibility="onchange")
+    date_from = fields.Date("From", required=True, default=_get_default_date_from, tracking=True)
     date_to = fields.Date("To", required=True, default=_get_default_date_to)
-    customer_id = fields.Many2one("res.partner", string="Customer", default=_get_default_customer, track_visibility="onchange")
+    customer_id = fields.Many2one("res.partner", string="Customer", default=_get_default_customer, tracking=True)
     domain_customer_ids = fields.Many2many("res.partner", string="Domain Customer", compute="_compute_domain_customer_ids")
-    partner_id = fields.Many2one("res.partner", string="Contact", track_visibility="onchange")
-    partner_ids = fields.Many2many("res.partner", string="Contact", track_visibility="onchange")
+    partner_id = fields.Many2one("res.partner", string="Contact", tracking=True)
+    partner_ids = fields.Many2many("res.partner", string="Contact", tracking=True)
     domain_partner_ids = fields.Many2many("res.partner", string="Domain partner", compute="_compute_domain_partner_ids")
-    active = fields.Boolean(string="Active", default=True, track_visibility="onchange")
-    sale_person_id = fields.Many2one("hr.employee", string="Sales Person", default=_get_default_employee, required=True, store=True, track_visibility="onchange")
-    department_id = fields.Many2one("hr.department",string="Department", related="sale_person_id.department_id", store=True, track_visibility="onchange")
-    division_id = fields.Many2one("hr.department",string="Department", related="sale_person_id.division_id", store=True, track_visibility="onchange")
-    job_id = fields.Many2one("hr.job", string="Job Position", default=_get_default_job, required=True, track_visibility="onchange")#default=_get_default_job, 
+    active = fields.Boolean(string="Active", default=True, tracking=True)
+    sale_person_id = fields.Many2one("hr.employee", string="Sales Person", default=_get_default_employee, required=True, store=True, tracking=True)
+    department_id = fields.Many2one("hr.department",string="Department", related="sale_person_id.department_id", store=True, tracking=True)
+    division_id = fields.Many2one("hr.department",string="Department", related="sale_person_id.division_id", store=True, tracking=True)
+    job_id = fields.Many2one("hr.job", string="Job Position", default=_get_default_job, required=True, tracking=True)#default=_get_default_job, 
     domain_job_ids = fields.Many2many("hr.job", string="Domain Job", compute="_compute_domain_job_ids")
-    user_id = fields.Many2one("res.users", string="User", related="sale_person_id.user_id", store=True, track_visibility="onchange")
+    user_id = fields.Many2one("res.users", string="User", related="sale_person_id.user_id", store=True, tracking=True)
     province_id = fields.Many2one("ccpp.province", string="Province", related="customer_id.province_id", store=True)
-    sale_area_id = fields.Many2one("hr.work.location", string="Sales Area", related="sale_person_id.work_location_id", store=True, track_visibility="onchange")
-    potential_ranking = fields.Integer(string="Potential in Area Rank", group_operator=False, track_visibility="onchange")
-    competitor_ranking = fields.Integer(string="Competitor's Sales Rank", group_operator=False, track_visibility="onchange")
-    actual_sale_ranking = fields.Integer(string="Winmed Actual Sales Rank", compute="_compute_actual_sale_ranking", store=True, group_operator=False, track_visibility="onchange")
-    total_sale_revenue = fields.Float(string="Total Sale Revenue Last Year(THB)", default=0.0, track_visibility="onchange")
+    sale_area_id = fields.Many2one("hr.work.location", string="Sales Area", related="sale_person_id.work_location_id", store=True, tracking=True)
+    potential_ranking = fields.Integer(string="Potential in Area Rank", group_operator=False, tracking=True)
+    competitor_ranking = fields.Integer(string="Competitor's Sales Rank", group_operator=False, tracking=True)
+    actual_sale_ranking = fields.Integer(string="Winmed Actual Sales Rank", compute="_compute_actual_sale_ranking", store=True, group_operator=False, tracking=True)
+    total_sale_revenue = fields.Float(string="Total Sale Revenue Last Year(THB)", default=0.0, tracking=True)
     customer_category_id = fields.Many2one("ccpp.customer.category", string="Customer Category", related="customer_id.customer_category_id", store=True)
-    hospital_size = fields.Integer(string="Hospital Size", track_visibility="onchange")
-    customer_budget_id = fields.Many2one("ccpp.customer.budget",string="Funding/Budget",track_visibility="onchange")
+    hospital_size = fields.Integer(string="Hospital Size", tracking=True)
+    customer_budget_id = fields.Many2one("ccpp.customer.budget",string="Funding/Budget",tracking=True)
     is_other_budget = fields.Boolean("Is Other Funding/Budget")
     budget = fields.Char(string="Other Funding/Budget")
     future_plan = fields.Text(string="Future Project/Plan")
@@ -109,7 +110,7 @@ class CCPPCustomerInformation(models.Model):
     state = fields.Selection(selection=[
         ('active', 'Active'),
         ('inactive', 'Inactive')
-    ], default='active', string="Status", compute="_compute_state", store=True, track_visibility="onchange") 
+    ], default='active', string="Status", compute="_compute_state", store=True, tracking=True) 
     type = fields.Selection(selection=[
         ('customer','Customer'),
         ('internal','Internal'),
@@ -177,7 +178,7 @@ class CCPPCustomerInformation(models.Model):
         ('2071', '2071'),
         ('2072', '2072'),
         ('2073', '2073'),
-    ], required=True, string="Year", default=_get_default_year_selection, track_visibility="onchange")
+    ], required=True, string="Year", default=_get_default_year_selection, tracking=True)
     year_text = fields.Char("Year")
     is_customer = fields.Boolean(string="Customer", compute="_compute_customer_type", store=True)
     is_potential = fields.Boolean(string="Potential", compute="_compute_customer_type", store=True)

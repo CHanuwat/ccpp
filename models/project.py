@@ -82,14 +82,14 @@ class Project(models.Model):
         return self.env.user.company_id
 
     rec_name = fields.Char(string="Record Name", default='CCPP')
-    department_id = fields.Many2one("hr.department",string="Department", related="employee_id.department_id", store=True, track_visibility="onchange")
-    division_id = fields.Many2one("hr.department",string="Division", related="employee_id.division_id", store=True, track_visibility="onchange")
-    employee_id = fields.Many2one("hr.employee", string="User", default=_get_default_employee, track_visibility="onchange")
-    employee_ids = fields.Many2many("hr.employee", "ccpp_hr_employee_rel", "ccpp_id", "employee_id", string="CCPP Team", default=_get_default_employee_ids, track_visibility="onchange", required=True)
-    job_id = fields.Many2one("hr.job", string="Job Position", default=_get_default_job, required=True, track_visibility="onchange")#default=_get_default_job, 
-    job_ids = fields.Many2many("hr.job", "ccpp_hr_job_rel", "ccpp_id", "job_id", string="CCPP Team", default=_get_default_job_ids, track_visibility="onchange", required=True)
+    department_id = fields.Many2one("hr.department",string="Department", related="employee_id.department_id", store=True, tracking=True)
+    division_id = fields.Many2one("hr.department",string="Division", related="employee_id.division_id", store=True, tracking=True)
+    employee_id = fields.Many2one("hr.employee", string="User", default=_get_default_employee, tracking=True)
+    employee_ids = fields.Many2many("hr.employee", "ccpp_hr_employee_rel", "ccpp_id", "employee_id", string="CCPP Team", default=_get_default_employee_ids, tracking=True, required=True)
+    job_id = fields.Many2one("hr.job", string="Job Position", default=_get_default_job, required=True, tracking=True)#default=_get_default_job, 
+    job_ids = fields.Many2many("hr.job", "ccpp_hr_job_rel", "ccpp_id", "job_id", string="CCPP Team", default=_get_default_job_ids, tracking=True, required=True)
     domain_job_ids = fields.Many2many("hr.job", string="Domain Job", compute="_compute_domain_job_ids")
-    priority_id = fields.Many2one("ccpp.priority", string="CCPP Priority", compute="_get_priority", store=True, track_visibility="onchange")
+    priority_id = fields.Many2one("ccpp.priority", string="CCPP Priority", compute="_get_priority", store=True, tracking=True)
     priority_select = fields.Selection([
         ('to_define', 'Undefine'),
         ('1', '1st'),
@@ -102,33 +102,33 @@ class Project(models.Model):
     sale_team_id = fields.Many2one("crm.team", string="Sale Team")
     domain_task_solution_ids = fields.Many2many('project.task', string="Domain task solution")
     tasks_solution = fields.One2many('project.task', 'project_solution_id', string="Solution", context={'is_solution': True})
-    name = fields.Char(string="Name of CCPP", translate=False, track_visibility="onchange")
+    name = fields.Char(string="Name of CCPP", translate=False, tracking=True)
     user_id = fields.Many2one(related="employee_id.user_id", string="CCPP User", store=True)
     color = fields.Integer(related="priority_id.color", store=True)
     domain_partner_ids = fields.Many2many("res.partner", string="Domain Customer", compute="_compute_domain_partner_ids")
-    partner_id = fields.Many2one('res.partner', string="Customer (Company)", track_visibility="onchange")
+    partner_id = fields.Many2one('res.partner', string="Customer (Company)", tracking=True)
 
     # Host CCPP
-    partner_contact_id = fields.Many2one("res.partner", string="Host of CCPP (Contact)", track_visibility="onchange")
+    partner_contact_id = fields.Many2one("res.partner", string="Host of CCPP (Contact)", tracking=True)
     domain_partner_contact_ids = fields.Many2many("res.partner", string="Domain partner contact", compute="_compute_domain_partner_contact_ids")
     job_position_id = fields.Many2one("res.partner.position", string="Contact Job Position", related="partner_contact_id.job_position_id")
     domain_job_position_ids = fields.Many2many("res.partner.position", string="Domain Job Position", compute="_compute_domain_job_position_ids")
     
     ## impact customer ##
-    is_income_cus = fields.Boolean("Income/Funding", default=False, track_visibility="onchange")
-    is_effectiveness_cus = fields.Boolean("Effectiveness/Personal Performance", default=False, track_visibility="onchange")
-    is_repulation_cus = fields.Boolean("Repulation", default=False, track_visibility="onchange")
-    is_competitive_cus = fields.Boolean("Competitive Advantage", default=False, track_visibility="onchange")
-    is_critical = fields.Boolean("Need help Now!", default=False, track_visibility="onchange")
-    is_not_critical = fields.Boolean("I can wait", default=False, track_visibility="onchange")
+    is_income_cus = fields.Boolean("Income/Funding", default=False, tracking=True)
+    is_effectiveness_cus = fields.Boolean("Effectiveness/Personal Performance", default=False, tracking=True)
+    is_repulation_cus = fields.Boolean("Repulation", default=False, tracking=True)
+    is_competitive_cus = fields.Boolean("Competitive Advantage", default=False, tracking=True)
+    is_critical = fields.Boolean("Need help Now!", default=False, tracking=True)
+    is_not_critical = fields.Boolean("I can wait", default=False, tracking=True)
     
     ## impact winmed ##
-    is_income_comp = fields.Boolean("Sale Revenue/Cost", default=False, track_visibility="onchange")
-    is_effectiveness_comp = fields.Boolean("Future Business Opportunity", default=False, track_visibility="onchange")
-    is_repulation_comp = fields.Boolean("Repulation", default=False, track_visibility="onchange")
-    is_competitive_comp = fields.Boolean("Competitive Advantage", default=False, track_visibility="onchange")
-    is_short_time = fields.Boolean("Short", track_visibility="onchange")
-    is_long_time = fields.Boolean("Long", track_visibility="onchange")
+    is_income_comp = fields.Boolean("Sale Revenue/Cost", default=False, tracking=True)
+    is_effectiveness_comp = fields.Boolean("Future Business Opportunity", default=False, tracking=True)
+    is_repulation_comp = fields.Boolean("Repulation", default=False, tracking=True)
+    is_competitive_comp = fields.Boolean("Competitive Advantage", default=False, tracking=True)
+    is_short_time = fields.Boolean("Short", tracking=True)
+    is_long_time = fields.Boolean("Long", tracking=True)
     
     is_verify_impact_cus = fields.Boolean("Verify impact Customer", default=False)
     is_stamp_record = fields.Boolean("Aready have record", default=False)
@@ -136,10 +136,10 @@ class Project(models.Model):
     show_time = fields.Char(string="Time", compute="_compute_show_time")
     code = fields.Char(string="Code")
     #show_period = fields.Char(string="Period", compute="_compute_period_deadline", store=True)
-    show_period = fields.Char(string="Period", track_visibility="onchange")
+    show_period = fields.Char(string="Period", tracking=True)
     period_id = fields.Many2one("ccpp.period", string="Priority Period", compute="_get_priority", store=True)
     #deadline_date = fields.Date(string="Deadline", compute="_compute_period_deadline", store=True)
-    deadline_date = fields.Date(string="Deadline", compute="_compute_deadline", store=True, track_visibility="onchange")
+    deadline_date = fields.Date(string="Deadline", compute="_compute_deadline", store=True, tracking=True)
     state = fields.Selection([
         ('open', 'Open'),
         ('waiting_approve', 'Waiting For Approval'),
@@ -149,7 +149,7 @@ class Project(models.Model):
         ('cancel', 'Cancelled'),
         #('void','Void'),
         #('delay', 'delayed'),
-    ], default='open', index=True, string="State", track_visibility="onchange", tracking=True)
+    ], default='open', index=True, string="State", tracking=True)
     state_color = fields.Integer(compute='_compute_state_color')
     next_action = fields.Char("Next Action")
     is_ccpp_done = fields.Boolean(string="Is CCPP Done", compute="_compute_ccpp_done")
@@ -157,9 +157,9 @@ class Project(models.Model):
     delay_date = fields.Date(string="Delayed Date")
     is_approve_strategy = fields.Boolean(string="Is Approve Strategy", default=False)
     is_ready_create_solution = fields.Boolean(string="Is Ready Create Solution", compute="_compute_ready_create_solution")
-    reason_reject = fields.Text(string="Comment Rejection",track_visibility="onchange")
-    reason_cancel = fields.Text(string="Comment Cancellation",track_visibility="onchange")
-    reason_void = fields.Text(string="Comment Voidation",track_visibility="onchange")
+    reason_reject = fields.Text(string="Comment Rejection",tracking=True)
+    reason_cancel = fields.Text(string="Comment Cancellation",tracking=True)
+    reason_void = fields.Text(string="Comment Voidation",tracking=True)
     task_last_update_id = fields.Many2one("account.analytic.line", string="Task Last Update Situation")
     task_current_action = fields.Char(related="task_last_update_id.current_action", string="Task Current Situation")
     task_next_action = fields.Char(related="task_last_update_id.next_action", string="Task Next Action")
@@ -1598,10 +1598,10 @@ class Task(models.Model):
         return self.env.user.ids
     
     rec_name = fields.Char(string="Record Name", compute="_compute_rec_name", store=True)
-    is_solution = fields.Boolean(string='Is Solution', default=_get_default_level, compute="_compute_level", store=True, track_visibility="onchange")
-    is_strategy = fields.Boolean(string='Is Strategy', default=False, compute="_compute_level", store=True, track_visibility="onchange")
-    is_task = fields.Boolean(string='Is Task', default=False, compute="_compute_level", store=True, track_visibility="onchange")
-    is_subtask = fields.Boolean(string='Is SubTask', default=False, compute="_compute_level", store=True, track_visibility="onchange")
+    is_solution = fields.Boolean(string='Is Solution', default=_get_default_level, compute="_compute_level", store=True, tracking=True)
+    is_strategy = fields.Boolean(string='Is Strategy', default=False, compute="_compute_level", store=True, tracking=True)
+    is_task = fields.Boolean(string='Is Task', default=False, compute="_compute_level", store=True, tracking=True)
+    is_subtask = fields.Boolean(string='Is SubTask', default=False, compute="_compute_level", store=True, tracking=True)
     task_type = fields.Selection([
         ('solution', 'Solution'),
         ('strategy', 'Strategy'),
@@ -1616,7 +1616,7 @@ class Task(models.Model):
     department_id = fields.Many2one(related="project_id.department_id", store=True)
     division_id = fields.Many2one(related="project_id.division_id", store=True)
     priority_id = fields.Many2one("ccpp.priority", string="Priority", related="project_id.priority_id", store=True)
-    evaluate_method = fields.Char("วิธีวัดผล/เป้าหมาย", track_visibility="onchange")
+    evaluate_method = fields.Char("วิธีวัดผล/เป้าหมาย", tracking=True)
     situation_ids = fields.One2many("project.update", 'strategy_id', string="Current Situation")
     task_situation_ids = fields.One2many("account.analytic.line", 'task_strategy_id', string="Task Current Situation")
     last_situation_id = fields.Many2one("project.update", string="Last Update Situation Strategy") # last update at strategy
@@ -1630,7 +1630,7 @@ class Task(models.Model):
         ('cancel', 'Cancelled'),
         #('void', 'Void'),
         #('delay', 'Delayed'),
-    ], default='open', index=True, string="State", track_visibility="onchange", tracking=True)
+    ], default='open', index=True, string="State", tracking=True)
     last_update_status_strategy = fields.Selection(selection=[
         ('on_track', 'On Track'),
         ('at_risk', 'At Risk'),
@@ -1656,18 +1656,18 @@ class Task(models.Model):
     task_last_situation_solution_id = fields.Many2one("account.analytic.line", string="Task Last Update Situation Solution", copy=False) # last update at solution
     task_last_current_action = fields.Char(related="task_last_situation_id.current_action", string="Task Current Action")
     task_last_current_action_solution = fields.Char(related="task_last_situation_solution_id.current_action", string="Task Current Action Solution")
-    start_date = fields.Date(string="Start Date", copy=False, track_visibility="onchange")
-    deadline_date = fields.Date(string="Deadline", compute="_compute_deadline", store=True, track_visibility="onchange")
+    start_date = fields.Date(string="Start Date", copy=False, tracking=True)
+    deadline_date = fields.Date(string="Deadline", compute="_compute_deadline", store=True, tracking=True)
     priority_line_id = fields.Date(string="Priority Line") # stamp when approve :fix me
-    show_period = fields.Char(string="Period", compute="_compute_deadline", store=True, track_visibility="onchange")
-    is_delay = fields.Boolean(string="Is Delay", default=False, copy=False, track_visibility="onchange")
-    delay_date = fields.Date(string="Delayed Date", track_visibility="onchange", copy="False")
+    show_period = fields.Char(string="Period", compute="_compute_deadline", store=True, tracking=True)
+    is_delay = fields.Boolean(string="Is Delay", default=False, copy=False, tracking=True)
+    delay_date = fields.Date(string="Delayed Date", tracking=True, copy="False")
     is_ccpp_on_process = fields.Boolean(string="Is CCPP on process", compute="_is_on_process", store=True, copy="False")
     is_solution_on_approve = fields.Boolean(string="Is Solution on process", compute="_is_on_process", store=True, copy="False")
     user_ids = fields.Many2many(default=_default_user_ids)
     priority_select = fields.Selection(related="project_id.priority_select")
-    reason_reject = fields.Text(string="Comment Rejection",track_visibility="onchange")
-    reason_cancel = fields.Text(string="Comment Cancellation",track_visibility="onchange")
+    reason_reject = fields.Text(string="Comment Rejection",tracking=True)
+    reason_cancel = fields.Text(string="Comment Cancellation",tracking=True)
     solution_approve_lines = fields.One2many("ccpp.approve.line", "solution_id", string="Solution Approve Lines", copy="False")
     strategy_approve_lines = fields.One2many("ccpp.approve.line", "strategy_id", string="Strategy Approve Lines", copy="False")
     current_solution_approve_ids = fields.Many2many("hr.job", "solution_hr_job_rel", "solution_id", "job_id", string="Current Solution Apporver", compute="_compute_current_solution_approve", store="True")
@@ -1678,7 +1678,7 @@ class Task(models.Model):
     child_ids = fields.One2many(copy=False)
     is_owner = fields.Boolean(string="Is Show To Open", compute="_compute_is_owner")
     check_step = fields.Selection(related="project_id.check_step")
-    is_have_child = fields.Boolean(string="Is have Child", defailt=False, compute="_compute_is_have_child")
+    is_have_child = fields.Boolean(string="Is have Child", default=False, compute="_compute_is_have_child")
     is_solution_already_approve = fields.Boolean(string="Is Solution Already Approve", compute="_compute_is_solution_already_approve")
     is_strategy_already_approve = fields.Boolean(string="Is Strategy Already Approve", compute="_compute_is_strategy_already_approve")
     
@@ -2813,7 +2813,7 @@ class ProjectApprovelines(models.Model):
         ('approve', 'Approved'),
         ('cancel', 'Cancelled'),
         ('reject', 'Rejected'),
-    ], default='waiting_approve', string="State", track_visibility="onchange", tracking=True)
+    ], default='waiting_approve', string="State", tracking=True)
     approve_date = fields.Datetime(string="Approved Date")
     job_approve_by_id = fields.Many2one("hr.job", string="Approved By")
     user_approve_ids = fields.Many2many('hr.employee', string="User", compute="_compute_user_ids", store=True)

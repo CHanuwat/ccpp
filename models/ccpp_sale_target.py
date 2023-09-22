@@ -16,6 +16,7 @@ STATUS_COLOR = {
 
 class CCPPSaleTarget(models.Model):
     _name = "ccpp.sale.target"
+    _description = "CCPP Sale Target"
     _inherit = ['mail.thread']
     
     """def _get_default_date_from(self):
@@ -141,7 +142,7 @@ class CCPPSaleTarget(models.Model):
     actual = fields.Float(string="Sales Actual")
     actual_percent = fields.Float(string="% Success", compute="_compute_actual_percent", store=True)
     sale_person_id = fields.Many2one("hr.employee", default=_get_default_employee, string="Sales Person", required=True)
-    job_id = fields.Many2one("hr.job", string="Job Position",  default=_get_default_job, required=True, track_visibility="onchange")#default=_get_default_job,
+    job_id = fields.Many2one("hr.job", string="Job Position",  default=_get_default_job, required=True, tracking=True)#default=_get_default_job,
     domain_job_ids = fields.Many2many("hr.job", string="Domain Job", compute="_compute_domain_job_ids")
     department_id = fields.Many2one("hr.department", string="Deparment", related="sale_person_id.department_id")
     division_id = fields.Many2one("hr.department", string="Division", related="sale_person_id.division_id")

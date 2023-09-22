@@ -9,6 +9,7 @@ from random import randint
 
 class CCPPPeriod(models.Model):
     _name = "ccpp.period"
+    _description = "CCPP Period"
     _inherit = ['mail.thread']
 
     name = fields.Char(string="Name")
