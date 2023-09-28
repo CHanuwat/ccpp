@@ -74,9 +74,11 @@ class Approval(models.Model):
     
 class ApprovalLine(models.Model):
     _name = "approval.line"
+    _description = "Approval Line"
 
     approve_id = fields.Many2one("approval", index=True, ondelete='cascade', readonly=True, required=True)
     sequence = fields.Integer(string="Sequence")
+    contract_type_id = fields.Many2one('hr.contract.type', string='Employment Type')
     job_approve_ids = fields.Many2many("hr.job", "hr_job_approval_rel", "apporve_line_id", "job_id", string="Approvers", required=True)
     user_approve_ids = fields.Many2many("hr.employee", string="Users", compute="_compute_user_approve")
     
@@ -87,6 +89,7 @@ class ApprovalLine(models.Model):
             if obj.job_approve_ids:
                 user_approve_ids = self.env['hr.employee'].search([('job_id', 'in', obj.job_approve_ids.ids)])
             obj.user_approve_ids = user_approve_ids
+            obj.contract_type_id = user_approve_ids.job_id.contract_type_id
             
     def unlink(self):
         for obj in self:

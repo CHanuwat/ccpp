@@ -65,6 +65,7 @@
                             <field name="job_request_ids" domain="[('id', 'in', domain_job_request_ids)]" options="{'no_create': True}">
                                 <tree>
                                     <field name="name"/>
+                                    <field name="contract_type_id"/>
                                     <field name="employee_ids" widget="many2many_avatar_user"/>
                                 </tree>
                             </field>
@@ -76,6 +77,7 @@
                                 <tree editable="bottom" delete="true">
                                     <field name="sequence"/>
                                     <field name="job_approve_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                                    <field name="contract_type_id"/>
                                     <field name="user_approve_ids" widget="many2many_avatar_user"/>
                                 </tree>
                             </field>
