@@ -9,8 +9,8 @@ from pprint import pprint
 class Job(models.Model):
     _inherit = "hr.job"
     _order = "code"
-
-
+    
+    
     name = fields.Char(translate=False)
     code = fields.Char(string="Code", required=True, default="New")
     parent_id = fields.Many2one("hr.job", string="Parent Job Position")
@@ -26,7 +26,7 @@ class Job(models.Model):
         # ('name_company_uniq', 'unique(code, company_id)', 'The code of the job position must be unique in company!'),
         ('no_of_recruitment_positive', 'CHECK(no_of_recruitment >= 0)', 'The expected number of new employees must be positive.')
     ]
-
+    
     # def unlink(self):
     #     raise UserError("ระบบไม่สามารถลบตำแหน่งได้")
     #     res = super().unlink()
@@ -46,7 +46,7 @@ class Job(models.Model):
             if obj.department_id:
                 domain_division_ids = obj.department_id.child_ids
             obj.domain_division_ids = domain_division_ids
-
+    
     @api.onchange('employee_id')
     def onchange_employee(self):
         for obj in self:
@@ -60,4 +60,3 @@ class Job(models.Model):
                 obj.employee_id.work_contact_id.job_position_id = job_position_id
             else:
                 obj._origin.employee_id.work_contact_id.job_position_id = False
-                
