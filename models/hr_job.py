@@ -1,5 +1,6 @@
 from email.policy import default
 from odoo import fields, models, api, _
+from odoo.osv import expression
 from odoo.exceptions import AccessError, UserError, ValidationError
 from datetime import datetime, timedelta, date, timezone
 import pytz
@@ -62,3 +63,10 @@ class Job(models.Model):
                 obj._origin.employee_id.work_contact_id.job_position_id = False
                 
         
+
+    def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None):
+        domain = []
+        args = list(args or [])
+        if name:
+            domain = ['|', ('code', '=', name), ('name', operator, name)]
+        return self._search(domain + args, limit=limit, access_rights_uid=name_get_uid)
