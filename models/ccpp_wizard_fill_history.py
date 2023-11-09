@@ -113,6 +113,7 @@ class CCPPWizardFillHistory(models.TransientModel):
 
 class CCPPWizardFillHistoryOrder(models.TransientModel):
     _name = "ccpp.wizard.fill.history.order"
+    _description = "CCPP Wizard Fill History Order"
     
     wizard_id = fields.Many2one("ccpp.wizard.fill.history", index=True, ondelete='cascade', readonly=True, required=True)
     history_line_id = fields.Many2one("ccpp.purchase.history.line", string="Purchase History Line")
@@ -123,6 +124,7 @@ class CCPPWizardFillHistoryOrder(models.TransientModel):
 
 class CCPPWizardFillHistoryBorrow(models.TransientModel):
     _name = "ccpp.wizard.fill.history.borrow"
+    _description = "CCPP Wizard Fill History Borrow"
     
     wizard_id = fields.Many2one("ccpp.wizard.fill.history", index=True, ondelete='cascade', readonly=True, required=True)
     history_line_id = fields.Many2one("ccpp.purchase.history.line", string="Purchase History Line")

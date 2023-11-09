@@ -2799,6 +2799,7 @@ class ProjectUpdate(models.Model):
     
 class ProjectApprovelines(models.Model):
     _name = "ccpp.approve.line" 
+    _description = "CCPP Approve Line"
     _order = "sequence, id"
     
     ccpp_id = fields.Many2one("project.project", string="CCPP", ondelete="cascade")

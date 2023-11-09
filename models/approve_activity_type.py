@@ -54,7 +54,7 @@ class ApproveActivityType(models.Model):
         for obj in self:
             count_doc = 0
             employee_id = self.env['hr.employee'].search([('user_id','=',self.env.user.id)],limit=1)
-            activity_ids = self.env['mail.activity'].search([('job_id','=',employee_id.job_id.id),('approve_activity_type_id','=',obj.id)])
+            activity_ids = self.env['mail.activity'].search([('user_id','=',self.env.user.id),('approve_activity_type_id','=',obj.id)])
             count_doc = len(activity_ids)
             obj.count_doc = count_doc
         

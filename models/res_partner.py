@@ -172,6 +172,7 @@ class Partner(models.Model):
                 
 class PartnerPosition(models.Model):
     _name = "res.partner.position"
+    _description = "Partner Position"
     
     name = fields.Char("Position Name", required=True)
     type = fields.Selection([

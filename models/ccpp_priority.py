@@ -35,6 +35,7 @@ class CCPPPrioirty(models.Model):
     
 class CCPPPrioirtyLine(models.Model):
     _name = "ccpp.priority.line"
+    _description = "CCPP Priority Line"
 
     priority_id = fields.Many2one("ccpp.priority", index=True, ondelete='cascade', readonly=True, required=True)
     date = fields.Date(string="Start Date", required=True)

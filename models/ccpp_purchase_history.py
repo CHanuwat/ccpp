@@ -314,6 +314,7 @@ class CCPPPurchaseHistory(models.Model):
             
 class CCPPPurchaseHistoryLine(models.Model):
     _name = "ccpp.purchase.history.line"
+    _description = "CCPP Purchase History Line"
     
     def _get_default_type(self):
         if self._context.get('potential_type'):
@@ -417,6 +418,7 @@ class CCPPPurchaseHistoryLine(models.Model):
     
 class CCPPPurchaseHistoryDetailLine(models.Model):
     _name = "ccpp.purchase.history.detail.line"
+    _description = "CCPP Purchase History Detail Line"
     
     history_line_id = fields.Many2one("ccpp.purchase.history.line", index=True, ondelete='cascade')#, readonly=True
     product_id = fields.Many2one(related="history_line_id.product_id", store=True)

@@ -1508,7 +1508,7 @@ class RockerTimesheet(models.Model):
         
         # if 'need_done_strategy' in context[5]:
             # obj.task_strategy_id.button_done()
-        print("max1"*100)
+        # print("max1"*100)
         print(context[5])
         need_done_strategy = False
         if 'need_done_strategy' in context[5]:
@@ -1549,7 +1549,7 @@ class RockerTimesheet(models.Model):
         else:
             obj.state = 'done'
         
-        print("max2"*100)
+        # print("max2"*100)
         
         return {'purchase_history': is_purchase_history,
                 'order_lines': order_line_list,
@@ -1675,6 +1675,7 @@ class RockerTimesheet(models.Model):
     
 class AccountAnalyticLineLog(models.Model):
     _name = "account.analytic.line.log"
+    _description = "Account Analytic Line Log"
     _order = "sequence"
     
     analytic_line_id = fields.Many2one("account.analytic.line", index=True, ondelete='cascade', readonly=True, required=True)
