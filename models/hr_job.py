@@ -18,6 +18,8 @@ class Job(models.Model):
     employee_id = fields.Many2one("hr.employee", string="Employee")
     division_id = fields.Many2one("hr.department", string="Division")
     domain_division_ids = fields.Many2many("hr.department", string="Domain Division", compute="_compute_domain_division")
+    temp_approve_id = fields.Many2one("hr.employee", string="ผู้รักษาการแทน")
+    # domain_parent_ids = fields.Many2many("hr.job", string="Domain Parent", compute="_compute_domain_parent")
     
     _sql_constraints = [
         ('name_company_uniq', 'unique(name, company_id, department_id)', 'The name of the job position must be unique per department in company!'),
@@ -28,7 +30,15 @@ class Job(models.Model):
     # def unlink(self):
     #     raise UserError("ระบบไม่สามารถลบตำแหน่งได้")
     #     res = super().unlink()
-    
+
+    # @api.depends('department_id')
+    # def _compute_domain_parent(self):
+    #     for obj in self:
+    #         domain_parent_ids = self.env['hr.job']
+    #         if obj.department_id:
+    #             domain_parent_ids = self.env['hr.job'].search([('department_id','=',obj.department_id.id)])
+    #         obj.domain_parent_ids = domain_parent_ids
+
     @api.depends('department_id')
     def _compute_domain_division(self):
         for obj in self:

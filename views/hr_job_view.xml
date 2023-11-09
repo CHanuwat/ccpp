@@ -31,6 +31,7 @@
             </xpath>
             <xpath expr="//form[1]/sheet[1]/notebook[1]/page[1]/group[1]/group[1]/field[@name='contract_type_id']" position="after">            
                 <field name="parent_id" placeholder="e.g. Senior Sales Manager"/>
+                <field name="temp_approve_id"/>
             </xpath>
         </field>
     </record>

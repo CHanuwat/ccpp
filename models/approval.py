@@ -80,14 +80,20 @@ class ApprovalLine(models.Model):
     sequence = fields.Integer(string="Sequence")
     contract_type_id = fields.Many2one('hr.contract.type', string='Employment Type')
     job_approve_ids = fields.Many2many("hr.job", "hr_job_approval_rel", "apporve_line_id", "job_id", string="Approvers", required=True)
+    user_approve_id = fields.Many2one("hr.employee", string="Temp Users", compute="_compute_user_approve") # for temp approve
     user_approve_ids = fields.Many2many("hr.employee", string="Users", compute="_compute_user_approve")
     
     @api.depends("job_approve_ids")
     def _compute_user_approve(self):
         for obj in self:
             user_approve_ids = self.env['hr.employee']
+            user_approve_id = self.env['hr.employee']
             if obj.job_approve_ids:
                 user_approve_ids = self.env['hr.employee'].search([('job_id', 'in', obj.job_approve_ids.ids)])
+                for job_approve_id in obj.job_approve_ids:
+                    user_approve_id = job_approve_id.temp_approve_id
+
+            obj.user_approve_id = user_approve_id.id
             obj.user_approve_ids = user_approve_ids
             obj.contract_type_id = user_approve_ids.job_id.contract_type_id
             

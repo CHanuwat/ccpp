@@ -164,6 +164,7 @@ class Partner(models.Model):
             if obj.name:
                 partner_duplicate = self.env['res.partner'].search([('id','!=',obj.id),('name','=',obj.name),('company_id','=',obj.company_id.id),('nav_id','=',obj.nav_id)])
                 if partner_duplicate:
+                    print(" xxx ",obj.id, obj.name, obj.nav_id)
                     print(partner_duplicate)
                     print("Partner Duplicate")
                     print(obj)
