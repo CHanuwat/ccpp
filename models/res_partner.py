@@ -147,13 +147,13 @@ class Partner(models.Model):
         for obj in self:
             if obj.parent_id:
                 new_name_list = []
-                if obj.title:
+                if obj.title and obj.title.name:
                     new_name_list.append(obj.title.name)
                 if obj.name:
                     new_name_list.append(obj.name)
                 if obj.function:
                     new_name_list.append(obj.function)
-                if obj.job_position_id:
+                if obj.job_position_id and obj.job_position_id.name:
                     new_name_list.append(obj.job_position_id.name)
                 new_name = ', '.join(new_name_list)
                 obj.display_name = new_name
@@ -174,7 +174,7 @@ class PartnerPosition(models.Model):
     _name = "res.partner.position"
     _description = "Partner Position"
     
-    name = fields.Char("Position Name", required=True)
+    name = fields.Char("Position Name", required=False)
     type = fields.Selection([
         ('external', 'External'),
         ('internal', 'Internal'),
